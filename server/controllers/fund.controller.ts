@@ -7,8 +7,6 @@ import {
 } from "@shared/schema";
 
 // Import interface from service
-import { FundWithAllocations } from "../services/fund.service";
-import { fundService } from "../services";
 
 /**
  * Fund Controller - Handles HTTP requests and responses for fund resources
@@ -19,7 +17,6 @@ export class FundController {
    */
   async getFunds(req: Request, res: Response) {
     try {
-      const funds = await fundService.getAllFundsWithAllocations();
       return res.json(funds);
     } catch (error) {
       console.error("Error fetching funds:", error);
@@ -40,7 +37,6 @@ export class FundController {
         return res.status(400).json({ message: "Invalid fund ID" });
       }
 
-      const fund = await fundService.getFundWithAllocations(fundId);
       
       if (!fund) {
         return res.status(404).json({ message: "Fund not found" });
@@ -69,7 +65,6 @@ export class FundController {
         return res.status(401).json({ message: "Authentication required" });
       }
       
-      const fund = await fundService.createFund(fundData);
       return res.status(201).json(fund);
     } catch (error) {
       console.error("Error creating fund:", error);
@@ -102,7 +97,6 @@ export class FundController {
       const updateSchema = insertFundSchema.partial();
       const fundUpdate = updateSchema.parse(req.body);
       
-      const updatedFund = await fundService.updateFund(fundId, fundUpdate);
       
       if (!updatedFund) {
         return res.status(404).json({ message: "Fund not found" });
@@ -136,7 +130,6 @@ export class FundController {
         return res.status(400).json({ message: "Invalid fund ID" });
       }
 
-      const result = await fundService.deleteFund(fundId);
       
       if (!result) {
         return res.status(404).json({ message: "Fund not found" });

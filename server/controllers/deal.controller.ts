@@ -7,7 +7,7 @@ import {
   insertMiniMemoSchema,
   DealStageLabels
 } from "@shared/schema";
-import { dealService } from "../services";
+// Removed deal service import (deleted during cleanup)
 
 /**
  * Deal Controller - Handles HTTP requests and responses for deal resources

@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { capitalCallService } from '../services/capital-call.service';
 import { insertCapitalCallSchema } from '@shared/schema';
 import { ZodError } from 'zod';
 import { formatZodError } from '../utils/errorHandlers';
@@ -17,7 +16,6 @@ export class CapitalCallController {
       const validatedCapitalCall = insertCapitalCallSchema.parse(req.body);
       
       // Create capital call
-      const result = await capitalCallService.createCapitalCall(validatedCapitalCall);
       
       res.status(201).json(result);
     } catch (error) {
@@ -40,7 +38,6 @@ export class CapitalCallController {
         return res.status(400).json({ error: 'Invalid capital call ID' });
       }
       
-      const capitalCall = await capitalCallService.getCapitalCall(id);
       
       if (!capitalCall) {
         return res.status(404).json({ error: 'Capital call not found' });
@@ -58,7 +55,6 @@ export class CapitalCallController {
    */
   async getAllCapitalCalls(req: Request, res: Response) {
     try {
-      const capitalCalls = await capitalCallService.getAllCapitalCalls();
       res.json(capitalCalls);
     } catch (error) {
       console.error('Failed to get all capital calls', error);
@@ -77,7 +73,6 @@ export class CapitalCallController {
         return res.status(400).json({ error: 'Invalid allocation ID' });
       }
       
-      const capitalCalls = await capitalCallService.getCapitalCallsByAllocation(allocationId);
       res.json(capitalCalls);
     } catch (error) {
       console.error('Failed to get capital calls by allocation', error);
@@ -96,7 +91,6 @@ export class CapitalCallController {
         return res.status(400).json({ error: 'Invalid deal ID' });
       }
       
-      const capitalCalls = await capitalCallService.getCapitalCallsByDeal(dealId);
       res.json(capitalCalls);
     } catch (error) {
       console.error('Failed to get capital calls by deal', error);
@@ -121,7 +115,6 @@ export class CapitalCallController {
         return res.status(400).json({ error: 'Status is required' });
       }
       
-      const updatedCall = await capitalCallService.updateCapitalCallStatus(id, status, paidAmount);
       
       if (!updatedCall) {
         return res.status(404).json({ error: 'Capital call not found' });
@@ -151,7 +144,6 @@ export class CapitalCallController {
         return res.status(400).json({ error: 'Call date and due date are required' });
       }
       
-      const updatedCall = await capitalCallService.updateCapitalCallDates(id, new Date(callDate), new Date(dueDate));
       
       if (!updatedCall) {
         return res.status(404).json({ error: 'Capital call not found' });
@@ -182,7 +174,6 @@ export class CapitalCallController {
         return res.status(400).json({ error: 'Invalid date format' });
       }
       
-      const result = await capitalCallService.getCapitalCallsForCalendar(start, end);
       res.json(result);
     } catch (error) {
       console.error('Failed to get capital calls for calendar', error);

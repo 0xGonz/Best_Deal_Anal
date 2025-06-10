@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { userService } from '../services/user.service';
 import { insertUserSchema } from '@shared/schema';
 import { ZodError } from 'zod';
 import { formatZodError } from '../utils/errorHandlers';
@@ -13,7 +12,6 @@ export class UserController {
    */
   async getAllUsers(req: Request, res: Response) {
     try {
-      const users = await userService.getAllUsers();
       res.json(users);
     } catch (error) {
       console.error('Failed to get all users', error);
@@ -32,7 +30,6 @@ export class UserController {
         return res.status(400).json({ error: 'Invalid user ID' });
       }
       
-      const user = await userService.getUserById(id);
       
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
@@ -54,7 +51,6 @@ export class UserController {
       const validatedUser = insertUserSchema.parse(req.body);
       
       // Create user
-      const result = await userService.createUser(validatedUser);
       
       res.status(201).json(result);
     } catch (error) {
@@ -86,7 +82,6 @@ export class UserController {
       const userData = req.body;
       
       // Update user
-      const result = await userService.updateUser(id, userData);
       
       if (!result) {
         return res.status(404).json({ error: 'User not found' });
@@ -110,7 +105,6 @@ export class UserController {
         return res.status(400).json({ error: 'Invalid user ID' });
       }
       
-      const result = await userService.deleteUser(id);
       
       if (!result) {
         return res.status(404).json({ error: 'User not found' });
