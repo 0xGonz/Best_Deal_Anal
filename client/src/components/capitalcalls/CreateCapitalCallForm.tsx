@@ -291,7 +291,7 @@ export function CreateCapitalCallForm({ isOpen, onClose, dealId, onSuccess }: Cr
             <p className="text-xs text-muted-foreground mt-1">
               {formData.status === 'scheduled' && "The capital call is planned but not yet issued to investors."}
               {formData.status === 'called' && "Official notice has been issued to investors."}
-              {formData.status === 'partial' && "Some funds have been received but not the full amount."}
+              {formData.status === 'partially_paid' && "Some funds have been received but not the full amount."}
               {formData.status === 'paid' && "The capital call has been fully paid by investors."}
               {formData.status === 'defaulted' && "The investor failed to meet their payment obligation."}
             </p>

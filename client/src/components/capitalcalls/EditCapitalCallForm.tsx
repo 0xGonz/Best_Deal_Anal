@@ -96,7 +96,7 @@ export function EditCapitalCallForm({ isOpen, onClose, capitalCall, dealId }: Ed
 
   // Watch for status changes to conditionally show paid fields
   const watchStatus = form.watch('status');
-  const isPartialOrPaid = watchStatus === 'partial' || watchStatus === 'paid';
+  const isPartialOrPaid = watchStatus === 'partially_paid' || watchStatus === 'paid';
 
   // Update capital call mutation
   const updateMutation = useMutation({
@@ -125,8 +125,8 @@ export function EditCapitalCallForm({ isOpen, onClose, capitalCall, dealId }: Ed
 
   // Form submission handler
   function onSubmit(values: FormValues) {
-    // If status is not partial or paid, clear paid fields
-    if (values.status !== 'partial' && values.status !== 'paid') {
+    // If status is not partially_paid or paid, clear paid fields
+    if (values.status !== 'partially_paid' && values.status !== 'paid') {
       values.paidAmount = 0;
       values.paidDate = null;
     } else if (!values.paidDate) {

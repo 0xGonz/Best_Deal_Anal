@@ -146,7 +146,7 @@ const CapitalCallsByAllocation = () => {
     return capitalCalls.reduce((total, call) => {
       if (call.status === 'paid') {
         return total + call.callAmount;
-      } else if (call.status === 'partial') {
+      } else if (call.status === 'partially_paid') {
         return total + (call.paidAmount || 0);
       }
       return total;
@@ -210,8 +210,8 @@ const CapitalCallsByAllocation = () => {
     mutationFn: async ({ id, status, paidAmount }: { id: number, status: CapitalCallStatus, paidAmount?: number }) => {
       const data = {
         status,
-        paidAmount: status === CAPITAL_CALL_STATUS.PARTIAL ? paidAmount : undefined,
-        paidDate: (status === CAPITAL_CALL_STATUS.PAID || status === CAPITAL_CALL_STATUS.PARTIAL) ? new Date().toISOString() : undefined,
+        paidAmount: status === CAPITAL_CALL_STATUS.PARTIALLY_PAID ? paidAmount : undefined,
+        paidDate: (status === CAPITAL_CALL_STATUS.PAID || status === CAPITAL_CALL_STATUS.PARTIALLY_PAID) ? new Date().toISOString() : undefined,
       };
       
       const response = await apiRequest('PATCH', `/api/capital-calls/${id}/status`, data);
@@ -454,7 +454,7 @@ const CapitalCallsByAllocation = () => {
                           )}
                           {(call.status === CAPITAL_CALL_STATUS.SCHEDULED || 
                             call.status === CAPITAL_CALL_STATUS.CALLED || 
-                            call.status === CAPITAL_CALL_STATUS.PARTIAL) && (
+                            call.status === CAPITAL_CALL_STATUS.PARTIALLY_PAID) && (
                             <Button 
                               size="sm" 
                               variant="outline"
