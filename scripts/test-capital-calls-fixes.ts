@@ -5,8 +5,7 @@
 
 import { DatabaseStorage } from '../server/database-storage';
 import { capitalCallsConfig } from '../server/config/capital-calls-config';
-import { batchQueryService } from '../server/services/batch-query.service';
-import { capitalCallService } from '../server/services/capital-call.service';
+// Removed broken service imports - using direct storage access
 import { createNormalizedDate, calculateDueDate } from '../server/utils/date-utils';
 
 interface TestResult {

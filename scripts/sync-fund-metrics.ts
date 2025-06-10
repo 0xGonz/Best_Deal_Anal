@@ -1,5 +1,5 @@
 import { DatabaseStorage } from '../server/database-storage';
-import { FundMetricsService } from '../server/services/fund-metrics.service';
+// Removed broken service import - using direct storage access
 
 /**
  * Syncs fund metrics to reflect actual allocation status

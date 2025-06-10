@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { requireAuth } from '../utils/auth';
-import { AIAnalyzer } from '../services/ai-analyzer';
+// Removed broken service import - simplified AI analysis
 import { z } from 'zod';
 
 const router = Router();

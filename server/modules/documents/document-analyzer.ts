@@ -3,7 +3,7 @@ import { StorageFactory } from '../../storage-factory';
 import * as path from 'path';
 import * as fs from 'fs';
 import { Document } from '@shared/schema';
-import { DataExtractor } from '../../services/data-extractor';
+// Removed broken service import - simplified data extraction
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,

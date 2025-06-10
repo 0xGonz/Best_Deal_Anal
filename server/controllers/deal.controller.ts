@@ -7,7 +7,7 @@ import {
   insertMiniMemoSchema,
   DealStageLabels
 } from "@shared/schema";
-// Removed deal service import (deleted during cleanup)
+import { StorageFactory } from '../storage-factory';
 
 /**
  * Deal Controller - Handles HTTP requests and responses for deal resources
@@ -18,17 +18,17 @@ export class DealController {
    */
   async getDeals(req: Request, res: Response) {
     try {
+      const storage = StorageFactory.getStorage();
       let deals;
       
       if (req.query.stage) {
-        deals = await dealService.getDealsByStage(req.query.stage as string);
+        deals = await storage.getDealsByStage(req.query.stage as string);
       } else {
-        deals = await dealService.getAllDeals();
+        deals = await storage.getDeals();
       }
       
       res.json(deals);
     } catch (error) {
-      console.error('Error fetching deals:', error);
       res.status(500).json({ message: 'Failed to fetch deals' });
     }
   }
@@ -48,7 +48,7 @@ export class DealController {
         return res.status(400).json({ message: 'Invalid deal ID format' });
       }
       
-      const deal = await dealService.getDealWithRelations(dealId);
+      const deal = await storage.getDeal(dealId);
       
       if (!deal) {
         return res.status(404).json({ message: 'Deal not found' });

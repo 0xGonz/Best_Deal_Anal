@@ -8,7 +8,7 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import { fundAllocations } from '../shared/schema.js';
-import { PaymentWorkflowService } from '../server/services/payment-workflow.service.js';
+// Removed broken service import - using direct storage access
 import { eq } from 'drizzle-orm';
 
 const pool = new Pool({
