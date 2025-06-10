@@ -68,17 +68,17 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const url = queryKey[0] as string;
-    console.log(`Query fetch request: ${url}`, { queryKey, unauthorizedBehavior });
+    // Debug logging removed for production performance
     
     try {
       const res = await fetch(url, {
         credentials: "include",
       });
       
-      console.log(`Query Response from ${url}:`, { status: res.status, statusText: res.statusText, ok: res.ok });
+      // Response logging removed for performance
       
       if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-        console.log(`Returning null for 401 response from ${url} as configured`);
+        // 401 handling - logging removed
         return null;
       }
       
@@ -93,7 +93,7 @@ export const getQueryFn: <T>(options: {
       
       await throwIfResNotOk(res);
       const data = await res.json();
-      console.log(`Query data received from ${url}:`, data);
+      // Data logging removed for performance
       return data;
     } catch (error) {
       console.error(`Exception during query fetch to ${url}:`, error);
@@ -107,8 +107,8 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "returnNull" }),
       refetchInterval: false,
       refetchOnWindowFocus: false, // Disable to prevent excessive refetching
-      staleTime: 10 * 60 * 1000, // 10 minutes for better caching
-      gcTime: 15 * 60 * 1000, // 15 minutes garbage collection time (React Query v5)
+      staleTime: 5 * 60 * 1000, // 5 minutes - optimized for memory management
+      gcTime: 8 * 60 * 1000, // 8 minutes - reduced to prevent memory leaks
       retry: (failureCount, error) => {
         // Don't retry on 4xx errors except 401
         if (error && typeof error === 'object' && 'message' in error) {

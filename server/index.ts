@@ -91,8 +91,9 @@ async function initialize() {
         pool, 
         tableName: "session",
         createTableIfMissing: true,
-        pruneSessionInterval: 60, // Prune expired sessions every 60 seconds
-        // Add error handling to be more resilient
+        pruneSessionInterval: 300, // Reduced frequency to 5 minutes to prevent timeouts
+        ttl: 86400, // 24 hours session timeout
+        disableTouch: false, // Enable session touch to prevent premature expiry
         errorLog: (err) => console.error("PgSession error:", err)
       });
       console.log("▶ Using PgSession for sessions (PostgreSQL)");

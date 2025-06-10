@@ -13,12 +13,9 @@ type HybridStatus = {
   } | null;
 };
 
-type SystemHealthResponse = {
-  status: string;
-  timestamp: string;
-  storage: 'database' | 'memory' | 'hybrid' | 'pg' | 'unknown';
-  databaseConnected: boolean;
-  environment: string;
+import { HealthResponse } from '@shared/types/api-responses';
+
+type SystemHealthResponse = HealthResponse & {
   hybridStatus: HybridStatus | null;
 };
 
