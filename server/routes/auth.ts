@@ -116,12 +116,7 @@ const registrationSchema = insertUserSchema.extend({
 // Register route - public registration always creates analyst users
 router.post('/register', asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
   try {
-      body: {
-        ...req.body,
-        password: req.body?.password ? '******' : undefined,
-        passwordConfirm: req.body?.passwordConfirm ? '******' : undefined
-      }
-    });
+    // Registration logic without debug logging
     
     // Check if passwords match before validation schema
     if (req.body.password !== req.body.passwordConfirm) {

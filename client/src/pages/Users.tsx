@@ -65,7 +65,7 @@ export default function UsersPage() {
         </div>
 
         {/* Users List with Admin functionality */}
-        <div className={`${MARGIN.LAYOUT.COMPONENT}`}>
+        <div className="mb-6">
           <UsersListAdmin 
             users={users} 
             isLoading={isLoading} 

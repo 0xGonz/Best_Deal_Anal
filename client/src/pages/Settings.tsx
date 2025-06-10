@@ -19,8 +19,8 @@ export default function SettingsPage() {
 
   return (
     <AppLayout>
-      <div className={`${PADDING.LAYOUT.PAGE} pb-20 w-full overflow-hidden`}>
-        <div className={`${MARGIN.LAYOUT.SECTION}`}>
+      <div className="p-6 pb-20 w-full overflow-hidden">
+        <div className="mb-8">
           <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
           <p className="text-muted-foreground">Manage your application settings.</p>
         </div>
