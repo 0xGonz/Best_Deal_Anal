@@ -1,4 +1,4 @@
-import { BaseService } from './BaseService';
+import { BaseService } from './base.service';
 import { User, InsertUser } from '@shared/schema';
 import { scrypt, randomBytes, timingSafeEqual } from 'crypto';
 import { promisify } from 'util';

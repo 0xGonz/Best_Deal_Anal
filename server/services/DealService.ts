@@ -1,4 +1,4 @@
-import { BaseService } from './BaseService';
+import { BaseService } from './base.service';
 import { Deal, InsertDeal, TimelineEvent, InsertTimelineEvent, deals, timelineEvents } from '@shared/schema';
 import { eq, desc, and } from 'drizzle-orm';
 
