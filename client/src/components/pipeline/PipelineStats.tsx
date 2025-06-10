@@ -4,7 +4,7 @@ import { TrendingUp, TrendingDown, Target, Briefcase, Clock, DollarSign, PieChar
 import { Deal } from "@/lib/types";
 import { formatCurrency, formatPercentage } from "@/lib/utils/format";
 import { FINANCIAL_CALCULATION } from "../../../../shared/constants";
-import { PADDING, MARGIN, GAP } from "@/lib/constants/spacing-constants";
+// Removed spacing constants import - using inline Tailwind classes
 
 type PipelineStat = {
   label: string;
@@ -204,7 +204,7 @@ export default function PipelineStats({ deals, filteredDeals, stage }: PipelineS
   }
 
   return (
-    <div className={`grid grid-cols-2 sm:grid-cols-4 ${GAP.MD} ${MARGIN.LAYOUT.COMPONENT}`}>
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
       {stats.map((stat, index) => (
         <Card key={index} className="bg-white overflow-hidden h-full">
           <CardContent className="pt-3 xs:pt-4 sm:pt-6 p-2 xs:p-3 sm:p-6 h-full flex flex-col">

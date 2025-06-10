@@ -7,7 +7,7 @@ import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import LeaderboardWidget from "@/components/dashboard/LeaderboardWidget";
 import SectorDistributionChart from "@/components/dashboard/SectorDistributionChart";
 import { formatCurrency } from "@/lib/utils/format";
-import { PADDING, MARGIN, GAP } from "@/lib/constants/spacing-constants";
+// Removed spacing constants import - using inline Tailwind classes
 import { 
   Activity, 
   TrendingUp, 

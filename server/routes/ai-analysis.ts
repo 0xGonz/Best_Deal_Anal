@@ -81,7 +81,6 @@ router.post('/deals/:dealId/analyze', requireAuth, async (req: Request, res: Res
       return res.status(400).json({ message: 'Invalid deal ID' });
     }
 
-    console.log(`🤖 AI Analysis request for deal ${dealId} by user ${req.user?.username}`);
 
     // Validate request body
     const validation = analysisRequestSchema.safeParse(req.body);
@@ -97,7 +96,6 @@ router.post('/deals/:dealId/analyze', requireAuth, async (req: Request, res: Res
     // Generate AI analysis
     const analysis = await AIAnalyzer.analyzeDeal(dealId, query);
 
-    console.log(`✅ AI Analysis completed for deal ${dealId}: ${analysis.context.dealName}`);
 
     return res.json({
       success: true,
@@ -132,7 +130,6 @@ router.get('/deals/:dealId/context', requireAuth, async (req: Request, res: Resp
       return res.status(400).json({ message: 'Invalid deal ID' });
     }
 
-    console.log(`📋 Context extraction request for deal ${dealId}`);
 
     // Extract deal context
     const context = await AIAnalyzer.extractDealContext(dealId);
@@ -161,7 +158,6 @@ router.get('/deals/:dealId/context', requireAuth, async (req: Request, res: Resp
       }))
     };
 
-    console.log(`✅ Context extracted for deal ${dealId}: ${context.deal.name}`);
 
     return res.json({
       success: true,

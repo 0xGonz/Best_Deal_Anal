@@ -7,7 +7,6 @@ const router = Router();
 // Get activity feed with improved error handling and performance
 router.get('/', requireAuth, async (req: Request, res: Response) => {
   try {
-    console.log('Activity feed request received');
     const storage = StorageFactory.getStorage();
     
     // Use a timeout to prevent long-running queries
@@ -26,7 +25,6 @@ router.get('/', requireAuth, async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'No deals available' });
     }
     
-    console.log(`Retrieved ${deals.length} deals for activity feed`);
     
     // Get only the most recent events for better performance
     // Limit to 100 deals or less to avoid excessive queries
@@ -68,7 +66,6 @@ router.get('/', requireAuth, async (req: Request, res: Response) => {
       }
     }
     
-    console.log(`Retrieved ${allEvents.length} events for activity feed`);
     
     // Sort by date (descending) and limit to latest 20
     const sortedEvents = allEvents.sort((a, b) => 
@@ -77,7 +74,6 @@ router.get('/', requireAuth, async (req: Request, res: Response) => {
     
     // Get user info for each event
     const userIds = Array.from(new Set(sortedEvents.map(e => e.createdBy)));
-    console.log(`Fetching information for ${userIds.length} users`);
     
     // Use Promise.allSettled to handle potential failures in user fetching
     const userPromises = userIds.map(id => storage.getUser(id));
@@ -103,7 +99,6 @@ router.get('/', requireAuth, async (req: Request, res: Response) => {
       };
     });
     
-    console.log('Activity feed successfully generated');
     res.json(eventsWithUserInfo);
   } catch (error) {
     console.error('Error generating activity feed:', error);

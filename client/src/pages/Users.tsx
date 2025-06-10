@@ -7,7 +7,7 @@ import UsersListAdmin from "@/components/users/UsersListAdmin";
 import AddUserDialog from "@/components/users/AddUserDialog";
 import EditUserDialog from "@/components/users/EditUserDialog";
 import DeleteUserAlert from "@/components/users/DeleteUserAlert";
-import { PADDING, MARGIN, GAP } from "@/lib/constants/spacing-constants";
+// Removed spacing constants import - using inline Tailwind classes
 
 // Define User type
 interface User {
@@ -47,8 +47,8 @@ export default function UsersPage() {
   
   return (
     <AppLayout>
-      <div className={`${PADDING.LAYOUT.PAGE} pb-20 w-full overflow-hidden`}>
-        <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center ${MARGIN.LAYOUT.SECTION}`}>
+      <div className="p-6 pb-20 w-full overflow-hidden">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Users</h1>
             <p className="text-muted-foreground">Manage users and permissions</p>

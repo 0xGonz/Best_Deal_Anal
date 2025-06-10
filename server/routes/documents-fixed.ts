@@ -97,14 +97,12 @@ router.get('/deal/:dealId', async (req, res) => {
 router.get('/:documentId/download', async (req, res) => {
   try {
     const documentId = parseInt(req.params.documentId);
-    console.log(`📥 Download request for document ID: ${documentId}`);
     
     if (isNaN(documentId)) {
       return res.status(400).json({ error: 'Invalid document ID' });
     }
 
     const result = await documentStorage.downloadDocument(documentId);
-    console.log(`📥 Download result:`, result ? 'Found' : 'Not found');
     
     if (!result) {
       return res.status(404).json({ error: 'Document not found' });

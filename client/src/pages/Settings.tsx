@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PADDING, MARGIN, GAP } from "@/lib/constants/spacing-constants";
+// Removed spacing constants import - using inline Tailwind classes
 
 export default function SettingsPage() {
   const { toast } = useToast();

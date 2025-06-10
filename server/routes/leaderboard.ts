@@ -59,7 +59,6 @@ router.get('/', requireAuth, async (req: Request, res: Response) => {
     // Filter out deals in the "invested" stage as they're no longer part of the evaluation process
     const deals = allDeals.filter(deal => deal.stage !== 'invested');
     
-    console.log(`Leaderboard: Found ${allDeals.length} total deals, ${deals.length} in active evaluation`);
     
     // For each deal, get stars and memos to calculate rankings
     const leaderboardItems = await Promise.all(deals.map(async (deal) => {

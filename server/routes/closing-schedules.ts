@@ -21,7 +21,6 @@ interface AuthRequest extends Request {
 router.get('/', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     // Debug session data
-    console.log(`Closing schedules GET request with session userId: ${req.session?.userId}`);
     
     // Get raw closing schedule events
     const closingEvents = await storage.getAllClosingScheduleEvents();
@@ -230,7 +229,6 @@ router.patch('/:id/date', requireAuth, requirePermission('edit', 'closingEvent')
 // Delete a closing schedule event - rewritten to use async/await
 router.delete('/:id', requireAuth, requirePermission('delete', 'closingEvent'), async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    console.log('DELETE request to /api/closing-schedules/', req.params.id);
     
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -238,7 +236,6 @@ router.delete('/:id', requireAuth, requirePermission('delete', 'closingEvent'), 
     }
     
     const userId = req.user?.id || 0; // Default to 0 if user ID is undefined
-    console.log(`User ID ${userId} attempting to delete closing schedule event ${id}`);
     
     // First get the event to ensure it exists
     const event = await storage.getClosingScheduleEvent(id);
@@ -267,7 +264,6 @@ router.delete('/:id', requireAuth, requirePermission('delete', 'closingEvent'), 
       }
     });
     
-    console.log(`Successfully deleted closing schedule event with ID ${id}`);
     return res.json({ success: true, id });
   } catch (error) {
     console.error(`Error deleting closing schedule event ${req.params.id}:`, error);
