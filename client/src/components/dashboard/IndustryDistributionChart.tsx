@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { formatPercentage } from '@/lib/utils/format';
-import { FINANCIAL_CALCULATION } from '@/lib/constants/calculation-constants';
+import { FINANCIAL_CALCULATION } from '../../../../shared/constants';
 
 interface SectorStatItem {
   sector: string;

@@ -17,7 +17,7 @@ import {
 import { Star } from "lucide-react";
 import { LeaderboardItem } from "@/lib/types";
 import { getDealStageBadgeClass, formatPercentage } from "@/lib/utils/format";
-import { FINANCIAL_CALCULATION } from "@/lib/constants/calculation-constants";
+import { FINANCIAL_CALCULATION } from "../../../../shared/constants";
 
 export default function LeaderboardWidget() {
   const [, navigate] = useLocation();
