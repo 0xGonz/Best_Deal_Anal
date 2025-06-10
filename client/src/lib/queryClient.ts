@@ -13,7 +13,7 @@ export async function apiRequest(
   data?: unknown | undefined,
   isFormData: boolean = false,
 ): Promise<Response> {
-  console.log(`API Request: ${method} ${url}`, data ? { data: isFormData ? 'FormData' : data } : 'No data');
+  // Debug logging removed for production performance
   
   const options: RequestInit = {
     method,
@@ -31,9 +31,9 @@ export async function apiRequest(
   }
 
   try {
-    console.log(`Sending fetch request to ${url} with options:`, { ...options, body: options.body ? 'BODY_DATA' : undefined });
+    // Request logging removed for performance
     const res = await fetch(url, options);
-    console.log(`API Response from ${url}:`, { status: res.status, statusText: res.statusText, ok: res.ok });
+    // Response logging removed for performance
     
     // Create a clone of response before reading its body
     // This allows us to both log the error response and return the original response

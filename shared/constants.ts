@@ -1,75 +1,69 @@
 /**
- * Shared constants for fund allocation and capital calls
- * Used by both frontend and backend
+ * Shared constants across the application
  */
 
+// Due diligence checklist items - single source of truth
+export const DUE_DILIGENCE_CHECKLIST = {
+  financialReview: 'Financial Review',
+  legalReview: 'Legal Review',
+  marketAnalysis: 'Market Analysis',
+  teamAssessment: 'Team Assessment', 
+  customerInterviews: 'Customer Interviews',
+  competitorAnalysis: 'Competitor Analysis',
+  technologyReview: 'Technology Review',
+  businessModelValidation: 'Business Model Validation',
+  regulatoryCompliance: 'Regulatory Compliance',
+  esgAssessment: 'ESG Assessment'
+} as const;
+
+// Allocation status values - standardized enum
 export const ALLOCATION_STATUS = {
   COMMITTED: 'committed',
-  INVESTED: 'invested',
   FUNDED: 'funded',
+  UNFUNDED: 'unfunded',
   PARTIALLY_PAID: 'partially_paid',
-  PARTIALLY_CLOSED: 'partially_closed',
-  CLOSED: 'closed',
   WRITTEN_OFF: 'written_off'
-};
+} as const;
 
-export const CAPITAL_CALL_SCHEDULES = {
-  SINGLE: 'single',
-  QUARTERLY: 'quarterly',
-  MONTHLY: 'monthly',
-  BIANNUAL: 'biannual',
-  ANNUAL: 'annual',
-  CUSTOM: 'custom'
-};
-
+// Capital call status values
 export const CAPITAL_CALL_STATUS = {
   SCHEDULED: 'scheduled',
   CALLED: 'called',
   PARTIALLY_PAID: 'partially_paid',
   PAID: 'paid',
-  DEFAULTED: 'defaulted'
-};
+  DEFAULTED: 'defaulted',
+  OVERDUE: 'overdue'
+} as const;
+
+// Deal stages
+export const DEAL_STAGES = {
+  INITIAL_REVIEW: 'initial_review',
+  SCREENING: 'screening',
+  DILIGENCE: 'diligence',
+  IC_REVIEW: 'ic_review',
+  CLOSING: 'closing',
+  CLOSED: 'closed',
+  INVESTED: 'invested',
+  REJECTED: 'rejected'
+} as const;
 
 // Capital call timing constants
 export const CAPITAL_CALL_TIMING = {
-  DEFAULT_DUE_DAYS: 30, // Default days between call date and due date
-  PAYMENT_GRACE_DAYS: 7, // Grace period for late payments
-  REMINDER_DAYS_BEFORE: 7 // Days before due date to send reminders
-};
-
-// Default allocation values
-export const ALLOCATION_DEFAULTS = {
-  PORTFOLIO_WEIGHT: 0,
-  INTEREST_PAID: 0,
-  DISTRIBUTION_PAID: 0,
-  INITIAL_MARKET_VALUE: 0, // Market value starts at 0, updated based on performance
-  INITIAL_MOIC: 1, // Multiple of Invested Capital starts at 1x
-  INITIAL_IRR: 0, // Internal Rate of Return starts at 0%
-  PAID_AMOUNT: 0, // Initially no amount paid
-  OUTSTANDING_AMOUNT: 0 // Initially no outstanding amount
-};
-
-// Security types
-export const SECURITY_TYPES = {
-  EQUITY: 'equity',
-  DEBT: 'debt',
-  CONVERTIBLE: 'convertible',
-  PREFERRED: 'preferred',
-  COMMON: 'common',
-  WARRANT: 'warrant',
-  OPTION: 'option',
-  REAL_ESTATE: 'real_estate',
-  VENTURE: 'venture',
-  BUYOUT: 'buyout',
-  ENERGY: 'energy',
-  INFRASTRUCTURE: 'infrastructure',
-  CREDIT: 'credit'
+  STANDARD_NOTICE_DAYS: 14,
+  URGENT_NOTICE_DAYS: 7,
+  MINIMUM_NOTICE_DAYS: 3,
+  DEFAULT_DUE_DAYS: 30,
+  GRACE_PERIOD_DAYS: 15
 } as const;
 
-export const DEFAULT_SECURITY_TYPE = SECURITY_TYPES.EQUITY;
-
-// Payment defaults  
+// Payment defaults for allocation calculations
 export const PAYMENT_DEFAULTS = {
-  INITIAL_PAID_AMOUNT: 0,
-  FULL_OUTSTANDING: 0 // When payment is complete, outstanding amount is 0
-};
+  MIN_PAYMENT_AMOUNT: 1000,
+  DEFAULT_CALL_PERCENTAGE: 25,
+  MAX_CALL_PERCENTAGE: 100,
+  PAYMENT_GRACE_PERIOD_DAYS: 30
+} as const;
+
+export type AllocationStatus = typeof ALLOCATION_STATUS[keyof typeof ALLOCATION_STATUS];
+export type CapitalCallStatus = typeof CAPITAL_CALL_STATUS[keyof typeof CAPITAL_CALL_STATUS];
+export type DealStage = typeof DEAL_STAGES[keyof typeof DEAL_STAGES];

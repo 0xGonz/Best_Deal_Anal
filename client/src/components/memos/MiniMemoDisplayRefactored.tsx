@@ -9,19 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { MiniMemo } from '@shared/schema';
 
-// Define checklist items as a constant for reuse across components
-export const DUE_DILIGENCE_CHECKLIST = {
-  financialReview: 'Financial Review',
-  legalReview: 'Legal Review',
-  marketAnalysis: 'Market Analysis',
-  teamAssessment: 'Team Assessment', 
-  customerInterviews: 'Customer Interviews',
-  competitorAnalysis: 'Competitor Analysis',
-  technologyReview: 'Technology Review',
-  businessModelValidation: 'Business Model Validation',
-  regulatoryCompliance: 'Regulatory Compliance',
-  esgAssessment: 'ESG Assessment'
-};
+import { DUE_DILIGENCE_CHECKLIST } from '@shared/constants';
 
 interface MemoUser {
   id: number;
@@ -304,5 +292,4 @@ export function MiniMemoDisplayRefactored({
   );
 }
 
-// Backward compatible alias
-export const MiniMemoDisplay = MiniMemoDisplayRefactored;
+// Remove redundant alias to prevent confusion and circular dependencies
