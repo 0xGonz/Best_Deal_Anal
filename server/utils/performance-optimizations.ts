@@ -40,9 +40,9 @@ export class PerformanceOptimizer {
     for (const indexQuery of indexes) {
       try {
         await db.execute(indexQuery);
-        results.push({ success: true, query: indexQuery.sql });
+        results.push({ success: true, query: 'index created' });
       } catch (error) {
-        results.push({ success: false, query: indexQuery.sql, error: error.message });
+        results.push({ success: false, query: 'index failed', error: (error as Error).message });
       }
     }
     
@@ -90,14 +90,14 @@ export class PerformanceOptimizer {
         const result = await db.execute(cleanupQuery);
         results.push({ 
           success: true, 
-          query: cleanupQuery.sql,
+          query: 'cache cleanup',
           rowsAffected: result.rowCount || 0
         });
       } catch (error) {
         results.push({ 
           success: false, 
-          query: cleanupQuery.sql, 
-          error: error.message 
+          query: 'cache cleanup failed', 
+          error: (error as Error).message 
         });
       }
     }

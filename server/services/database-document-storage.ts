@@ -1,4 +1,4 @@
-import { db } from '../db-read-replica.js';
+import { db } from '../db.js';
 import { documents } from '../../shared/schema.js';
 import { eq, desc } from 'drizzle-orm';
 

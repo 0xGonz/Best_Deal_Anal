@@ -16,7 +16,7 @@ import * as path from 'path';
 import connectPgSimple from 'connect-pg-simple';
 import memorystore from 'memorystore';
 import { StorageFactory } from "./storage-factory";
-import { initJobQueues } from "./jobs";
+// Job queues removed for modular cleanup
 import { metricsMiddleware } from "./middleware/metrics";
 import { LoggingService } from "./services";
 
@@ -194,7 +194,7 @@ async function initialize() {
 
   // Initialize background job queues
   try {
-    initJobQueues();
+    // Job queue initialization removed for modularity
     console.log('Background job processing system initialized');
   } catch (error) {
     console.error('Failed to initialize background jobs:', error);

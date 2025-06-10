@@ -1,6 +1,6 @@
 import { IStorage } from '../storage';
 import { StorageFactory } from '../storage-factory';
-import { primaryDB, readDB } from '../db-read-replica';
+import { db } from '../db';
 import { optimizedRead, optimizedWrite, generateCacheKey } from '../utils/db-helpers';
 import { CacheService } from './CacheService';
 import { LoggingService } from './LoggingService';

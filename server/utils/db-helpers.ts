@@ -3,7 +3,7 @@
  */
 
 import { SQL } from 'drizzle-orm';
-import { primaryDB, readDB } from '../db-read-replica';
+import { db } from '../db';
 import { CacheService } from '../services/CacheService';
 import { LoggingService } from '../services/LoggingService';
 import { MetricsService } from '../services/MetricsService';
