@@ -107,8 +107,8 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "returnNull" }),
       refetchInterval: false,
       refetchOnWindowFocus: false, // Disable to prevent excessive refetching
-      staleTime: 5 * 60 * 1000, // 5 minutes - optimized for memory management
-      gcTime: 8 * 60 * 1000, // 8 minutes - reduced to prevent memory leaks
+      staleTime: 10 * 60 * 1000, // 10 minutes - increased for /me endpoint caching
+      gcTime: 15 * 60 * 1000, // 15 minutes - balance between memory and performance
       retry: (failureCount, error) => {
         // Don't retry on 4xx errors except 401
         if (error && typeof error === 'object' && 'message' in error) {

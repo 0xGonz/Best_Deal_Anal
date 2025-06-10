@@ -1,7 +1,7 @@
 /**
  * Server-side formatting utilities, consistent with client-side formatting
  */
-import { FINANCIAL_CALCULATION } from '../constants/calculation-constants';
+import { FINANCIAL_CALCULATION } from '../../shared/constants';
 
 /**
  * Format a percentage value

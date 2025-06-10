@@ -9,7 +9,7 @@
  */
 
 import { StorageFactory } from '../storage-factory';
-import { TIME_MS, DEFAULT_DURATIONS } from '../constants/time-constants';
+import { TIME_MS } from '../../shared/constants';
 import { SCHEDULE_TYPES } from '../constants/status-constants';
 
 /**

@@ -56,6 +56,48 @@ export const CAPITAL_CALL_TIMING = {
   GRACE_PERIOD_DAYS: 15
 } as const;
 
+// Financial calculation constants - consolidated from client/server
+export const FINANCIAL_CALCULATION = {
+  MILLION: 1000000,
+  BILLION: 1000000000,
+  THOUSAND: 1000,
+  PRECISION: {
+    CURRENCY: 2,
+    PERCENTAGE: 2,
+    IRR: 1,
+    MULTIPLE: 2,
+  },
+  DEFAULT_IRR: 0,
+  DEFAULT_MOIC: 1,
+  MIN_DAYS_FOR_IRR: 30,
+  DECIMAL_TO_PERCENTAGE: 100,
+  BASE_VALUE: 100,
+} as const;
+
+// Time constants in milliseconds
+export const TIME_MS = {
+  SECOND: 1000,
+  MINUTE: 60 * 1000,
+  HOUR: 60 * 60 * 1000,
+  DAY: 24 * 60 * 60 * 1000,
+  WEEK: 7 * 24 * 60 * 60 * 1000,
+  MONTH: 30 * 24 * 60 * 60 * 1000,
+  YEAR: 365 * 24 * 60 * 60 * 1000,
+} as const;
+
+// Date formats
+export const DATE_FORMATS = {
+  DEFAULT: 'MMM d, yyyy',
+  SHORT: 'MM/dd/yyyy',
+  ISO: 'yyyy-MM-dd',
+  MONTH_YEAR: 'MMM yyyy',
+  YEAR: 'yyyy',
+  MONTH_DAY: 'MMM d',
+  FULL: 'MMMM d, yyyy',
+  DATE_TIME: 'MMM d, yyyy h:mm a',
+  TIME: 'h:mm a',
+} as const;
+
 // Payment defaults for allocation calculations
 export const PAYMENT_DEFAULTS = {
   MIN_PAYMENT_AMOUNT: 1000,
