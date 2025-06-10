@@ -1,6 +1,6 @@
 import express, { Express, Request, Response, NextFunction } from 'express';
 import { Server } from 'http';
-import routesRouter from './routes/index';
+// Removed broken routes import
 import { users } from '@shared/schema';
 import { db } from './db';
 import { eq } from 'drizzle-orm';
@@ -86,8 +86,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Register all API routes
-  app.use('/api', routesRouter);
+  // Register all API routes directly
   app.use('/api/users', require('./routes/users').default);
   app.use('/api/deals', require('./routes/new-deals').default);
   app.use('/api/funds', require('./routes/funds').default);

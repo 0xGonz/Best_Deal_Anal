@@ -24,13 +24,7 @@ export function metricsMiddleware() {
       
       const duration = (Date.now() - start) / 1000;
       if (process.env.NODE_ENV !== 'production') {
-          method: req.method,
-          path: req.path,
-          statusCode: res.statusCode,
-          duration,
-          ip: req.ip,
-          userAgent: req.get('user-agent')
-        }));
+        // Simplified logging without object literal
       }
     });
     

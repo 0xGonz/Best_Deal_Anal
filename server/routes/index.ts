@@ -1,7 +1,7 @@
 import { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { versioningMiddleware } from "../middleware/versioning";
-import { standardRateLimiter, authRateLimiter, apiRateLimiter } from "../middleware/rateLimit";
+// Removed rate limiting imports
 import v1Routes from './v1';
 import { systemRouter } from './system';
 
@@ -30,20 +30,20 @@ export function registerRoutes(app: Express): Server {
   app.use('/api', authenticate);
   
   // Apply stricter rate limits to authentication-related endpoints
-  app.use('/api/v1/auth', authRateLimiter);
-  app.use('/api/auth', authRateLimiter);
+  app.use('/api/v1/auth');
+  app.use('/api/auth');
   
   // Apply API rate limiting to versioned routes
-  app.use('/api/v1', apiRateLimiter, v1Routes);
+  app.use('/api/v1', v1Routes);
   
   // For backwards compatibility, also route the base /api/* to current version with rate limiting
-  app.use('/api', apiRateLimiter, v1Routes);
+  app.use('/api', v1Routes);
   
   // System routes with standard rate limiting
-  app.use('/api/system', standardRateLimiter, systemRouter);
+  app.use('/api/system', systemRouter);
   
   // API Documentation route with standard rate limiting
-  app.get('/api', standardRateLimiter, (req, res) => {
+  app.get('/api', (req, res) => {
     res.json({
       name: 'Investment Lifecycle Tracking API',
       versions: ['1'],
