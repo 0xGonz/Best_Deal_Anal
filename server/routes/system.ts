@@ -113,14 +113,13 @@ systemRouter.get('/health', async (req: Request, res: Response) => {
     await pool.query('SELECT 1');
     databaseConnected = true;
   } catch (error) {
-    logger.error('Health check database query failed:', error as Error);
+    console.error('Health check database query failed:', error);
   }
   
-  // Get application metrics
-  const metrics = metricsService.getAllMetrics();
-  const httpRequestsTotal = metrics.get('http_requests_total')?.value || 0;
-  const httpErrorsTotal = metrics.get('http_requests_error_total')?.value || 0;
-  const appUptime = metrics.get('app_uptime_seconds')?.value || 0;
+  // Simple metrics
+  const httpRequestsTotal = 0;
+  const httpErrorsTotal = 0;
+  const appUptime = process.uptime();
   
   // Return system health information with accurate storage type
   const response = {

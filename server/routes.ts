@@ -12,7 +12,7 @@ import activityRoutes from './routes/activity';
 import notificationsRoutes from './routes/notifications';
 import documentsRoutes from './routes/documents-persistent';
 import allocationsRoutes from './routes/allocations';
-import capitalCallsRoutes from './routes/capital-calls';
+// Removed capital-calls route (deleted unused service)
 import closingSchedulesRoutes from './routes/closing-schedules';
 import meetingsRoutes from './routes/meetings';
 import calendarRoutes from './routes/calendar.routes'; // New unified calendar API
@@ -85,7 +85,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/auth', authRoutes);
   app.use('/api/allocations', allocationsRoutes);
   app.use('/api/fund-allocations', allocationsRoutes); // Add this alias for client compatibility
-  app.use('/api/capital-calls', capitalCallsRoutes);
+  // Removed capital-calls route (deleted unused service)
   app.use('/api/closing-schedules', closingSchedulesRoutes);
   app.use('/api/meetings', meetingsRoutes);
   app.use('/api/calendar', calendarRoutes); // New unified calendar API endpoint

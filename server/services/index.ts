@@ -1,4 +1,3 @@
 // Export remaining utility services
-export { calculateAllocation } from './allocation-calculator';
-export { extractDataFromDocument } from './data-extractor';
-export { aiAnalyzer } from './ai-analyzer';
+export { AIAnalyzer } from './ai-analyzer';
+export { DataExtractor } from './data-extractor';
