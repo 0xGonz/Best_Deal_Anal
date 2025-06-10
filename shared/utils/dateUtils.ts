@@ -1,6 +1,7 @@
-// Comprehensive date handling utilities for perfect alignment across all investment operations
-// Prevents timezone shifts that cause dates to show as "next day"
+// Re-export all functions from the main date-utils file to avoid duplication
+export * from './date-utils';
 
+// Additional utility functions that were duplicated here
 /**
  * Convert date to UTC date string in YYYY-MM-DD format
  * Ensures consistent date handling without timezone issues
