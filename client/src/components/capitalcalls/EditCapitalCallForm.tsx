@@ -45,7 +45,7 @@ const formSchema = z.object({
   amountType: z.enum(['percentage', 'dollar']),
   callDate: z.date(),
   dueDate: z.date(),
-  status: z.enum(['scheduled', 'called', 'partial', 'paid', 'defaulted']),
+  status: z.enum(['scheduled', 'called', 'partially_paid', 'paid', 'defaulted']),
   notes: z.string().optional(),
   paidAmount: z.number().optional(),
   paidDate: z.date().optional().nullable(),

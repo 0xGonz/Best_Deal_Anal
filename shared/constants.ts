@@ -25,7 +25,7 @@ export const CAPITAL_CALL_SCHEDULES = {
 export const CAPITAL_CALL_STATUS = {
   SCHEDULED: 'scheduled',
   CALLED: 'called',
-  PARTIAL: 'partial',
+  PARTIALLY_PAID: 'partially_paid',
   PAID: 'paid',
   DEFAULTED: 'defaulted'
 };

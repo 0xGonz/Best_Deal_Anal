@@ -6,7 +6,7 @@
 export const CAPITAL_CALL_STATUS = {
   SCHEDULED: 'scheduled' as const,
   CALLED: 'called' as const,
-  PARTIAL: 'partial' as const,
+  PARTIALLY_PAID: 'partially_paid' as const,
   PAID: 'paid' as const,
   DEFAULTED: 'defaulted' as const
 };
@@ -29,7 +29,7 @@ export type ScheduleType = typeof SCHEDULE_TYPES[keyof typeof SCHEDULE_TYPES];
 export const CAPITAL_CALL_STATUS_COLORS = {
   [CAPITAL_CALL_STATUS.SCHEDULED]: 'bg-blue-100 text-blue-800',
   [CAPITAL_CALL_STATUS.CALLED]: 'bg-amber-100 text-amber-800',
-  [CAPITAL_CALL_STATUS.PARTIAL]: 'bg-purple-100 text-purple-800',
+  [CAPITAL_CALL_STATUS.PARTIALLY_PAID]: 'bg-purple-100 text-purple-800',
   [CAPITAL_CALL_STATUS.PAID]: 'bg-green-100 text-green-800',
   [CAPITAL_CALL_STATUS.DEFAULTED]: 'bg-red-100 text-red-800',
 };
@@ -38,7 +38,7 @@ export const CAPITAL_CALL_STATUS_COLORS = {
 export const CAPITAL_CALL_STATUS_LABELS = {
   [CAPITAL_CALL_STATUS.SCHEDULED]: 'Scheduled',
   [CAPITAL_CALL_STATUS.CALLED]: 'Called',
-  [CAPITAL_CALL_STATUS.PARTIAL]: 'Partial',
+  [CAPITAL_CALL_STATUS.PARTIALLY_PAID]: 'Partially Paid',
   [CAPITAL_CALL_STATUS.PAID]: 'Paid',
   [CAPITAL_CALL_STATUS.DEFAULTED]: 'Defaulted',
 };
