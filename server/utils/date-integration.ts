@@ -12,6 +12,17 @@ import { StorageFactory } from '../storage-factory';
 import { TIME_MS } from '../../shared/constants';
 import { SCHEDULE_TYPES } from '../constants/status-constants';
 
+// Default durations simplified for modularity
+const DEFAULT_DURATIONS = {
+  CAPITAL_CALL_NOTICE: 14 * TIME_MS.DAY,
+  CAPITAL_CALL_DUE: 30 * TIME_MS.DAY,
+  CLOSING_PREPARATION: 60 * TIME_MS.DAY,
+  DUE_DILIGENCE: 90 * TIME_MS.DAY,
+  ALLOCATION_BUFFER_DAYS: 7,
+  CAPITAL_CALL_BUFFER_DAYS: 14,
+  CLOSING_BUFFER_DAYS: 30,
+} as const;
+
 /**
  * Get the appropriate reference date for a capital call based on allocation
  * 
@@ -49,7 +60,7 @@ export async function getAllocationReferenceDate(
  */
 export function calculateDueDate(
   referenceDate: Date, 
-  daysUntilDue: number = DEFAULT_DURATIONS.CAPITAL_CALL_DUE_DAYS
+  daysUntilDue: number = 30
 ): Date {
   const dueDate = new Date(referenceDate);
   dueDate.setDate(dueDate.getDate() + daysUntilDue);
