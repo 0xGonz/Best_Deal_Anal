@@ -14,7 +14,6 @@ router.get('/fund/:fundId', requireAuth, async (req: Request, res: Response) => 
     const allocations = await storage.getAllocationsByFund(fundId);
     res.json(allocations);
   } catch (error) {
-    console.error('Error fetching fund allocations:', error);
     res.status(500).json({ message: 'Failed to fetch allocations' });
   }
 });
@@ -26,7 +25,6 @@ router.get('/deal/:dealId', requireAuth, async (req: Request, res: Response) => 
     const allocations = await storage.getAllocationsByDeal(dealId);
     res.json(allocations);
   } catch (error) {
-    console.error('Error fetching deal allocations:', error);
     res.status(500).json({ message: 'Failed to fetch allocations' });
   }
 });
@@ -41,7 +39,6 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ message: 'Validation error', errors: error.errors });
     }
-    console.error('Error creating allocation:', error);
     res.status(500).json({ message: 'Failed to create allocation' });
   }
 });
@@ -59,7 +56,6 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
     
     res.json(allocation);
   } catch (error) {
-    console.error('Error updating allocation:', error);
     res.status(500).json({ message: 'Failed to update allocation' });
   }
 });
@@ -76,7 +72,6 @@ router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
     
     res.json({ message: 'Allocation deleted successfully' });
   } catch (error) {
-    console.error('Error deleting allocation:', error);
     res.status(500).json({ message: 'Failed to delete allocation' });
   }
 });

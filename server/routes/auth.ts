@@ -93,7 +93,6 @@ router.get('/me', asyncHandler(async (req: Request, res: Response) => {
     await storage.updateUser(user.id, { lastActive: new Date() });
   } catch (error) {
     // Log error but don't fail the request
-    console.warn('Failed to update last active timestamp:', error);
   }
   
   // Return user info (without password)
@@ -120,7 +119,6 @@ router.post('/register', asyncHandler(async (req: Request, res: Response, next: 
     
     // Check if passwords match before validation schema
     if (req.body.password !== req.body.passwordConfirm) {
-      console.error('Password mismatch in request');
       return res.status(400).json({ 
         message: 'Passwords do not match',
         path: ['passwordConfirm']
@@ -133,7 +131,6 @@ router.post('/register', asyncHandler(async (req: Request, res: Response, next: 
       validatedData = registrationSchema.parse(req.body);
     } catch (validationError) {
       if (validationError instanceof ZodError) {
-        console.error('Zod validation error:', validationError.errors);
         return res.status(400).json({ 
           message: formatErrors(validationError),
           errors: validationError.errors 
@@ -175,7 +172,6 @@ router.post('/register', asyncHandler(async (req: Request, res: Response, next: 
     
     // Check if session was properly established
     if (!req.session.userId) {
-      console.error('Session not established after registration');
       return res.status(500).json({ 
         message: 'Registration successful but session not established. Please try logging in.' 
       });
@@ -187,7 +183,6 @@ router.post('/register', asyncHandler(async (req: Request, res: Response, next: 
   } catch (err) {
     // Use type assertion for better error handling
     const error = err as Error;
-    console.error('Registration route error:', error);
     
     // Handle specific error types
     if (error instanceof AppError) {
@@ -202,7 +197,6 @@ router.post('/register', asyncHandler(async (req: Request, res: Response, next: 
       return res.status(400).json({ message: formatErrors(error) });
     } else {
       // For unknown errors, provide a generic message but log the details
-      console.error('Unknown error during registration:', error);
       return res.status(500).json({ message: 'Registration failed due to an internal error' });
     }
   }

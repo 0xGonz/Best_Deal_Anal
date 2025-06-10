@@ -19,7 +19,6 @@ export class FundController {
     try {
       return res.json(funds);
     } catch (error) {
-      console.error("Error fetching funds:", error);
       return res.status(500).json({ 
         message: error instanceof Error ? error.message : "Internal server error" 
       });
@@ -44,7 +43,6 @@ export class FundController {
       
       return res.json(fund);
     } catch (error) {
-      console.error(`Error fetching fund ${req.params.id}:`, error);
       return res.status(500).json({ 
         message: error instanceof Error ? error.message : "Internal server error" 
       });
@@ -67,7 +65,6 @@ export class FundController {
       
       return res.status(201).json(fund);
     } catch (error) {
-      console.error("Error creating fund:", error);
       
       if (error instanceof z.ZodError) {
         return res.status(400).json({ 
@@ -104,7 +101,6 @@ export class FundController {
       
       return res.json(updatedFund);
     } catch (error) {
-      console.error(`Error updating fund ${req.params.id}:`, error);
       
       if (error instanceof z.ZodError) {
         return res.status(400).json({ 
@@ -137,7 +133,6 @@ export class FundController {
       
       return res.status(204).end();
     } catch (error) {
-      console.error(`Error deleting fund ${req.params.id}:`, error);
       return res.status(500).json({ 
         message: error instanceof Error ? error.message : "Internal server error" 
       });

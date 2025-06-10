@@ -26,7 +26,6 @@ router.post('/deals/:dealId/analyze', requireAuth, async (req: Request, res: Res
       return res.status(401).json({ error: 'User authentication required' });
     }
     
-    console.log(`🔍 AI ANALYSIS REQUEST - Deal ${dealId}, User ${userId}, Query: ${query || 'comprehensive analysis'}`);
     
     const storage = StorageFactory.getStorage();
     
@@ -36,7 +35,6 @@ router.post('/deals/:dealId/analyze', requireAuth, async (req: Request, res: Res
       return res.status(404).json({ error: 'Deal not found' });
     }
     
-    console.log(`📈 Analyzing deal: ${deal.name} (${deal.sector})`);
 
     // Initialize the document analyzer
     const analyzer = new DocumentAnalyzer();
@@ -56,12 +54,9 @@ router.post('/deals/:dealId/analyze', requireAuth, async (req: Request, res: Res
     
     const result = await analyzer.performAnalysis(analysisRequest, documentContents, deal);
     
-    console.log(`✅ AI analysis completed successfully for deal ${dealId}`);
-    console.log(`📄 Analysis based on ${documentContents.length} authentic documents`);
 
     res.json(result);
   } catch (error) {
-    console.error('Error in document analysis:', error);
     
     if (error instanceof Error && error.message.includes('No authentic document content')) {
       return res.status(400).json({ 
@@ -90,7 +85,6 @@ router.post('/deals/:dealId/documents/:documentId/analyze', requireAuth, async (
       return res.status(401).json({ error: 'User authentication required' });
     }
     
-    console.log(`🔍 Analyzing specific document ${documentId} for deal ${dealId}`);
     
     const storage = StorageFactory.getStorage();
     
@@ -131,10 +125,8 @@ router.post('/deals/:dealId/documents/:documentId/analyze', requireAuth, async (
 
       const result = await analyzer.performAnalysis(analysisRequest, [specificDoc], deal);
       
-      console.log(`✅ Specific document analysis completed for ${document.fileName}`);
       res.json(result);
     } catch (error) {
-      console.error('Error in specific document analysis:', error);
       
       if (error instanceof Error && error.message.includes('No authentic document content')) {
         return res.status(400).json({ 
@@ -149,7 +141,6 @@ router.post('/deals/:dealId/documents/:documentId/analyze', requireAuth, async (
       });
     }
   } catch (error) {
-    console.error('Error in document analysis endpoint:', error);
     res.status(500).json({ 
       error: 'Failed to process request',
       details: error instanceof Error ? error.message : 'Unknown error'

@@ -220,7 +220,6 @@ export class UniversalDocumentResolver {
     if (resolution.found && resolution.confidence !== 'low') {
       // Update database with the correct path
       const relativePath = this.makeRelativePath(resolution.resolvedPath!);
-      console.log(`🔧 Auto-fixing document ${documentId}: ${currentPath} → ${relativePath}`);
       return true;
     }
     

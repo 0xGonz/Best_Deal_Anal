@@ -19,7 +19,6 @@ router.get('/', requireAuth, async (req: Request, res: Response) => {
     const notifications = await storage.getUserNotifications(user.id);
     return res.json(notifications);
   } catch (error) {
-    console.error('Error fetching notifications:', error);
     return res.status(500).json({ message: 'Failed to fetch notifications' });
   }
 });
@@ -37,7 +36,6 @@ router.get('/unread-count', requireAuth, async (req: Request, res: Response) => 
     const count = await storage.getUnreadNotificationsCount(user.id);
     return res.json({ count });
   } catch (error) {
-    console.error('Error fetching unread count:', error);
     return res.status(500).json({ message: 'Failed to fetch unread notification count' });
   }
 });
@@ -58,7 +56,6 @@ router.patch('/:id/read', requireAuth, async (req: Request, res: Response) => {
 
     return res.json({ success: true });
   } catch (error) {
-    console.error('Error marking notification as read:', error);
     return res.status(500).json({ message: 'Failed to mark notification as read' });
   }
 });
@@ -76,7 +73,6 @@ router.post('/mark-all-read', requireAuth, async (req: Request, res: Response) =
     const success = await storage.markAllNotificationsAsRead(user.id);
     return res.json({ success });
   } catch (error) {
-    console.error('Error marking all notifications as read:', error);
     return res.status(500).json({ message: 'Failed to mark all notifications as read' });
   }
 });
@@ -96,7 +92,6 @@ router.post('/', async (req: Request, res: Response) => {
     const notification = await storage.createNotification(validationResult.data);
     return res.status(201).json(notification);
   } catch (error) {
-    console.error('Error creating notification:', error);
     return res.status(500).json({ message: 'Failed to create notification' });
   }
 });

@@ -16,7 +16,6 @@ const authenticate = (req: Request, res: Response, next: NextFunction) => {
 
 // Error handling middleware
 const errorHandler = (err: any, _req: Request, res: Response, _next: NextFunction) => {
-  console.error(err.stack);
   res.status(500).json({ 
     message: 'An unexpected error occurred', 
     error: process.env.NODE_ENV === 'development' ? err.message : undefined 

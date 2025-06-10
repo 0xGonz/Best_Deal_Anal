@@ -25,7 +25,6 @@ router.get('/allocation/:allocationId', requireAuth, async (req, res) => {
       .where(eq(distributions.allocationId, parseInt(allocationId)));
     res.json(allocationDistributions);
   } catch (error) {
-    console.error('Error fetching distributions:', error);
     res.status(500).json({ message: 'Failed to fetch distributions' });
   }
 });
@@ -48,7 +47,6 @@ router.post('/', requireAuth, async (req, res) => {
       });
     }
     
-    console.error('Error creating distribution:', error);
     res.status(500).json({ message: 'Failed to create distribution' });
   }
 });
@@ -77,7 +75,6 @@ router.put('/:id', requireAuth, async (req, res) => {
       });
     }
     
-    console.error('Error updating distribution:', error);
     res.status(500).json({ message: 'Failed to update distribution' });
   }
 });
@@ -99,7 +96,6 @@ router.delete('/:id', requireAuth, async (req, res) => {
     
     res.json({ message: 'Distribution deleted successfully' });
   } catch (error) {
-    console.error('Error deleting distribution:', error);
     res.status(500).json({ message: 'Failed to delete distribution' });
   }
 });

@@ -21,7 +21,6 @@ router.get('/', requireAuth, async (req: Request, res: Response) => {
     ]) as any[];
     
     if (!deals || !Array.isArray(deals)) {
-      console.error('Failed to retrieve deals for activity feed');
       return res.status(404).json({ message: 'No deals available' });
     }
     
@@ -54,7 +53,6 @@ router.get('/', requireAuth, async (req: Request, res: Response) => {
               }
             }));
           } catch (err) {
-            console.error(`Error fetching events for deal ${deal.id}:`, err);
             return []; // Return empty array for this deal instead of failing
           }
         })
@@ -101,7 +99,6 @@ router.get('/', requireAuth, async (req: Request, res: Response) => {
     
     res.json(eventsWithUserInfo);
   } catch (error) {
-    console.error('Error generating activity feed:', error);
     // Return a more specific error message with a 500 status
     res.status(500).json({ 
       message: 'Failed to fetch activity feed',

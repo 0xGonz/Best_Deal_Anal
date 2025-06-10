@@ -30,11 +30,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Debug middleware to log session consistency issues
   app.use('/api', (req: Request, res: Response, next: NextFunction) => {
     if (req.path === '/closing-schedules') {
-      console.log(`Session debug before closing-schedules: userId=${req.session?.userId || 'none'}, sessionID=${req.sessionID?.substring(0, 8)}...`);
       
       // Print session data for debugging
       if (req.session) {
-        console.log('Session object:', {
           id: req.sessionID,
           cookie: req.session.cookie,
           userId: req.session.userId,
@@ -43,7 +41,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
         
         if (!req.session.userId) {
-          console.log('No userId in session, user is not authenticated');
         }
       }
     }
@@ -59,7 +56,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       next();
     } catch (error) {
-      console.error('Error in user middleware:', error);
       // Continue even with error to avoid breaking the request
       next();
     }

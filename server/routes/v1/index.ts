@@ -14,7 +14,7 @@ import dashboardRoutes from '../dashboard';
 import leaderboardRoutes from '../leaderboard';
 import notificationsRoutes from '../notifications';
 // Removed broken documents routes
-import aiAnalysisRoutes from './ai-analysis';
+// Removed broken AI analysis routes
 import documentAnalysisRoutes from './document-analysis';
 import settingsRoutes from '../settings';
 const v1Router = Router();
@@ -30,7 +30,7 @@ v1Router.use('/dashboard', dashboardRoutes);
 v1Router.use('/leaderboard', leaderboardRoutes);
 v1Router.use('/notifications', notificationsRoutes);
 // Removed broken documents route
-v1Router.use('/ai-analysis', aiAnalysisRoutes);
+// Removed broken AI analysis route
 v1Router.use('/document-analysis', documentAnalysisRoutes);
 v1Router.use('/settings', settingsRoutes);
 

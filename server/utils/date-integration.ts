@@ -46,7 +46,6 @@ export async function getAllocationReferenceDate(
     
     return fallbackDate;
   } catch (error) {
-    console.error(`Error getting allocation reference date for allocation ${allocationId}:`, error);
     return fallbackDate;
   }
 }
@@ -120,7 +119,6 @@ export async function synchronizeAllocationDates(
     // 1. First get the allocation to ensure it exists
     const allocation = await storage.getFundAllocation(allocationId);
     if (!allocation) {
-      console.error(`Cannot synchronize dates: Allocation ${allocationId} not found`);
       return false;
     }
     
@@ -150,7 +148,6 @@ export async function synchronizeAllocationDates(
           await storage.updateCapitalCallDates(call.id, newCallDate, newDueDate);
         }
       } catch (error) {
-        console.error(`Error updating capital call ${call.id} dates:`, error);
       }
     }
     
@@ -165,14 +162,11 @@ export async function synchronizeAllocationDates(
           await storage.updateClosingScheduleEventDate(event.id, newScheduledDate);
         }
       } catch (error) {
-        console.error(`Error updating closing schedule event ${event.id} date:`, error);
       }
     }
     
-    console.log(`Successfully synchronized dates for allocation ${allocationId}`);
     return true;
   } catch (error) {
-    console.error(`Error synchronizing dates for allocation ${allocationId}:`, error);
     return false;
   }
 }
@@ -279,7 +273,6 @@ export async function getNextIntegrationDate(
     
     return nextDate;
   } catch (error) {
-    console.error(`Error calculating next integration date for deal ${dealId}:`, error);
     return new Date(); // Return today as fallback
   }
 }

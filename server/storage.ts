@@ -155,7 +155,6 @@ export class MemStorage implements IStorage {
   
   // Method to return the database client (or null for MemStorage)
   getDbClient(): any {
-    console.warn('getDbClient called on MemStorage - no database available');
     return null;
   }
   

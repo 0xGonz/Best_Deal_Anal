@@ -64,7 +64,6 @@ router.get('/:dealId/memos', requireAuth, async (req: Request, res: Response) =>
     
     res.json(memosWithUserInfo);
   } catch (error) {
-    console.error("Error fetching mini memos:", error);
     res.status(500).json({ message: 'Failed to fetch mini memos' });
   }
 });
@@ -109,7 +108,6 @@ router.post('/:dealId/memos', requireAuth, async (req: Request, res: Response) =
       } : null
     });
   } catch (error) {
-    console.error('Error creating mini memo:', error);
     if (error instanceof z.ZodError) {
       return res.status(400).json({ message: 'Invalid memo data', errors: error.errors });
     }
@@ -151,7 +149,6 @@ router.get('/:dealId/assignments', requireAuth, async (req: Request, res: Respon
     // Filter out null values (if any user wasn't found)
     res.json(assignedUsers.filter(Boolean));
   } catch (error) {
-    console.error('Error fetching deal assignments:', error);
     res.status(500).json({ message: 'Failed to fetch deal assignments' });
   }
 });
@@ -224,7 +221,6 @@ router.post('/:dealId/assignments', requireAuth, async (req: Request, res: Respo
     
     res.status(201).json({ ...assignment, user: assignedUser });
   } catch (error) {
-    console.error('Error assigning user to deal:', error);
     res.status(500).json({ message: 'Failed to assign user to deal' });
   }
 });
@@ -280,7 +276,6 @@ router.delete('/:dealId/assignments/:userId', requireAuth, async (req: Request, 
     
     res.json({ success: true });
   } catch (error) {
-    console.error('Error unassigning user from deal:', error);
     res.status(500).json({ message: 'Failed to unassign user from deal' });
   }
 });
@@ -325,7 +320,6 @@ router.delete('/:dealId/memos/:memoId', requireAuth, async (req: Request, res: R
       res.status(500).json({ message: 'Failed to delete mini memo' });
     }
   } catch (error) {
-    console.error('Error deleting mini memo:', error);
     res.status(500).json({ message: 'Failed to delete mini memo' });
   }
 });

@@ -3,7 +3,6 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 const moduleUrl = import.meta.url;
 const modulePath = fileURLToPath(moduleUrl);
-console.log("🐞  Boot file:", modulePath);
 
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
@@ -18,7 +17,7 @@ import memorystore from 'memorystore';
 import { StorageFactory } from "./storage-factory";
 // Job queues removed for modular cleanup
 import { metricsMiddleware } from "./middleware/metrics";
-import { LoggingService } from "./services";
+// Removed LoggingService import - simplified logging
 
 // Main async function to allow using await
 async function initialize() {
@@ -77,9 +76,7 @@ async function initialize() {
         });
     });
     
-    console.log("Database connectivity check passed");
   } catch (error: any) {
-    console.error("Database connectivity check failed:", error.message);
     isDbHealthy = false;
   }
 
@@ -94,17 +91,13 @@ async function initialize() {
         pruneSessionInterval: 300, // Reduced frequency to 5 minutes to prevent timeouts
         ttl: 86400, // 24 hours session timeout
         disableTouch: false, // Enable session touch to prevent premature expiry
-        errorLog: (err) => console.error("PgSession error:", err)
       });
-      console.log("▶ Using PgSession for sessions (PostgreSQL)");
     } catch (error) {
-      console.error("Failed to create PostgreSQL session store:", error);
       if (isProd) {
         throw new Error("Cannot run in production without PostgreSQL session store");
       } else {
         // Fallback to memory store only in dev mode
         sessionStore = createMemoryStore();
-        console.log("▶ Fallback to MemoryStore for sessions due to PostgreSQL error");
       }
     }
   } else {
@@ -112,14 +105,11 @@ async function initialize() {
     sessionStore = createMemoryStore();
     
     if (forceUseMemory) {
-      console.log("▶ Using MemoryStore for sessions (explicitly requested)");
     } else {
-      console.log("▶ Using MemoryStore for sessions (database health check failed)");
     }
   }
 
   // Debug the session store to verify it remains consistent
-  console.log("⏱️  Session store is", sessionStore.constructor.name);
 
   // Add metrics middleware to track request metrics
   app.use(metricsMiddleware());
@@ -164,7 +154,6 @@ async function initialize() {
       const sessionID = req.sessionID?.substring(0, 10) + '...';
       const hasSession = !!req.session;
       const userId = req.session?.userId;
-      console.log(`Session debug [${req.method} ${req.path}]: sessionID=${sessionID}, hasSession=${hasSession}, userId=${userId}`);
     }
     next();
   });
@@ -173,7 +162,6 @@ async function initialize() {
   const uploadDir = path.join(process.cwd(), 'data/uploads');
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
-    console.log('Created persistent uploads directory:', uploadDir);
   }
   
   // Also ensure old public/uploads exists for backwards compatibility
@@ -190,15 +178,11 @@ async function initialize() {
   
   // Serve PDF worker file directly from public root
   app.use(express.static(rootPublic));
-  console.log('Configured static file serving for uploads and PDF.js worker');
 
   // Initialize background job queues
   try {
     // Job queue initialization removed for modularity
-    console.log('Background job processing system initialized');
   } catch (error) {
-    console.error('Failed to initialize background jobs:', error);
-    console.log('Continuing without background processing');
   }
   
   const server = await registerRoutes(app);
@@ -228,6 +212,5 @@ async function initialize() {
 
 // Execute the main function
 initialize().catch(error => {
-  console.error('Failed to initialize application:', error);
   process.exit(1);
 });

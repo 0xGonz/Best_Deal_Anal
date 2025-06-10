@@ -88,7 +88,6 @@ router.get('/stats', requireAuth, async (req: Request, res: Response) => {
     
     res.json(response);
   } catch (error) {
-    console.error('Error fetching dashboard stats:', error);
     res.status(500).json({ 
       error: { 
         code: 'DASHBOARD_STATS_ERROR', 
@@ -144,7 +143,6 @@ router.get('/sector-stats', async (req: Request, res: Response) => {
     const stats = await getSectorStats('Sector stats');
     res.json(stats);
   } catch (error) {
-    console.error('Error fetching sector statistics:', error);
     res.status(500).json({ message: 'Failed to fetch sector statistics' });
   }
 });
@@ -155,7 +153,6 @@ router.get('/industry-stats', async (req: Request, res: Response) => {
     const stats = await getSectorStats('Industry stats', true);
     res.json(stats);
   } catch (error) {
-    console.error('Error fetching industry statistics:', error);
     res.status(500).json({ message: 'Failed to fetch industry statistics' });
   }
 });

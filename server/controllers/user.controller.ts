@@ -14,7 +14,6 @@ export class UserController {
     try {
       res.json(users);
     } catch (error) {
-      console.error('Failed to get all users', error);
       res.status(500).json({ error: 'An error occurred while retrieving users' });
     }
   }
@@ -37,7 +36,6 @@ export class UserController {
       
       res.json(user);
     } catch (error) {
-      console.error('Failed to get user', error);
       res.status(500).json({ error: 'An error occurred while retrieving the user' });
     }
   }
@@ -62,7 +60,6 @@ export class UserController {
         return res.status(409).json({ error: 'Username already exists' });
       }
       
-      console.error('Failed to create user', error);
       res.status(500).json({ error: 'An error occurred while creating the user' });
     }
   }
@@ -89,7 +86,6 @@ export class UserController {
       
       res.json(result);
     } catch (error) {
-      console.error('Failed to update user', error);
       res.status(500).json({ error: 'An error occurred while updating the user' });
     }
   }
@@ -112,7 +108,6 @@ export class UserController {
       
       res.status(204).send();
     } catch (error) {
-      console.error('Failed to delete user', error);
       res.status(500).json({ error: 'An error occurred while deleting the user' });
     }
   }
@@ -128,7 +123,6 @@ export class UserController {
       
       res.json(req.user);
     } catch (error) {
-      console.error('Failed to get current user', error);
       res.status(500).json({ error: 'An error occurred while retrieving the current user' });
     }
   }

@@ -12,7 +12,6 @@ if (!process.env.DATABASE_URL) {
 }
 
 // Create direct pool/db exports, not nullable anymore
-console.log('Initializing database connection...');
 
 // Configure the pool with optimized settings for document access
 const pool = new Pool({
@@ -26,34 +25,26 @@ const pool = new Pool({
 
 // Set up event handlers for the pool
 pool.on('error', (err) => {
-  console.error('Unexpected database pool error:', err);
   // Don't crash, just log the error
 });
 
 pool.on('connect', (client) => {
   client.on('error', (err) => {
-    console.error('Database client error:', err);
   });
 });
 
 // Test the connection by running a simple query
 pool.query('SELECT 1 AS test')
   .then(() => {
-    console.log('Database connection verified successfully');
   })
   .catch(err => {
-    console.error('Database connection test failed:', err);
-    console.error('Continuing with memory storage');
     
     // Attempt to reconnect after a delay
     setTimeout(() => {
-      console.log('Attempting to reconnect to database...');
       pool.query('SELECT 1 AS test')
         .then(() => {
-          console.log('Database reconnection successful');
         })
         .catch(reconnectErr => {
-          console.error('Database reconnection failed:', reconnectErr);
         });
     }, 5000); // Try again after 5 seconds
   });
@@ -65,7 +56,6 @@ const checkPoolHealth = async () => {
     await client.query('SELECT 1');
     client.release();
   } catch (err) {
-    console.error('Database health check failed:', err);
     // Log error but don't attempt to recreate pools
   }
 };
@@ -75,4 +65,3 @@ setInterval(checkPoolHealth, 10 * 60 * 1000);
 
 export { pool };
 export const db = drizzle(pool, { schema });
-console.log('Database connection initialized successfully');

@@ -4,7 +4,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { LoggingService } from '../services/LoggingService';
+// Removed LoggingService import - using console directly
 
 // Interface for rate limit configuration
 interface RateLimitConfig {

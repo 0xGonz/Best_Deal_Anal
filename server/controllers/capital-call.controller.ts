@@ -22,7 +22,6 @@ export class CapitalCallController {
       if (error instanceof ZodError) {
         return res.status(400).json({ error: formatZodError(error) });
       }
-      console.error('Failed to create capital call', error);
       res.status(500).json({ error: 'An error occurred while creating the capital call' });
     }
   }
@@ -45,7 +44,6 @@ export class CapitalCallController {
       
       res.json(capitalCall);
     } catch (error) {
-      console.error('Failed to get capital call', error);
       res.status(500).json({ error: 'An error occurred while retrieving the capital call' });
     }
   }
@@ -57,7 +55,6 @@ export class CapitalCallController {
     try {
       res.json(capitalCalls);
     } catch (error) {
-      console.error('Failed to get all capital calls', error);
       res.status(500).json({ error: 'An error occurred while retrieving capital calls' });
     }
   }
@@ -75,7 +72,6 @@ export class CapitalCallController {
       
       res.json(capitalCalls);
     } catch (error) {
-      console.error('Failed to get capital calls by allocation', error);
       res.status(500).json({ error: 'An error occurred while retrieving capital calls' });
     }
   }
@@ -93,7 +89,6 @@ export class CapitalCallController {
       
       res.json(capitalCalls);
     } catch (error) {
-      console.error('Failed to get capital calls by deal', error);
       res.status(500).json({ error: 'An error occurred while retrieving capital calls' });
     }
   }
@@ -122,7 +117,6 @@ export class CapitalCallController {
       
       res.json(updatedCall);
     } catch (error) {
-      console.error('Failed to update capital call status', error);
       res.status(500).json({ error: 'An error occurred while updating the capital call' });
     }
   }
@@ -151,7 +145,6 @@ export class CapitalCallController {
       
       res.json(updatedCall);
     } catch (error) {
-      console.error('Failed to update capital call dates', error);
       res.status(500).json({ error: 'An error occurred while updating the capital call' });
     }
   }
@@ -176,7 +169,6 @@ export class CapitalCallController {
       
       res.json(result);
     } catch (error) {
-      console.error('Failed to get capital calls for calendar', error);
       res.status(500).json({ error: 'An error occurred while retrieving capital calls' });
     }
   }

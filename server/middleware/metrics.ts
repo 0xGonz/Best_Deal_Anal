@@ -24,8 +24,6 @@ export function metricsMiddleware() {
       
       const duration = (Date.now() - start) / 1000;
       if (process.env.NODE_ENV !== 'production') {
-        console.log(`[${new Date().toISOString()}] [DEBUG] ${req.method} ${req.path} ${res.statusCode} ${duration.toFixed(3)}s`);
-        console.log(JSON.stringify({
           method: req.method,
           path: req.path,
           statusCode: res.statusCode,

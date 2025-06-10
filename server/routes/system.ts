@@ -13,7 +13,6 @@ systemRouter.post('/database/test-connection', async (req: Request, res: Respons
     await pool.query('SELECT 1');
     res.json({ success: true, connected: true, message: 'Database connection successful' });
   } catch (error) {
-    console.error('Database connection test failed:', error);
     res.status(503).json({ 
       success: false, 
       connected: false, 
@@ -26,7 +25,6 @@ systemRouter.post('/database/test-connection', async (req: Request, res: Respons
 // Endpoint to force synchronization of pending operations
 systemRouter.post('/database/sync-pending', async (req: Request, res: Response) => {
   // We no longer use hybrid storage, but keep endpoint for compatibility
-  console.log('Received sync-pending request - operation now obsolete');
   
   res.json({ 
     success: true, 
@@ -46,7 +44,6 @@ systemRouter.post('/database/simulate-failure', (req: Request, res: Response) =>
   }
   
   // We no longer use hybrid storage, but keep endpoint for compatibility
-  console.log('Received database-failure simulation request - operation now obsolete');
   
   res.json({ 
     success: true, 
@@ -66,7 +63,6 @@ systemRouter.post('/database/restore-normal', async (req: Request, res: Response
   }
   
   // We no longer use hybrid storage, but keep endpoint for compatibility
-  console.log('Received restore-normal request - operation now obsolete');
   
   // Check if database is connected
   try {
@@ -92,7 +88,6 @@ systemRouter.post('/database/restore-normal', async (req: Request, res: Response
 // Endpoint to check system health
 systemRouter.get('/health', async (req: Request, res: Response) => {
   // Log file path to help debugging
-  console.log('🔍 Health endpoint called from:', import.meta.url);
   
   // Determine actual session and data storage types - now fixed at startup
   const isMemoryStorage = StorageFactory.storage instanceof MemStorage;
@@ -104,7 +99,6 @@ systemRouter.get('/health', async (req: Request, res: Response) => {
   // Return 'pg' as storage type when using PostgreSQL, as required by the documentation
   const storageType = isMemoryStorage ? 'memory' : (useMemorySessions ? 'memory' : 'pg');
   
-  console.log('✅ Using fixed session and data store type:', storageType);
   
   // Database connectivity status
   let databaseConnected = false;
@@ -113,7 +107,6 @@ systemRouter.get('/health', async (req: Request, res: Response) => {
     await pool.query('SELECT 1');
     databaseConnected = true;
   } catch (error) {
-    console.error('Health check database query failed:', error);
   }
   
   // Simple metrics
@@ -136,7 +129,6 @@ systemRouter.get('/health', async (req: Request, res: Response) => {
     }
   };
   
-  console.log('📊 Health response:', JSON.stringify(response));
   res.json(response);
 });
 

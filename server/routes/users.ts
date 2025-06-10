@@ -77,7 +77,6 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
         errors: error.errors 
       });
     }
-    console.error('Error creating user:', error);
     res.status(500).json({ message: 'Failed to create user' });
   }
 });
@@ -213,7 +212,6 @@ router.patch('/:id', requireAuth, async (req: Request, res: Response) => {
     // Update the user
     const updatedUser = await storage.updateUser(targetUserId, updateData);
     if (!updatedUser) {
-      console.error(`Failed to update user ${targetUserId} in storage`);
       return res.status(500).json({ message: 'Failed to update user' });
     }
     
@@ -231,7 +229,6 @@ router.patch('/:id', requireAuth, async (req: Request, res: Response) => {
       message: 'User updated successfully'
     });
   } catch (error) {
-    console.error('Error updating user:', error);
     res.status(500).json({ message: 'Failed to update user' });
   }
 });
@@ -306,7 +303,6 @@ router.post('/:id/change-password', requireAuth, async (req: Request, res: Respo
     
     res.json({ message: 'Password changed successfully' });
   } catch (error) {
-    console.error('Error changing password:', error);
     res.status(500).json({ message: 'Failed to change password' });
   }
 });
@@ -348,7 +344,6 @@ router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
     
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
-    console.error('Error deleting user:', error);
     res.status(500).json({ message: 'Failed to delete user' });
   }
 });

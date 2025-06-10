@@ -111,7 +111,6 @@ router.get('/', requireAuth, async (req: Request, res: Response) => {
     
     res.json(sortedItems);
   } catch (error) {
-    console.error('Error fetching leaderboard data:', error);
     res.status(500).json({ message: 'Failed to fetch leaderboard data' });
   }
 });
