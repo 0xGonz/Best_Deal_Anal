@@ -13,10 +13,19 @@ type HybridStatus = {
   } | null;
 };
 
-import { HealthResponse } from '@shared/types/api-responses';
-
-type SystemHealthResponse = HealthResponse & {
+type SystemHealthResponse = {
+  status: string;
+  timestamp: string;
+  storage: 'database' | 'memory' | 'hybrid' | 'pg' | 'unknown';
+  databaseConnected: boolean;
+  environment: string;
   hybridStatus: HybridStatus | null;
+  metrics?: {
+    uptime: number;
+    requests: number;
+    errors: number;
+    errorRate: number;
+  };
 };
 
 export function DatabaseStatusAlert() {
