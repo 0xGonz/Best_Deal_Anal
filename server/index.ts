@@ -17,7 +17,7 @@ import memorystore from 'memorystore';
 import { StorageFactory } from "./storage-factory";
 // Job queues removed for modular cleanup
 import { metricsMiddleware } from "./middleware/metrics";
-// Removed LoggingService import - simplified logging
+// Removed // LoggingService import - simplified logging
 
 // Main async function to allow using await
 async function initialize() {

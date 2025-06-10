@@ -4,7 +4,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-// Removed LoggingService import - using console directly
+// Removed // LoggingService import - using console directly
 
 // Interface for rate limit configuration
 interface RateLimitConfig {
@@ -44,7 +44,7 @@ const DEFAULT_CONFIGS: Record<string, RateLimitConfig> = {
 export class RateLimiter {
   private buckets: Map<string, RateLimitBucket> = new Map();
   private config: RateLimitConfig;
-  private logger: LoggingService;
+  private logger: // LoggingService;
   
   /**
    * Create a new rate limiter
@@ -55,7 +55,7 @@ export class RateLimiter {
       ...config
     };
     
-    this.logger = LoggingService.getInstance();
+    this.logger = // LoggingService.getInstance();
     
     // Clean up buckets periodically to prevent memory leaks
     setInterval(() => this.cleanupBuckets(), 10 * 60 * 1000); // Every 10 minutes
@@ -148,7 +148,7 @@ function getRateLimitKey(req: Request): string {
  */
 export function createRateLimiter(configType: keyof typeof DEFAULT_CONFIGS = 'standard', config?: Partial<RateLimitConfig>) {
   const rateLimiter = new RateLimiter(config, configType);
-  const logger = LoggingService.getInstance();
+  const logger = // LoggingService.getInstance();
   
   return (req: Request, res: Response, next: NextFunction) => {
     const key = getRateLimitKey(req);
