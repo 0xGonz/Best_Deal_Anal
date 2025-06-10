@@ -18,7 +18,6 @@ export class DealController {
    */
   async getDeals(req: Request, res: Response) {
     try {
-      const storage = StorageFactory.getStorage();
       let deals;
       
       if (req.query.stage) {
@@ -80,7 +79,7 @@ export class DealController {
       });
       
       // Create the deal
-      const newDeal = await dealService.createDeal(dealData, user);
+      const newDeal = await storage.createDeal(dealData);
       
       // Verify we have a valid deal object with ID before returning
       if (!newDeal || typeof newDeal.id !== 'number') {
@@ -120,7 +119,7 @@ export class DealController {
       });
       
       // Update the deal
-      const updatedDeal = await dealService.updateDeal(dealId, dealUpdate, user);
+      const updatedDeal = await storage.updateDeal(dealId, dealUpdate);
       
       if (!updatedDeal) {
         return res.status(404).json({ message: 'Deal not found' });
@@ -151,7 +150,7 @@ export class DealController {
         return res.status(400).json({ message: 'Invalid deal ID format' });
       }
       
-      const success = await dealService.deleteDeal(dealId);
+      const success = await storage.deleteDeal(dealId);
       
       if (!success) {
         return res.status(404).json({ message: 'Deal not found or could not be deleted' });
@@ -171,7 +170,7 @@ export class DealController {
     try {
       const dealId = Number(req.params.dealId);
       
-      const events = await dealService.getDealTimeline(dealId);
+      const events = await storage.getTimelineEventsByDeal(dealId);
       
       if (events === null) {
         return res.status(404).json({ message: 'Deal not found' });
@@ -203,7 +202,7 @@ export class DealController {
         createdBy: user.id
       });
       
-      const newEvent = await dealService.createTimelineEvent(dealId, eventData, user);
+      const newEvent = await storage.createTimelineEvent(dealId, eventData, user);
       
       if (!newEvent) {
         return res.status(404).json({ message: 'Deal not found' });
@@ -238,7 +237,7 @@ export class DealController {
         metadata: req.body.metadata
       };
       
-      const result = await dealService.updateTimelineEvent(dealId, eventId, updateData, user);
+      const result = await storage.updateTimelineEvent(dealId, eventId, updateData, user);
       
       if (result.status === 'not_found') {
         return res.status(404).json({ message: result.message });
@@ -275,7 +274,7 @@ export class DealController {
         return res.status(401).json({ message: 'Unauthorized' });
       }
       
-      const result = await dealService.deleteTimelineEvent(dealId, eventId, user);
+      const result = await storage.deleteTimelineEvent(dealId, eventId, user);
       
       if (result.status === 'not_found') {
         return res.status(404).json({ message: result.message });
@@ -303,7 +302,7 @@ export class DealController {
     try {
       const dealId = Number(req.params.dealId);
       
-      const stars = await dealService.getDealStars(dealId);
+      const stars = await storage.getDealStars(dealId);
       
       if (stars === null) {
         return res.status(404).json({ message: 'Deal not found' });
@@ -329,7 +328,7 @@ export class DealController {
         return res.status(401).json({ message: 'Authentication required to star deals' });
       }
       
-      const result = await dealService.toggleDealStar(dealId, user.id);
+      const result = await storage.toggleDealStar(dealId, user.id);
       
       if (result.status === 'not_found') {
         return res.status(404).json({ message: result.message });
@@ -357,17 +356,17 @@ export class DealController {
       const dealId = Number(req.params.dealId);
       
       // Verify deal exists
-      const deal = await dealService.getDealById(dealId);
+      const deal = await storage.getDealById(dealId);
       if (!deal) {
         return res.status(404).json({ message: 'Deal not found' });
       }
       
       // Get all memos for this deal
-      const memos = await dealService.getMiniMemosByDeal(dealId);
+      const memos = await storage.getMiniMemosByDeal(dealId);
       
       // Fetch user details for each memo
       const userIds = Array.from(new Set(memos.map(m => m.userId)));
-      const users = await Promise.all(userIds.map(id => dealService.getUserById(id)));
+      const users = await Promise.all(userIds.map(id => storage.getUserById(id)));
       
       // Attach user details to memos
       const memosWithUserInfo = memos.map(memo => {
@@ -405,7 +404,7 @@ export class DealController {
       }
       
       // Verify deal exists
-      const deal = await dealService.getDealById(dealId);
+      const deal = await storage.getDealById(dealId);
       if (!deal) {
         return res.status(404).json({ message: 'Deal not found' });
       }
@@ -418,10 +417,10 @@ export class DealController {
       });
       
       // Create the memo
-      const newMemo = await dealService.createMiniMemo(memoData);
+      const newMemo = await storage.createMiniMemo(memoData);
       
       // Get user info to return with response
-      const userInfo = await dealService.getUserById(user.id);
+      const userInfo = await storage.getUserById(user.id);
       
       res.status(201).json({
         ...newMemo,

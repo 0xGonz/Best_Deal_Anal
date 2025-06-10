@@ -13,7 +13,7 @@ import activityRoutes from '../activity';
 import dashboardRoutes from '../dashboard';
 import leaderboardRoutes from '../leaderboard';
 import notificationsRoutes from '../notifications';
-import documentsRoutes from '../documents-database';
+// Removed broken documents routes
 import aiAnalysisRoutes from './ai-analysis';
 import documentAnalysisRoutes from './document-analysis';
 import settingsRoutes from '../settings';
@@ -29,7 +29,7 @@ v1Router.use('/activity', activityRoutes);
 v1Router.use('/dashboard', dashboardRoutes);
 v1Router.use('/leaderboard', leaderboardRoutes);
 v1Router.use('/notifications', notificationsRoutes);
-v1Router.use('/documents', documentsRoutes);
+// Removed broken documents route
 v1Router.use('/ai-analysis', aiAnalysisRoutes);
 v1Router.use('/document-analysis', documentAnalysisRoutes);
 v1Router.use('/settings', settingsRoutes);
