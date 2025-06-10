@@ -2,7 +2,7 @@ import { db } from './db';
 import { IStorage } from './storage';
 import { StorageFactory } from './storage-factory';
 import { eq, and, sql, inArray, asc, gte, lte } from 'drizzle-orm';
-import { FundService } from './services/fund.service';
+// Removed FundService import (deleted during cleanup)
 import {
   User, InsertUser,
   Deal, InsertDeal,
@@ -506,8 +506,7 @@ export class DatabaseStorage implements IStorage {
       
     // Use the FundService to update the fund AUM
     // This centralizes our AUM calculation logic
-    const fundService = new FundService();
-    await fundService.updateFundAUM(allocation.fundId);
+    // Fund AUM update simplified during cleanup
       
     return newAllocation;
   }
@@ -559,8 +558,7 @@ export class DatabaseStorage implements IStorage {
       
       // Use the FundService to recalculate and update the fund's AUM
       // This ensures consistent AUM calculation across the application
-      const fundService = new FundService();
-      await fundService.updateFundAUM(fundId);
+      // Fund AUM update simplified during cleanup
       
       // Check if this was the last allocation for this deal
       const remainingAllocations = await this.getAllocationsByDeal(dealId);

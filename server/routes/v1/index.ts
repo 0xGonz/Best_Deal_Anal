@@ -4,7 +4,7 @@
  */
 
 import { Router } from 'express';
-import dealsRoutes from '../deals';
+// Removed deals routes import (deleted during cleanup)
 import fundsRoutes from '../funds';
 import usersRoutes from '../users';
 import authRoutes from '../auth';
@@ -20,7 +20,7 @@ import settingsRoutes from '../settings';
 const v1Router = Router();
 
 // Register all route modules under the v1 router
-v1Router.use('/deals', dealsRoutes);
+// Removed deals routes usage (deleted during cleanup)
 v1Router.use('/funds', fundsRoutes);
 v1Router.use('/users', usersRoutes);
 v1Router.use('/auth', authRoutes);
