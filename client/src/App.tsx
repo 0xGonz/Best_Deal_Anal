@@ -47,7 +47,7 @@ function Router() {
 
 function App() {
   return (
-    <ErrorBoundary
+    <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <TooltipProvider>
