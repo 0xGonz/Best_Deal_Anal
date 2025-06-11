@@ -277,7 +277,7 @@ export class MemStorage implements IStorage {
       id, 
       createdAt, 
       updatedAt,
-      stage: deal.stage || 'initial_review',
+      stage: deal.stage ?? 'initial_review',
       description: deal.description || null,
       sector: deal.sector || null,
       notes: deal.notes || null,
@@ -333,14 +333,15 @@ export class MemStorage implements IStorage {
         eventType: 'stage_change',
         content: `Deal moved from ${deal.stage} to ${dealUpdate.stage}`,
         createdBy: dealUpdate.createdBy || deal.createdBy,
-        metadata: { prevStage: deal.stage, newStage: dealUpdate.stage }
+        metadata: { prevStage: deal.stage, newStage: dealUpdate.stage } as Record<string, any>
       });
     }
     
     const updatedDeal: Deal = {
       ...deal,
       ...dealUpdate,
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      tags: (dealUpdate.tags as string[]) || deal.tags
     };
     this.deals.set(id, updatedDeal);
     return updatedDeal;
@@ -638,11 +639,9 @@ export class MemStorage implements IStorage {
       notes: allocation.notes || null,
       allocationDate: allocation.allocationDate || allocationDate,
       portfolioWeight: allocation.portfolioWeight || null,
-      currentValue: allocation.currentValue || null,
-      multiple: allocation.multiple || null,
-      distributionAmount: allocation.distributionAmount || null,
-      appreciationAmount: allocation.appreciationAmount || null,
-      irr: allocation.irr || null
+      paidAmount: allocation.paidAmount || null,
+      irr: allocation.irr || null,
+      amountType: allocation.amountType || null
     };
     
     this.fundAllocations.set(id, newAllocation);
