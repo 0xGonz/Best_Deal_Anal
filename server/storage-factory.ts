@@ -1,5 +1,5 @@
 import { IStorage, MemStorage } from './storage';
-import { DatabaseStorage } from './database-storage-minimal';
+import { DatabaseStorage } from './database-storage-fixed';
 import { db, pool } from './db';
 
 /**

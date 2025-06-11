@@ -494,3 +494,46 @@ export const insertDistributionSchema = createInsertSchema(distributions).omit({
 
 export type Distribution = typeof distributions.$inferSelect;
 export type InsertDistribution = z.infer<typeof insertDistributionSchema>;
+
+// Export all missing types
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+
+export type Deal = typeof deals.$inferSelect;
+export type InsertDeal = z.infer<typeof insertDealSchema>;
+
+export type Document = typeof documents.$inferSelect;
+export type InsertDocument = z.infer<typeof insertDocumentSchema>;
+
+export type TimelineEvent = typeof timelineEvents.$inferSelect;
+export type InsertTimelineEvent = z.infer<typeof insertTimelineEventSchema>;
+
+export type DealStar = typeof dealStars.$inferSelect;
+export type InsertDealStar = z.infer<typeof insertDealStarSchema>;
+
+export type MiniMemo = typeof miniMemos.$inferSelect;
+export type InsertMiniMemo = z.infer<typeof insertMiniMemoSchema>;
+
+export type Fund = typeof funds.$inferSelect;
+export type InsertFund = z.infer<typeof insertFundSchema>;
+
+export type FundAllocation = typeof fundAllocations.$inferSelect;
+export type InsertFundAllocation = z.infer<typeof insertFundAllocationSchema>;
+
+export type DealAssignment = typeof dealAssignments.$inferSelect;
+export type InsertDealAssignment = z.infer<typeof insertDealAssignmentSchema>;
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+
+export type CapitalCall = typeof capitalCalls.$inferSelect;
+export type InsertCapitalCall = z.infer<typeof insertCapitalCallSchema>;
+
+export type CapitalCallPayment = typeof capitalCallPayments.$inferSelect;
+export type InsertCapitalCallPayment = z.infer<typeof insertCapitalCallPaymentSchema>;
+
+export type MemoComment = typeof memoComments.$inferSelect;
+export type InsertMemoComment = z.infer<typeof insertMemoCommentSchema>;
+
+export type ClosingScheduleEvent = typeof closingScheduleEvents.$inferSelect;
+export type InsertClosingScheduleEvent = z.infer<typeof insertClosingScheduleEventSchema>;
