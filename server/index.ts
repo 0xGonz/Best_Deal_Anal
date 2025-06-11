@@ -14,7 +14,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import connectPgSimple from 'connect-pg-simple';
 import memorystore from 'memorystore';
-import { StorageFactory } from "./storage-factory";
+import { DatabaseStorage } from "./database-storage";
 // Job queues removed for modular cleanup
 import { metricsMiddleware } from "./middleware/metrics";
 // Removed // LoggingService import - simplified logging
@@ -27,7 +27,7 @@ async function initialize() {
 
   // ─── SESSION CONFIGURATION - SINGLE POINT OF TRUTH ─────────────────────────
   // Initialize the StorageFactory to use the hybrid storage implementation
-  const storage = StorageFactory.getStorage();
+  // const storage = StorageFactory.getStorage();
 
   // Create the appropriate session store classes
   const PgSession = connectPgSimple(session);
@@ -212,5 +212,7 @@ async function initialize() {
 
 // Execute the main function
 initialize().catch(error => {
+  console.error('❌ Server initialization failed:', error);
+  console.error('Stack trace:', error.stack);
   process.exit(1);
 });

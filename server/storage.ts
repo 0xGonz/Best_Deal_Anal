@@ -127,6 +127,10 @@ export interface IStorage {
   updateClosingScheduleEventDate(id: number, scheduledDate: Date): Promise<ClosingScheduleEvent | undefined>;
   deleteClosingScheduleEvent(id: number): Promise<boolean>;
 
+  // Batch operations for performance
+  getDealStarsBatch(dealIds: number[]): Promise<DealStar[]>;
+  getMiniMemosBatch(dealIds: number[]): Promise<MiniMemo[]>;
+
   // Distributions - Modular investment tracking
   createDistribution(distribution: any): Promise<any>;
   getDistribution(id: number): Promise<any | undefined>;
@@ -1022,6 +1026,49 @@ export class MemStorage implements IStorage {
       this.closingScheduleEvents.delete(id);
     }
     return exists;
+  }
+
+  // Batch operations for performance
+  async getDealStarsBatch(dealIds: number[]): Promise<DealStar[]> {
+    return Array.from(this.dealStars.values())
+      .filter(star => dealIds.includes(star.dealId));
+  }
+
+  async getMiniMemosBatch(dealIds: number[]): Promise<MiniMemo[]> {
+    return Array.from(this.miniMemos.values())
+      .filter(memo => dealIds.includes(memo.dealId));
+  }
+
+  // Distribution methods (placeholder implementation)
+  async createDistribution(distribution: any): Promise<any> {
+    // For MemStorage, we'll just return the distribution with an ID
+    const id = Math.floor(Math.random() * 10000);
+    return { ...distribution, id };
+  }
+
+  async getDistribution(id: number): Promise<any | undefined> {
+    // For MemStorage, return undefined as we're not storing distributions
+    return undefined;
+  }
+
+  async getDistributionsByAllocation(allocationId: number): Promise<any[]> {
+    // For MemStorage, return empty array
+    return [];
+  }
+
+  async updateDistribution(id: number, distribution: any): Promise<any | undefined> {
+    // For MemStorage, return undefined
+    return undefined;
+  }
+
+  async deleteDistribution(id: number): Promise<boolean> {
+    // For MemStorage, return false
+    return false;
+  }
+
+  async recalculateAllocationMetrics(allocationId: number): Promise<void> {
+    // For MemStorage, this is a no-op
+    return;
   }
 }
 
