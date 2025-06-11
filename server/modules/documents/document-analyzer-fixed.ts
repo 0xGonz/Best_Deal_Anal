@@ -16,7 +16,7 @@ export interface DocumentContent {
   fileName: string;
   documentType: string;
   content: string;
-  extractedData?: any;
+  extractedData?: Record<string, unknown>;
 }
 
 export class DocumentAnalyzer {

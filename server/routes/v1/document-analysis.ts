@@ -90,7 +90,7 @@ router.post('/deals/:dealId/documents/:documentId/analyze', requireAuth, async (
     
     // Get the specific document
     const documents = await storage.getDocumentsByDeal(parseInt(dealId));
-    const document = documents.find((doc: any) => doc.id === parseInt(documentId));
+    const document = documents.find(doc => doc.id === parseInt(documentId));
     
     if (!document) {
       return res.status(404).json({ error: 'Document not found' });

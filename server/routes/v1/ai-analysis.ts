@@ -1,8 +1,23 @@
 import { Router, Request, Response } from 'express';
 import { StorageFactory } from '../../storage-factory';
 import { requireAuth } from '../../utils/auth';
-import { Document as DatabaseDocument } from '../../../shared/schema';
 import OpenAI from 'openai';
+
+type DatabaseDocument = {
+  id: number;
+  fileName: string;
+  fileData: string | null;
+  documentType: string;
+  dealId: number;
+  fileType: string;
+  fileSize: number;
+  filePath: string;
+  uploadedBy: number;
+  uploadedAt: Date;
+  description: string | null;
+  metadata: Record<string, any> | null;
+  version: number;
+};
 
 const router = Router();
 const openai = new OpenAI({
