@@ -121,34 +121,42 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
 
     console.log(`Found existing allocation ${id}:`, existingAllocation);
 
-    // Validate and convert numeric fields safely
-    const allowedNumericFields = {
-      amount: true,
-      portfolioWeight: true,
-      interestPaid: true,
-      distributionPaid: true,
-      marketValue: true,
-      moic: true,
-      irr: true
-    } as const;
+    // Validate and convert numeric fields safely with explicit property access
+    const allowedNumericFields = new Set([
+      'amount',
+      'portfolioWeight', 
+      'interestPaid',
+      'distributionPaid',
+      'marketValue',
+      'moic',
+      'irr'
+    ]);
     
     const sanitizedUpdates: any = {};
     
-    for (const field in updates) {
-      if (field in allowedNumericFields && updates[field] !== undefined && updates[field] !== null) {
+    // Process each allowed field explicitly to prevent prototype pollution
+    for (const field of allowedNumericFields) {
+      if (updates.hasOwnProperty(field) && updates[field] !== undefined && updates[field] !== null) {
         sanitizedUpdates[field] = Number(updates[field]) || 0;
-      } else if (field === 'allocationDate' && updates[field]) {
-        // Handle date fields properly
-        const dateValue = updates[field];
-        if (typeof dateValue === 'string') {
-          sanitizedUpdates[field] = new Date(dateValue);
-        } else if (dateValue instanceof Date) {
-          sanitizedUpdates[field] = dateValue;
-        } else {
-          // If it's already a proper date object, use it as is
-          sanitizedUpdates[field] = dateValue;
-        }
-      } else if (typeof updates[field] === 'string' || updates[field] === null) {
+      }
+    }
+    
+    // Handle date fields with explicit property checking
+    if (updates.hasOwnProperty('allocationDate') && updates.allocationDate) {
+      const dateValue = updates.allocationDate;
+      if (typeof dateValue === 'string') {
+        sanitizedUpdates.allocationDate = new Date(dateValue);
+      } else if (dateValue instanceof Date) {
+        sanitizedUpdates.allocationDate = dateValue;
+      } else {
+        sanitizedUpdates.allocationDate = dateValue;
+      }
+    }
+    
+    // Handle string fields with explicit property checking
+    const allowedStringFields = ['status', 'securityType', 'notes'];
+    for (const field of allowedStringFields) {
+      if (updates.hasOwnProperty(field) && (typeof updates[field] === 'string' || updates[field] === null)) {
         sanitizedUpdates[field] = updates[field];
       }
     }
