@@ -214,7 +214,7 @@ async function initialize() {
   }
 
   // Use configurable port from environment variables
-  const port = parseInt(process.env.PORT || '3000', 10);
+  const port = parseInt(process.env.PORT || '5000', 10);
   const host = process.env.HOST || '0.0.0.0';
   
   // Add error handling for port conflicts

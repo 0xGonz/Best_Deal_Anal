@@ -277,16 +277,23 @@ export class MemStorage implements IStorage {
       id, 
       createdAt, 
       updatedAt,
+      stage: deal.stage || 'initial_review',
       description: deal.description || null,
       sector: deal.sector || null,
       notes: deal.notes || null,
       rejectionReason: deal.rejectionReason || null,
       rejectedAt: deal.rejectedAt || null,
+      targetReturn: deal.targetReturn || null,
+      score: deal.score || null,
+      contactEmail: deal.contactEmail || null,
       round: deal.round || null,
       targetRaise: deal.targetRaise || null,
       valuation: deal.valuation || null,
       leadInvestor: deal.leadInvestor || null,
-      tags: deal.tags || []
+      projectedIrr: deal.projectedIrr || null,
+      projectedMultiple: deal.projectedMultiple || null,
+      companyStage: deal.companyStage || null,
+      tags: deal.tags as string[] || []
     };
     
     this.deals.set(id, newDeal);
@@ -297,7 +304,7 @@ export class MemStorage implements IStorage {
       eventType: 'stage_change',
       content: `Deal created and set to ${deal.stage === 'initial_review' ? 'Initial Review' : 'Screening'}`,
       createdBy: deal.createdBy,
-      metadata: { initialStage: deal.stage }
+      metadata: { initialStage: deal.stage } as Record<string, any>
     });
     
     return newDeal;
