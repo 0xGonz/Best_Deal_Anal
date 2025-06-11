@@ -23,5 +23,25 @@ export async function registerMinimalRoutes(app: Express): Promise<void> {
     }
   });
 
+  // System health endpoint for frontend
+  app.get('/api/system/health', async (req: Request, res: Response) => {
+    try {
+      res.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        storage: { type: 'memory' },
+        session: { type: 'memory' },
+        database: { connected: false },
+        metrics: {
+          uptime: process.uptime(),
+          requests: 0,
+          errors: 0
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'System health check failed' });
+    }
+  });
+
   // Routes registered successfully
 }

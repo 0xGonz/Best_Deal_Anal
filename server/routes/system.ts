@@ -134,3 +134,6 @@ systemRouter.get('/health', async (req: Request, res: Response) => {
 
 // Endpoint to expose metrics in Prometheus format
 systemRouter.get('/metrics', metricsHandler);
+
+// Export as default for ES module compatibility
+export default systemRouter;
