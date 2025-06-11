@@ -86,28 +86,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Register all API routes directly
-  app.use('/api/users', require('./routes/users').default);
-  app.use('/api/deals', require('./routes/new-deals').default);
-  app.use('/api/funds', require('./routes/funds').default);
-  app.use('/api/allocations', require('./routes/allocations').default);
-  app.use('/api/capital-calls', require('./routes/new-capital-calls').default);
-  app.use('/api/distributions', require('./routes/distributions').default);
-  app.use('/api/closing-schedules', require('./routes/closing-schedules').default);
+  // Register all API routes directly with dynamic imports
+  const { default: usersRouter } = await import('./routes/users.js');
+  const { default: dealsRouter } = await import('./routes/new-deals.js');
+  const { default: fundsRouter } = await import('./routes/funds.js');
+  const { default: allocationsRouter } = await import('./routes/allocations.js');
+  const { default: capitalCallsRouter } = await import('./routes/new-capital-calls.js');
+  const { default: distributionsRouter } = await import('./routes/distributions.js');
   
-  app.use('/api/activity', require('./routes/activity').default);
-  app.use('/api/dashboard', require('./routes/dashboard').default);
-  app.use('/api/leaderboard', require('./routes/leaderboard').default);
-  app.use('/api/notifications', require('./routes/notifications').default);
-  app.use('/api/calendar', require('./routes/calendar.routes').default);
-  app.use('/api/meetings', require('./routes/meetings').default);
-  app.use('/api/settings', require('./routes/settings').default);
+  app.use('/api/users', usersRouter);
+  app.use('/api/deals', dealsRouter);
+  app.use('/api/funds', fundsRouter);
+  app.use('/api/allocations', allocationsRouter);
+  app.use('/api/capital-calls', capitalCallsRouter);
+  app.use('/api/distributions', distributionsRouter);
+  const { default: closingSchedulesRouter } = await import('./routes/closing-schedules.js');
+  const { default: activityRouter } = await import('./routes/activity.js');
+  const { default: dashboardRouter } = await import('./routes/dashboard.js');
+  const { default: leaderboardRouter } = await import('./routes/leaderboard.js');
+  const { default: notificationsRouter } = await import('./routes/notifications.js');
+  const { default: calendarRouter } = await import('./routes/calendar.routes.js');
+  const { default: meetingsRouter } = await import('./routes/meetings.js');
+  const { default: settingsRouter } = await import('./routes/settings.js');
+  const { default: v1Router } = await import('./routes/v1/index.js');
+  const { default: systemRouter } = await import('./routes/system.js');
+  
+  app.use('/api/closing-schedules', closingSchedulesRouter);
+  app.use('/api/activity', activityRouter);
+  app.use('/api/dashboard', dashboardRouter);
+  app.use('/api/leaderboard', leaderboardRouter);
+  app.use('/api/notifications', notificationsRouter);
+  app.use('/api/calendar', calendarRouter);
+  app.use('/api/meetings', meetingsRouter);
+  app.use('/api/settings', settingsRouter);
 
   // Version 1 routes
-  app.use('/api/v1', require('./routes/v1/index').default);
+  app.use('/api/v1', v1Router);
 
   // System routes
-  app.use('/api/system', require('./routes/system').default);
+  app.use('/api/system', systemRouter);
 
   return app.listen(process.env.PORT || 3000);
 }

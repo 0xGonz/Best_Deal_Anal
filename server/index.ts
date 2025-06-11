@@ -6,7 +6,7 @@ const modulePath = fileURLToPath(moduleUrl);
 
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
-import { registerRoutes } from "./routes";
+import { registerMinimalRoutes } from "./minimal-routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { errorHandler } from "./utils/errorHandlers";
 import { pool } from "./db";
@@ -14,7 +14,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import connectPgSimple from 'connect-pg-simple';
 import memorystore from 'memorystore';
-// import { DatabaseStorage } from "./database-storage";
+import { DatabaseStorage } from "./database-storage";
 // Job queues removed for modular cleanup
 import { metricsMiddleware } from "./middleware/metrics";
 // Removed // LoggingService import - simplified logging
@@ -27,7 +27,7 @@ async function initialize() {
 
   // ─── SESSION CONFIGURATION - SINGLE POINT OF TRUTH ─────────────────────────
   // Initialize the database storage directly
-  // const storage = new DatabaseStorage();
+  const storage = new DatabaseStorage();
 
   // Create the appropriate session store classes
   const PgSession = connectPgSimple(session);
@@ -185,7 +185,7 @@ async function initialize() {
   } catch (error) {
   }
   
-  const server = await registerRoutes(app);
+  const server = await registerMinimalRoutes(app);
 
   // Error handling is centralized in routes.ts
 

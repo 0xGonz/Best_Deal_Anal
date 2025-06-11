@@ -389,3 +389,6 @@ export class DealController {
     }
   }
 }
+
+// Export an instance for use in routes
+export const dealController = new DealController();
