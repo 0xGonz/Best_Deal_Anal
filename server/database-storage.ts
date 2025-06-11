@@ -88,8 +88,8 @@ export class DatabaseStorage implements IStorage {
     if (!db) {
       throw new Error('Database not initialized');
     }
-    const [user] = await db.insert(users).values(insertUser as any).returning();
-    return user as User;
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
   }
   
   async getUsers(): Promise<User[]> {
