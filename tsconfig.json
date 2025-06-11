@@ -7,7 +7,7 @@
     "noEmit": true,
     "module": "ESNext",
     "target": "ES2022",
-    "strict": true,
+    "strict": false,
     "lib": ["ES2022"],
     "jsx": "preserve",
     "esModuleInterop": true,

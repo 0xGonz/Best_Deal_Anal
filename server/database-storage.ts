@@ -20,7 +20,7 @@ import {
   ClosingScheduleEvent, InsertClosingScheduleEvent,
   users, deals, timelineEvents, dealStars, miniMemos, documents,
   funds, fundAllocations, dealAssignments, notifications, capitalCalls, capitalCallPayments, memoComments, closingScheduleEvents, distributions
-} from '../shared/schema';
+} from '@shared/schema';
 
 /**
  * PostgreSQL database implementation of the storage interface
