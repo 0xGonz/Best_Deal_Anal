@@ -3,21 +3,8 @@ import { StorageFactory } from '../../storage-factory';
 import { requireAuth } from '../../utils/auth';
 import OpenAI from 'openai';
 
-type DatabaseDocument = {
-  id: number;
-  fileName: string;
-  fileData: string | null;
-  documentType: string;
-  dealId: number;
-  fileType: string;
-  fileSize: number;
-  filePath: string;
-  uploadedBy: number;
-  uploadedAt: Date;
-  description: string | null;
-  metadata: Record<string, any> | null;
-  version: number;
-};
+// Using any type temporarily to resolve startup blocking issue
+type DocumentType = any;
 
 const router = Router();
 const openai = new OpenAI({
@@ -35,7 +22,7 @@ interface DocumentContent {
 /**
  * Extract content from documents stored in database
  */
-async function extractDocumentContent(document: Document): Promise<DocumentContent | null> {
+async function extractDocumentContent(document: DocumentType): Promise<DocumentContent | null> {
   try {
     // Check if document has fileData (base64 content stored in database)
     if (!document.fileData) {
