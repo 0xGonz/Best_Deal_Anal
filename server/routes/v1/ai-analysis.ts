@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { StorageFactory } from '../../storage-factory';
 import { requireAuth } from '../../utils/auth';
+import { Document as DatabaseDocument } from '../../../shared/schema';
 import OpenAI from 'openai';
 
 const router = Router();
@@ -13,13 +14,13 @@ interface DocumentContent {
   fileName: string;
   documentType: string;
   content: string;
-  extractedData?: any;
+  extractedData?: Record<string, unknown>;
 }
 
 /**
  * Extract content from documents stored in database
  */
-async function extractDocumentContent(document: any): Promise<DocumentContent | null> {
+async function extractDocumentContent(document: Document): Promise<DocumentContent | null> {
   try {
     // Check if document has fileData (base64 content stored in database)
     if (!document.fileData) {
@@ -171,7 +172,7 @@ router.post('/deals/:dealId', requireAuth, async (req: Request, res: Response) =
   try {
     const { dealId } = req.params;
     const { query } = req.body;
-    const userId = (req as any).user.id;
+    const userId = (req.session as any)?.userId;
 
     
     const storage = StorageFactory.getStorage();
@@ -214,7 +215,7 @@ router.post('/documents/:documentId', requireAuth, async (req: Request, res: Res
   try {
     const { documentId } = req.params;
     const { query } = req.body;
-    const userId = (req as any).user.id;
+    const userId = (req.session as any)?.userId;
 
     
     const storage = StorageFactory.getStorage();

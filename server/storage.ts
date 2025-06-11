@@ -13,7 +13,7 @@ import {
   CapitalCall, InsertCapitalCall,
   CapitalCallPayment, InsertCapitalCallPayment,
   ClosingScheduleEvent, InsertClosingScheduleEvent
-} from "@shared/schema";
+} from "../shared/schema";
 
 // This file defines the storage interface and in-memory implementation
 // For database storage, see database-storage.ts
