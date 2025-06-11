@@ -1,18 +1,50 @@
-import express, { Express, Request, Response, NextFunction } from 'express';
-import { Server } from 'http';
-// Removed broken routes import
-import { users } from '@shared/schema';
-import { db } from './db';
-import { eq } from 'drizzle-orm';
+import type { Express, Request, Response, NextFunction } from "express";
+import { createServer, type Server } from "http";
+
+// Route imports
+import dealsRoutes from './routes/new-deals'; // Using refactored modular structure
+import fundsRoutes from './routes/new-funds'; // Using refactored modular structure
+import usersRoutes from './routes/users';
+import authRoutes from './routes/auth';
+import dashboardRoutes from './routes/dashboard';
+import leaderboardRoutes from './routes/leaderboard';
+import activityRoutes from './routes/activity';
+import notificationsRoutes from './routes/notifications';
+import documentsRoutes from './routes/documents-persistent';
+import allocationsRoutes from './routes/allocations';
+import capitalCallsRoutes from './routes/capital-calls';
+import closingSchedulesRoutes from './routes/closing-schedules';
+import meetingsRoutes from './routes/meetings';
+import calendarRoutes from './routes/calendar.routes'; // New unified calendar API
+import { systemRouter } from './routes/system';
+import v1Router from './routes/v1/index'; // V1 API routes including AI analysis
+import aiAnalysisRoutes from './routes/ai-analysis';
+
+// Utils
+import { errorHandler, notFoundHandler, AppError } from './utils/errorHandlers';
+import { requireAuth, getCurrentUser } from './utils/auth';
+import { pool } from './db';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
   // Debug middleware to log session consistency issues
   app.use('/api', (req: Request, res: Response, next: NextFunction) => {
     if (req.path === '/closing-schedules') {
+      console.log(`Session debug before closing-schedules: userId=${req.session?.userId || 'none'}, sessionID=${req.sessionID?.substring(0, 8)}...`);
+      
       // Print session data for debugging
       if (req.session) {
-        // Session debugging removed
+        console.log('Session object:', {
+          id: req.sessionID,
+          cookie: req.session.cookie,
+          userId: req.session.userId,
+          username: req.session.username,
+          role: req.session.role
+        });
+        
+        if (!req.session.userId) {
+          console.log('No userId in session, user is not authenticated');
+        }
       }
     }
     next();
@@ -21,110 +53,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Middleware to attach user object to request - enhanced with error handling
   app.use('/api', async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // Skip user attachment for certain routes
-      if (req.path === '/health' || req.path === '/status') {
-        return next();
+      if (req.session?.userId) {
+        const user = await getCurrentUser(req);
+        (req as any).user = user;
       }
-      
-      // Only process if we have session and userId
-      if (req.session && req.session.userId) {
-        try {
-          const userRecord = await db.select().from(users).where(eq(users.id, req.session.userId)).limit(1);
-          if (userRecord.length > 0) {
-            (req as any).user = userRecord[0];
-          }
-        } catch (userError) {
-          // User lookup failed, continue without user
-        }
-      }
-      
       next();
     } catch (error) {
+      console.error('Error in user middleware:', error);
+      // Continue even with error to avoid breaking the request
       next();
     }
   });
-
-  // Middleware to ensure session consistency
+  
+  // Authentication middleware for all API routes except auth endpoints and system endpoints
   app.use('/api', (req: Request, res: Response, next: NextFunction) => {
-    next();
-  });
-
-  // Health check endpoint
-  app.get('/health', async (req: Request, res: Response) => {
-    try {
-      
-      // Test database connection
-      let databaseConnected = false;
-      try {
-        await db.select().from(users).limit(1);
-        databaseConnected = true;
-      } catch (dbError) {
-        // Database connection failed
-      }
-      
-      const response = {
-        status: 'ok',
-        timestamp: new Date().toISOString(),
-        storage: 'pg', 
-        databaseConnected,
-        environment: process.env.NODE_ENV || 'development',
-        metrics: {
-          uptime: process.uptime(),
-          requests: 0,
-          errors: 0,
-          errorRate: 0
-        }
-      };
-      
-      res.json(response);
-    } catch (error) {
-      res.status(500).json({ 
-        status: 'error', 
-        message: 'Health check failed',
-        timestamp: new Date().toISOString()
-      });
+    // Skip auth check for auth/system endpoints and OPTIONS requests
+    if (req.path.startsWith('/auth') || 
+        req.path.startsWith('/system') || 
+        req.method === 'OPTIONS') {
+      return next();
     }
+    
+    // Require authentication for all other API routes
+    requireAuth(req, res, next);
   });
-
-  // Register all API routes directly with dynamic imports
-  const { default: usersRouter } = await import('./routes/users.js');
-  const { default: dealsRouter } = await import('./routes/new-deals.js');
-  const { default: fundsRouter } = await import('./routes/funds.js');
-  const { default: allocationsRouter } = await import('./routes/allocations.js');
-  const { default: capitalCallsRouter } = await import('./routes/new-capital-calls.js');
-  const { default: distributionsRouter } = await import('./routes/distributions.js');
   
-  app.use('/api/users', usersRouter);
-  app.use('/api/deals', dealsRouter);
-  app.use('/api/funds', fundsRouter);
-  app.use('/api/allocations', allocationsRouter);
-  app.use('/api/capital-calls', capitalCallsRouter);
-  app.use('/api/distributions', distributionsRouter);
-  const { default: closingSchedulesRouter } = await import('./routes/closing-schedules.js');
-  const { default: activityRouter } = await import('./routes/activity.js');
-  const { default: dashboardRouter } = await import('./routes/dashboard.js');
-  const { default: leaderboardRouter } = await import('./routes/leaderboard.js');
-  const { default: notificationsRouter } = await import('./routes/notifications.js');
-  const { default: calendarRouter } = await import('./routes/calendar.routes.js');
-  const { default: meetingsRouter } = await import('./routes/meetings.js');
-  const { default: settingsRouter } = await import('./routes/settings.js');
-  const { default: v1Router } = await import('./routes/v1/index.js');
-  const { default: systemRouter } = await import('./routes/system.js');
-  
-  app.use('/api/closing-schedules', closingSchedulesRouter);
-  app.use('/api/activity', activityRouter);
-  app.use('/api/dashboard', dashboardRouter);
-  app.use('/api/leaderboard', leaderboardRouter);
-  app.use('/api/notifications', notificationsRouter);
-  app.use('/api/calendar', calendarRouter);
-  app.use('/api/meetings', meetingsRouter);
-  app.use('/api/settings', settingsRouter);
-
-  // Version 1 routes
-  app.use('/api/v1', v1Router);
-
-  // System routes
+  // Register route modules
+  app.use('/api/deals', dealsRoutes);
+  app.use('/api/funds', fundsRoutes);
+  app.use('/api/users', usersRoutes);
+  app.use('/api/auth', authRoutes);
+  app.use('/api/allocations', allocationsRoutes);
+  app.use('/api/fund-allocations', allocationsRoutes); // Add this alias for client compatibility
+  app.use('/api/capital-calls', capitalCallsRoutes);
+  app.use('/api/closing-schedules', closingSchedulesRoutes);
+  app.use('/api/meetings', meetingsRoutes);
+  app.use('/api/calendar', calendarRoutes); // New unified calendar API endpoint
+  app.use('/api/dashboard', dashboardRoutes);
+  app.use('/api/leaderboard', leaderboardRoutes);
+  app.use('/api/activity', activityRoutes);
+  app.use('/api/notifications', notificationsRoutes);
+  app.use('/api/documents', documentsRoutes);
   app.use('/api/system', systemRouter);
+  app.use('/api/v1', v1Router); // V1 API routes including AI analysis
+  app.use('/api/ai-analysis', aiAnalysisRoutes); // Direct access to AI analysis
+  
+  // Catch-all route for 404s
+  app.use('/api/*', notFoundHandler);
+  
+  // Apply centralized error handling middleware
+  app.use(errorHandler);
 
-  return app.listen(process.env.PORT || 3000);
+  const httpServer = createServer(app);
+  return httpServer;
 }

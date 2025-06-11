@@ -7,32 +7,28 @@ import {
   insertMiniMemoSchema,
   DealStageLabels
 } from "@shared/schema";
-import { StorageFactory } from '../storage-factory';
+import { dealService } from "../services";
 
 /**
  * Deal Controller - Handles HTTP requests and responses for deal resources
  */
 export class DealController {
-  private getStorage() {
-    return StorageFactory.getStorage();
-  }
-
   /**
    * Get all deals or filter by stage
    */
   async getDeals(req: Request, res: Response) {
     try {
-      const storage = this.getStorage();
       let deals;
       
       if (req.query.stage) {
-        deals = await storage.getDealsByStage(req.query.stage as any);
+        deals = await dealService.getDealsByStage(req.query.stage as string);
       } else {
-        deals = await storage.getDeals();
+        deals = await dealService.getAllDeals();
       }
       
       res.json(deals);
     } catch (error) {
+      console.error('Error fetching deals:', error);
       res.status(500).json({ message: 'Failed to fetch deals' });
     }
   }
@@ -42,6 +38,7 @@ export class DealController {
    */
   async getDealById(req: Request, res: Response) {
     try {
+      // Check if the ID is valid
       if (req.params.id === 'undefined' || req.params.id === 'null') {
         return res.status(400).json({ message: 'Invalid deal ID' });
       }
@@ -51,8 +48,7 @@ export class DealController {
         return res.status(400).json({ message: 'Invalid deal ID format' });
       }
       
-      const storage = this.getStorage();
-      const deal = await storage.getDeal(dealId);
+      const deal = await dealService.getDealWithRelations(dealId);
       
       if (!deal) {
         return res.status(404).json({ message: 'Deal not found' });
@@ -60,6 +56,7 @@ export class DealController {
       
       res.json(deal);
     } catch (error) {
+      console.error('Error fetching deal by ID:', error);
       res.status(500).json({ message: 'Failed to fetch deal' });
     }
   }
@@ -70,33 +67,38 @@ export class DealController {
   async createDeal(req: Request, res: Response) {
     try {
       const user = (req as any).user;
+      
+      // Check if user is authenticated
       if (!user) {
-        return res.status(401).json({ message: 'User not authenticated' });
+        return res.status(401).json({ message: 'You must be logged in to create a deal' });
       }
-
-      const validatedData = insertDealSchema.parse(req.body);
-      const storage = this.getStorage();
       
-      const dealData = {
-        ...validatedData,
+      // Validate input
+      const dealData = insertDealSchema.parse({
+        ...req.body,
         createdBy: user.id
-      };
+      });
       
-      const newDeal = await storage.createDeal(dealData);
+      // Create the deal
+      const newDeal = await dealService.createDeal(dealData, user);
       
+      // Verify we have a valid deal object with ID before returning
       if (!newDeal || typeof newDeal.id !== 'number') {
+        console.error('Deal created but missing valid ID:', newDeal);
         return res.status(500).json({ message: 'Failed to create deal with valid ID' });
       }
       
+      // Log success for debugging
+      console.log(`Created new deal ID ${newDeal.id} for user ${user.id} (${user.username})`);
+      
+      // Return the full deal object with ID to the client
       res.status(201).json(newDeal);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          message: 'Validation error', 
-          errors: error.errors 
-        });
+        return res.status(400).json({ message: 'Invalid deal data', errors: error.errors });
       }
-      res.status(500).json({ message: 'Failed to create deal' });
+      console.error('Error creating deal:', error);
+      res.status(500).json({ message: 'Failed to create deal', error: String(error) });
     }
   }
 
@@ -105,20 +107,20 @@ export class DealController {
    */
   async updateDeal(req: Request, res: Response) {
     try {
-      const user = (req as any).user;
-      if (!user) {
-        return res.status(401).json({ message: 'User not authenticated' });
-      }
-
       const dealId = Number(req.params.id);
-      if (isNaN(dealId)) {
-        return res.status(400).json({ message: 'Invalid deal ID' });
-      }
-
-      const dealUpdate = insertDealSchema.partial().parse(req.body);
-      const storage = this.getStorage();
+      // Get user from request if available, or use a default system user ID if not
+      const user = (req as any).user || { id: 1 }; // Default to admin user if no user in request
       
-      const updatedDeal = await storage.updateDeal(dealId, dealUpdate);
+      // Validate the partial update data
+      const updateSchema = insertDealSchema.partial();
+      let dealUpdate = updateSchema.parse({
+        ...req.body,
+        // If stage is updated, record who changed it
+        ...(req.body.stage && { createdBy: user.id })
+      });
+      
+      // Update the deal
+      const updatedDeal = await dealService.updateDeal(dealId, dealUpdate, user);
       
       if (!updatedDeal) {
         return res.status(404).json({ message: 'Deal not found' });
@@ -127,11 +129,9 @@ export class DealController {
       res.json(updatedDeal);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          message: 'Validation error', 
-          errors: error.errors 
-        });
+        return res.status(400).json({ message: 'Invalid deal data', errors: error.errors });
       }
+      console.error('Error updating deal:', error);
       res.status(500).json({ message: 'Failed to update deal' });
     }
   }
@@ -141,20 +141,25 @@ export class DealController {
    */
   async deleteDeal(req: Request, res: Response) {
     try {
-      const dealId = Number(req.params.id);
-      if (isNaN(dealId)) {
+      // Check if the ID is valid
+      if (req.params.id === 'undefined' || req.params.id === 'null') {
         return res.status(400).json({ message: 'Invalid deal ID' });
       }
-
-      const storage = this.getStorage();
-      const success = await storage.deleteDeal(dealId);
       
-      if (!success) {
-        return res.status(404).json({ message: 'Deal not found' });
+      const dealId = Number(req.params.id);
+      if (isNaN(dealId)) {
+        return res.status(400).json({ message: 'Invalid deal ID format' });
       }
       
-      res.status(204).send();
+      const success = await dealService.deleteDeal(dealId);
+      
+      if (!success) {
+        return res.status(404).json({ message: 'Deal not found or could not be deleted' });
+      }
+      
+      res.json({ success: true, message: 'Deal deleted successfully' });
     } catch (error) {
+      console.error('Error deleting deal:', error);
       res.status(500).json({ message: 'Failed to delete deal' });
     }
   }
@@ -164,16 +169,17 @@ export class DealController {
    */
   async getDealTimeline(req: Request, res: Response) {
     try {
-      const dealId = Number(req.params.id);
-      if (isNaN(dealId)) {
-        return res.status(400).json({ message: 'Invalid deal ID' });
+      const dealId = Number(req.params.dealId);
+      
+      const events = await dealService.getDealTimeline(dealId);
+      
+      if (events === null) {
+        return res.status(404).json({ message: 'Deal not found' });
       }
-
-      const storage = this.getStorage();
-      const events = await storage.getTimelineEventsByDeal(dealId);
       
       res.json(events);
     } catch (error) {
+      console.error('Error fetching timeline events:', error);
       res.status(500).json({ message: 'Failed to fetch timeline events' });
     }
   }
@@ -183,33 +189,32 @@ export class DealController {
    */
   async createTimelineEvent(req: Request, res: Response) {
     try {
+      const dealId = Number(req.params.dealId);
       const user = (req as any).user;
+      
       if (!user) {
-        return res.status(401).json({ message: 'User not authenticated' });
+        return res.status(401).json({ message: 'Unauthorized' });
       }
-
-      const dealId = Number(req.params.id);
-      if (isNaN(dealId)) {
-        return res.status(400).json({ message: 'Invalid deal ID' });
-      }
-
+      
+      // Validate input
       const eventData = insertTimelineEventSchema.parse({
         ...req.body,
         dealId,
         createdBy: user.id
       });
-
-      const storage = this.getStorage();
-      const newEvent = await storage.createTimelineEvent(eventData);
+      
+      const newEvent = await dealService.createTimelineEvent(dealId, eventData, user);
+      
+      if (!newEvent) {
+        return res.status(404).json({ message: 'Deal not found' });
+      }
       
       res.status(201).json(newEvent);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          message: 'Validation error', 
-          errors: error.errors 
-        });
+        return res.status(400).json({ message: 'Invalid event data', errors: error.errors });
       }
+      console.error('Error creating timeline event:', error);
       res.status(500).json({ message: 'Failed to create timeline event' });
     }
   }
@@ -219,28 +224,40 @@ export class DealController {
    */
   async updateTimelineEvent(req: Request, res: Response) {
     try {
+      const dealId = Number(req.params.dealId);
       const eventId = Number(req.params.eventId);
-      if (isNaN(eventId)) {
-        return res.status(400).json({ message: 'Invalid event ID' });
-      }
-
-      const updateData = insertTimelineEventSchema.partial().parse(req.body);
-      const storage = this.getStorage();
+      const user = (req as any).user;
       
-      const result = await storage.updateTimelineEvent(eventId, updateData);
-      
-      if (!result) {
-        return res.status(404).json({ message: 'Timeline event not found' });
+      if (!user) {
+        return res.status(401).json({ message: 'Unauthorized' });
       }
       
-      res.json(result);
+      // Prepare update data
+      const updateData = {
+        content: req.body.content,
+        metadata: req.body.metadata
+      };
+      
+      const result = await dealService.updateTimelineEvent(dealId, eventId, updateData, user);
+      
+      if (result.status === 'not_found') {
+        return res.status(404).json({ message: result.message });
+      }
+      
+      if (result.status === 'forbidden') {
+        return res.status(403).json({ message: result.message });
+      }
+      
+      if (result.status === 'invalid') {
+        return res.status(400).json({ message: result.message });
+      }
+      
+      res.json(result.data);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          message: 'Validation error', 
-          errors: error.errors 
-        });
+        return res.status(400).json({ message: 'Invalid event data', errors: error.errors });
       }
+      console.error('Error updating timeline event:', error);
       res.status(500).json({ message: 'Failed to update timeline event' });
     }
   }
@@ -250,20 +267,31 @@ export class DealController {
    */
   async deleteTimelineEvent(req: Request, res: Response) {
     try {
+      const dealId = Number(req.params.dealId);
       const eventId = Number(req.params.eventId);
-      if (isNaN(eventId)) {
-        return res.status(400).json({ message: 'Invalid event ID' });
-      }
-
-      const storage = this.getStorage();
-      const result = await storage.deleteTimelineEvent(eventId);
+      const user = (req as any).user;
       
-      if (!result) {
-        return res.status(404).json({ message: 'Timeline event not found' });
+      if (!user) {
+        return res.status(401).json({ message: 'Unauthorized' });
       }
       
-      res.status(204).send();
+      const result = await dealService.deleteTimelineEvent(dealId, eventId, user);
+      
+      if (result.status === 'not_found') {
+        return res.status(404).json({ message: result.message });
+      }
+      
+      if (result.status === 'forbidden') {
+        return res.status(403).json({ message: result.message });
+      }
+      
+      if (result.status === 'invalid') {
+        return res.status(400).json({ message: result.message });
+      }
+      
+      res.status(200).json({ success: true });
     } catch (error) {
+      console.error('Error deleting timeline event:', error);
       res.status(500).json({ message: 'Failed to delete timeline event' });
     }
   }
@@ -273,51 +301,50 @@ export class DealController {
    */
   async getDealStars(req: Request, res: Response) {
     try {
-      const dealId = Number(req.params.id);
-      if (isNaN(dealId)) {
-        return res.status(400).json({ message: 'Invalid deal ID' });
+      const dealId = Number(req.params.dealId);
+      
+      const stars = await dealService.getDealStars(dealId);
+      
+      if (stars === null) {
+        return res.status(404).json({ message: 'Deal not found' });
       }
-
-      const storage = this.getStorage();
-      const stars = await storage.getDealStars(dealId);
       
       res.json(stars);
     } catch (error) {
+      console.error('Error fetching deal stars:', error);
       res.status(500).json({ message: 'Failed to fetch deal stars' });
     }
   }
 
   /**
-   * Toggle star status for a deal
+   * Toggle star on a deal
    */
   async toggleDealStar(req: Request, res: Response) {
     try {
+      const dealId = Number(req.params.dealId);
       const user = (req as any).user;
+      
+      // User must be authenticated
       if (!user) {
-        return res.status(401).json({ message: 'User not authenticated' });
+        return res.status(401).json({ message: 'Authentication required to star deals' });
       }
-
-      const dealId = Number(req.params.id);
-      if (isNaN(dealId)) {
-        return res.status(400).json({ message: 'Invalid deal ID' });
-      }
-
-      const storage = this.getStorage();
       
-      // Check if already starred
-      const existingStars = await storage.getDealStars(dealId);
-      const userStar = existingStars.find(star => star.userId === user.id);
+      const result = await dealService.toggleDealStar(dealId, user.id);
       
-      if (userStar) {
-        // Unstar
-        await storage.unstarDeal(dealId, user.id);
-        res.json({ starred: false });
-      } else {
-        // Star
-        await storage.starDeal({ dealId, userId: user.id });
-        res.json({ starred: true });
+      if (result.status === 'not_found') {
+        return res.status(404).json({ message: result.message });
       }
+      
+      if (result.status === 'unstarred') {
+        return res.json({ success: true, action: 'unstarred' });
+      }
+      
+      return res.status(201).json({ ...result.data, action: 'starred' });
     } catch (error) {
+      console.error('Error toggling deal star:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid star data', errors: error.errors });
+      }
       res.status(500).json({ message: 'Failed to toggle deal star' });
     }
   }
@@ -325,24 +352,41 @@ export class DealController {
   /**
    * Get mini memos for a deal
    */
-  async getMiniMemos(req: Request, res: Response) {
+  async getDealMemos(req: Request, res: Response) {
     try {
-      const dealId = Number(req.params.id);
-      if (isNaN(dealId)) {
-        return res.status(400).json({ message: 'Invalid deal ID' });
-      }
-
-      const storage = this.getStorage();
-      const deal = await storage.getDeal(dealId);
+      const dealId = Number(req.params.dealId);
       
+      // Verify deal exists
+      const deal = await dealService.getDealById(dealId);
       if (!deal) {
         return res.status(404).json({ message: 'Deal not found' });
       }
       
-      const memos = await storage.getMiniMemosByDeal(dealId);
+      // Get all memos for this deal
+      const memos = await dealService.getMiniMemosByDeal(dealId);
       
-      res.json(memos);
+      // Fetch user details for each memo
+      const userIds = Array.from(new Set(memos.map(m => m.userId)));
+      const users = await Promise.all(userIds.map(id => dealService.getUserById(id)));
+      
+      // Attach user details to memos
+      const memosWithUserInfo = memos.map(memo => {
+        const user = users.find(u => u?.id === memo.userId);
+        return {
+          ...memo,
+          user: user ? {
+            id: user.id,
+            fullName: user.fullName,
+            initials: user.initials,
+            avatarColor: user.avatarColor,
+            role: user.role
+          } : null
+        };
+      });
+      
+      res.json(memosWithUserInfo);
     } catch (error) {
+      console.error('Error fetching mini memos:', error);
       res.status(500).json({ message: 'Failed to fetch mini memos' });
     }
   }
@@ -352,43 +396,51 @@ export class DealController {
    */
   async createMiniMemo(req: Request, res: Response) {
     try {
+      const dealId = Number(req.params.dealId);
       const user = (req as any).user;
-      if (!user) {
-        return res.status(401).json({ message: 'User not authenticated' });
-      }
-
-      const dealId = Number(req.params.id);
-      if (isNaN(dealId)) {
-        return res.status(400).json({ message: 'Invalid deal ID' });
-      }
-
-      const storage = this.getStorage();
-      const deal = await storage.getDeal(dealId);
       
+      // User must be authenticated
+      if (!user) {
+        return res.status(401).json({ message: 'Authentication required to create memos' });
+      }
+      
+      // Verify deal exists
+      const deal = await dealService.getDealById(dealId);
       if (!deal) {
         return res.status(404).json({ message: 'Deal not found' });
       }
-
+      
+      // Validate and prepare memo data
       const memoData = insertMiniMemoSchema.parse({
         ...req.body,
         dealId,
-        authorId: user.id
+        userId: user.id
       });
-
-      const newMemo = await storage.createMiniMemo(memoData);
       
-      res.status(201).json(newMemo);
+      // Create the memo
+      const newMemo = await dealService.createMiniMemo(memoData);
+      
+      // Get user info to return with response
+      const userInfo = await dealService.getUserById(user.id);
+      
+      res.status(201).json({
+        ...newMemo,
+        user: userInfo ? {
+          id: userInfo.id,
+          fullName: userInfo.fullName,
+          initials: userInfo.initials,
+          avatarColor: userInfo.avatarColor,
+          role: userInfo.role
+        } : null
+      });
     } catch (error) {
+      console.error('Error creating mini memo:', error);
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          message: 'Validation error', 
-          errors: error.errors 
-        });
+        return res.status(400).json({ message: 'Invalid memo data', errors: error.errors });
       }
       res.status(500).json({ message: 'Failed to create mini memo' });
     }
   }
 }
 
-// Export an instance for use in routes
 export const dealController = new DealController();

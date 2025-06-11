@@ -1,0 +1,97 @@
+Deep‑Clean Code Audit → Allocation, Capital‑Call, and Fund Modules
+Below is a punch‑list that surfaces every remaining hard‑code, test stub, and inefficiency I found while stepping through the repo. Each item is paired with a concrete fix so you can turn this into a sprint checklist.
+
+1  Hard‑coded & “sample” values
+File / Layer	Line(s)	Issue	Action
+fund‑allocation.schema	enum strings partial, partially_paid	Dual labels do the same job → bugs & migrations every time you rename.	Collapse to a single canonical value (partially_paid). Migrate old rows once; enforce via ENUM constraint.
+allocation.service.ts	MAX_COMMITMENT = 1_000_000_000	Business rule buried in code; will break if fund size grows.	Move to /config/fund.ts. Inject via DI so tests can override.
+ui/FundAllocationForm.tsx	step={1000} on currency fields	Arbitrary $1 k granularity forces manual edits for odd lots.	Read currencyStep from a settings endpoint; expose in ENV.
+AllocationSeeder.ts	Inserts $500_000 “Demo Allocation”	Left‑over sample data pollutes dev DB.	Replace with if (process.env.SEED_DEMO === 'true') …. Never seed by default.
+CapitalCallService	Default dueDate = addDays(callDate, 10)	Hidden business logic (10‑day grace) is not configurable.	Accept as param; fall back to a site‑wide default in config.
+All tests	fundId = 1, dealId = 42	Hard‑coded primaries cause collisions in parallel CI runs.	Use factory helpers (createFund(), createDeal()) that return IDs.
+getStorage().put('allocations/*')	String path literal couples code to S3 structure.	Wrap in StoragePaths.allocations(key) so you can swap bucket layout.	
+
+2  Efficiency / scalability hot‑spots
+Pattern	Bottleneck	Fix
+N + 1 queries when fetching /api/funds ➜ React calls /api/allocations per‑fund.	97 deals × 2 funds already hits 194 SQL calls.	On funds page use FundRepository.listWithAllocations() that JOINs and aggregates once. Provide a ?withAllocations=true flag so other screens stay light.
+Full‑table scans on capital_calls for status <> 'paid'.	Missing composite index (allocation_id, status).	CREATE INDEX idx_call_allocation_status ON capital_calls (allocation_id, status); speeds up every updateAllocationStatus() batch.
+Recalculate portfolio weights after every row update.	Triggers O(n²) updates when bulk‑importing historical payments.	Queue weight‐recalculation into a post‑commit job (BullMQ / Sidekiq). Collapse duplicates by key (fundId).
+Sync double‑write (payments table and call‑payments legacy).	Two inserts inside a request → higher p99.	Mark legacy table read‑only; backfill once; delete double‑write.
+Large JSON payloads in /api/deals (97 rows fetch entire notes array).	Unused notes field crosses 1 MB over the wire.	Add select=summary param; hydrate notes only on deal‑detail page.
+
+3  Modularity & testability gaps
+Service / Repository boundaries
+
+Problem: Some services still open DB connections directly (e.g., CapitalCallService.markPaid) instead of going through repositories.
+
+Fix: Standardise on repositories/*.ts that expose raw CRUD. Every business rule lives in the service layer; controllers get thin.
+
+Domain events instead of imperative calls
+
+Emit CapitalCallPaid, AllocationFunded events. Fund‑AUM recalculation becomes an event handler so callers don’t have to remember to “also update fund”.
+
+Configuration
+
+Centralise all tunables in /config/index.ts; load from ENV or defaults JSON.
+
+Expose /api/settings so the front‑end never bakes‑in constants.
+
+Strict TypeScript
+
+Turn on "strict": true, "noImplicitAny": true.
+
+Add a TSC step to CI; fix the handful of any escapes (mostly legacy loaders).
+
+Unit & integration tests
+
+Unit‑test: allocation status matrix (committed → partially_paid → funded).
+
+Integration‑test: POST /capital‑calls/:id/payments should drive all downstream table updates + fund AUM.
+
+Use test factories + SQLite in‑memory; execute via Jest.
+
+4  Error‑handling & logging
+Concern	Recommendation
+500 “Failed to fetch allocations” masks root cause.	Wrap repo errors in ApiError(code, msg, meta); the middleware logs meta + stack, sends sanitized msg down to client.
+“body stream already read” in fetch wrapper.	Clone response once and read JSON or text; never both.
+Missing SLO metrics.	Add p95 latency + error‑rate dashboard in Grafana via OpenTelemetry auto‑instrumentation; tag by route.
+
+5  Quick‑win refactors
+Extract AllocationCalculator
+
+Pure‑function module that takes {commitment, calls:[{amount, paid}]} ⇒ returns {called, paid, outstanding, status}.
+
+Re‑use in both the service and a new Jest spec.
+
+Pagination hook
+
+Back‑end: accept limit, cursor on /api/allocations.
+
+Front‑end: use useInfiniteQuery so the funds page loads “above the fold” instantly.
+
+@doliver/components package
+
+Move CurrencyInput, PercentInput, StatusBadge to a shared package to avoid copy‑pasted code between funds and deals UIs.
+
+Final deliverables for this refactor
+Deliverable	Owner	Effort
+Config migration + env injection	BE	½ day
+ENUM collapse + data migration	BE	½ day
+Repository standardisation	BE	1 day
+Domain events + AUM handler	BE	1 day
+Front‑end fetch wrapper fix	FE	½ day
+Pagination on allocations	FE	1 day
+Unit / integration test suite	BE	1 day
+CI pipeline (lint, tsc, tests)	DevOps	½ day
+
+Total ≈ 6 dev‑days. Knock out the enum collapse + config refactor first; those will eliminate your 500s immediately, and everything else layers on cleanly.
+
+Tackle these in order and the allocation module (and every fund metric that relies on it) will be hard‑code‑free, unit‑tested, horizontally scalable, and future‑proof.
+
+
+
+
+
+
+
+

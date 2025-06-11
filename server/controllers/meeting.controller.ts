@@ -32,6 +32,7 @@ export const getMeetings = [
 
       return res.status(200).json(meetingsWithDeals);
     } catch (error) {
+      console.error('Error fetching meetings:', error);
       return res.status(500).json({ error: 'Failed to fetch meetings' });
     }
   }
@@ -65,6 +66,7 @@ export const createMeeting = [
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation error', details: error.errors });
       }
+      console.error('Error creating meeting:', error);
       return res.status(500).json({ error: 'Failed to create meeting' });
     }
   }
@@ -101,6 +103,7 @@ export const getMeetingById = [
         dealName: deal?.name || 'Unknown Deal',
       });
     } catch (error) {
+      console.error('Error fetching meeting:', error);
       return res.status(500).json({ error: 'Failed to fetch meeting' });
     }
   }
@@ -154,6 +157,7 @@ export const updateMeeting = [
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation error', details: error.errors });
       }
+      console.error('Error updating meeting:', error);
       return res.status(500).json({ error: 'Failed to update meeting' });
     }
   }
@@ -183,6 +187,7 @@ export const deleteMeeting = [
       
       return res.status(200).json({ message: 'Meeting deleted successfully' });
     } catch (error) {
+      console.error('Error deleting meeting:', error);
       return res.status(500).json({ error: 'Failed to delete meeting' });
     }
   }
@@ -219,6 +224,7 @@ export const getMeetingsByDeal = [
       
       return res.status(200).json(meetingsWithDealName);
     } catch (error) {
+      console.error(`Error fetching meetings for deal ${req.params.dealId}:`, error);
       return res.status(500).json({ error: 'Failed to fetch meetings for this deal' });
     }
   }

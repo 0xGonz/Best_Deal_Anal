@@ -44,14 +44,3 @@ export function parseDateSafe(dateStr: string): Date | null {
     return null;
   }
 }
-
-/**
- * Convert date to UTC date string in YYYY-MM-DD format
- * Ensures consistent date handling without timezone issues
- */
-export function toUTCDateString(date: Date | string): string {
-  const d = new Date(date);
-  return d.getUTCFullYear() + '-' + 
-         String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + 
-         String(d.getUTCDate()).padStart(2, '0');
-}

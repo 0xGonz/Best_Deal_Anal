@@ -7,7 +7,7 @@ import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import LeaderboardWidget from "@/components/dashboard/LeaderboardWidget";
 import SectorDistributionChart from "@/components/dashboard/SectorDistributionChart";
 import { formatCurrency } from "@/lib/utils/format";
-// Removed spacing constants import - using inline Tailwind classes
+import { PADDING, MARGIN, GAP } from "@/lib/constants/spacing-constants";
 import { 
   Activity, 
   TrendingUp, 
@@ -43,11 +43,11 @@ export default function Dashboard() {
 
   return (
     <AppLayout>
-      <div className="p-6 pb-20 w-full overflow-hidden">
+      <div className={`${PADDING.LAYOUT.PAGE} pb-20 w-full overflow-hidden`}>
         {/* Dashboard Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8">
+        <div className={`grid grid-cols-1 md:grid-cols-12 ${GAP.LG} ${MARGIN.LAYOUT.SECTION}`}>
           {/* Quick Stats */}
-          <div className="md:col-span-12 lg:col-span-12 grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className={`md:col-span-12 lg:col-span-12 grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 ${GAP.MD}`}>
             {/* Define stats cards configuration - completely data-driven approach */}
             {[
               {
@@ -108,7 +108,7 @@ export default function Dashboard() {
         </div>
         
         {/* Sector Distribution and Recent Deals */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+        <div className={`grid grid-cols-1 lg:grid-cols-12 ${GAP.LG} ${MARGIN.LAYOUT.COMPONENT}`}>
           <div className="lg:col-span-5 flex w-full">
             <SectorDistributionChart />
           </div>
@@ -119,7 +119,7 @@ export default function Dashboard() {
         </div>
         
         {/* Activity Feed and Leaderboard */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-6">
+        <div className={`grid grid-cols-1 md:grid-cols-12 ${GAP.LG} ${MARGIN.LAYOUT.COMPONENT}`}>
           <div className="md:col-span-7 flex w-full">
             <ActivityFeed />
           </div>

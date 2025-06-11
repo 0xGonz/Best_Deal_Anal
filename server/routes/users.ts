@@ -31,6 +31,7 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
       return res.status(403).json({ message: 'Only administrators can create new users' });
     }
     
+    console.log(`Admin user (ID: ${req.session.userId}) attempting to create a new user`);
     
     // Validate request body
     const userData = userInsertSchema.parse(req.body);
@@ -69,6 +70,7 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
     // Don't return the password
     const { password, ...userWithoutPassword } = newUser;
     
+    console.log(`New user created by admin: ${userData.username}, role: ${userData.role}`);
     res.status(201).json(userWithoutPassword);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -77,6 +79,7 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
         errors: error.errors 
       });
     }
+    console.error('Error creating user:', error);
     res.status(500).json({ message: 'Failed to create user' });
   }
 });
@@ -150,6 +153,8 @@ router.patch('/:id', requireAuth, async (req: Request, res: Response) => {
     const { fullName, role, avatarColor, email, username, password } = req.body;
     const updateData: any = {};
     
+    console.log(`Update request for user ${targetUserId} by user ${currentUserId} (admin: ${isAdmin})`);
+    console.log('Update data received:', { fullName, role, avatarColor, email, username });
     
     if (fullName) {
       updateData.fullName = fullName;
@@ -166,6 +171,7 @@ router.patch('/:id', requireAuth, async (req: Request, res: Response) => {
     // Admins can update email and username
     if (email && isAdmin) {
       updateData.email = email;
+      console.log(`Admin updating email for user ${targetUserId} to: ${email}`);
     }
     
     if (username && isAdmin) {
@@ -177,11 +183,13 @@ router.patch('/:id', requireAuth, async (req: Request, res: Response) => {
         });
       }
       updateData.username = username;
+      console.log(`Admin updating username for user ${targetUserId} to: ${username}`);
     }
     
     // Only admins can update roles
     if (role && isAdmin) {
       updateData.role = role;
+      console.log(`Admin updating role for user ${targetUserId} to: ${role}`);
     } else if (role && !isAdmin) {
       return res.status(403).json({ 
         message: 'Only administrators can update user roles' 
@@ -191,12 +199,14 @@ router.patch('/:id', requireAuth, async (req: Request, res: Response) => {
     // Allow users to update their avatar color
     if (avatarColor) {
       updateData.avatarColor = avatarColor;
+      console.log(`Updating avatar color for user ${targetUserId} to: ${avatarColor}`);
     }
     
     // Handle password updates (admins can update any password, users can update their own)
     if (password && (isAdmin || isOwnProfile)) {
       // Hash the password before storing
       updateData.password = await hashPassword(password);
+      console.log(`Updating password for user ${targetUserId}`);
     } else if (password && !isAdmin && !isOwnProfile) {
       return res.status(403).json({ 
         message: 'You can only update your own password' 
@@ -208,13 +218,16 @@ router.patch('/:id', requireAuth, async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'No valid fields to update' });
     }
     
+    console.log('Final update data being sent to storage:', updateData);
     
     // Update the user
     const updatedUser = await storage.updateUser(targetUserId, updateData);
     if (!updatedUser) {
+      console.error(`Failed to update user ${targetUserId} in storage`);
       return res.status(500).json({ message: 'Failed to update user' });
     }
     
+    console.log(`Successfully updated user ${targetUserId}:`, updatedUser.fullName);
     
     // Return the updated user without password
     const { password: userPassword, ...userWithoutPassword } = updatedUser;
@@ -229,6 +242,7 @@ router.patch('/:id', requireAuth, async (req: Request, res: Response) => {
       message: 'User updated successfully'
     });
   } catch (error) {
+    console.error('Error updating user:', error);
     res.status(500).json({ message: 'Failed to update user' });
   }
 });
@@ -301,8 +315,10 @@ router.post('/:id/change-password', requireAuth, async (req: Request, res: Respo
       return res.status(500).json({ message: 'Failed to update password' });
     }
     
+    console.log(`Password changed for user ID ${targetUserId}${isAdmin && !isOwnPassword ? ' by admin' : ''}`);
     res.json({ message: 'Password changed successfully' });
   } catch (error) {
+    console.error('Error changing password:', error);
     res.status(500).json({ message: 'Failed to change password' });
   }
 });
@@ -327,6 +343,7 @@ router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'You cannot delete your own account' });
     }
     
+    console.log(`Admin user (ID: ${currentUserId}) attempting to delete user ID: ${targetUserId}`);
     
     const storage = StorageFactory.getStorage();
     
@@ -342,8 +359,10 @@ router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
       return res.status(500).json({ message: 'Failed to delete user' });
     }
     
+    console.log(`User ID ${targetUserId} (${userToDelete.username}) deleted by admin (ID: ${currentUserId})`);
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
+    console.error('Error deleting user:', error);
     res.status(500).json({ message: 'Failed to delete user' });
   }
 });

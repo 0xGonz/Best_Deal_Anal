@@ -1,0 +1,85 @@
+Error response from /api/deals: 
+Object {status: 500, text: "{"message":"Failed to fetch deals"}"}
+
+Exception during query fetch to /api/deals: 
+TypeError {message: "Failed to execute 'text' on 'Response': body stream already read"}
+
+Query Response from /api/dashboard/stats: 
+Object {status: 200, statusText: "OK", ok: true}
+Query data received from /api/dashboard/stats: 
+Object {totalDeals: 97, totalDealsTrend: 10, activeDeals: 76, activePipelinePercent: 78, activePipelineTrend: 17, …}
+Query fetch request: /api/deals 
+Object {queryKey: Array(1), unauthorizedBehavior: "returnNull"}
+Query Response from /api/leaderboard: 
+Object {status: 500, statusText: "Internal Server Error", ok: false}
+Error response from /api/leaderboard: 
+Object {status: 500, text: "{"message":"Failed to fetch leaderboard data"}"}
+
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Exception during query fetch to /api/leaderboard: 
+TypeError {message: "Failed to execute 'text' on 'Response': body stream already read"}
+
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Query Response from /api/auth/me: 
+Object {status: 200, statusText: "OK", ok: true}
+Query data received from /api/auth/me: 
+Object {id: 4, username: "Gonz", fullName: "Brett Gonzalez", initials: "BG", email: "bgonzalez@doliveradvisors.com", …}
+ProtectedRoute for /: isLoading=false, user=Gonz
+ProtectedRoute /: Rendering component for user Gonz
+Query Response from /api/funds: 
+Object {status: 200, statusText: "OK", ok: true}
+Query data received from /api/funds: 
+(2) [{…}, {…}]
+Query fetch request: /api/leaderboard 
+Object {queryKey: Array(1), unauthorizedBehavior: "returnNull"}
+Query Response from /api/deals: 
+Object {status: 500, statusText: "Internal Server Error", ok: false}
+Error response from /api/deals: 
+Object {status: 500, text: "{"message":"Failed to fetch deals"}"}
+
+Exception during query fetch to /api/deals: 
+TypeError {message: "Failed to execute 'text' on 'Response': body stream already read"}
+
+Using /me endpoint data for avatar 
+Object {id: 4, username: "Gonz", fullName: "Brett Gonzalez", initials: "BG", email: "bgonzalez@doliveradvisors.com", …}
+Query fetch request: /api/deals 
+Object {queryKey: Array(1), unauthorizedBehavior: "returnNull"}
+Query Response from /api/leaderboard: 
+Object {status: 500, statusText: "Internal Server Error", ok: false}
+Error response from /api/leaderboard: 
+Object {status: 500, text: "{"message":"Failed to fetch leaderboard data"}"}
+
+Exception during query fetch to /api/leaderboard: 
+TypeError {message: "Failed to execute 'text' on 'Response': body stream already read"}
+
+Query fetch request: /api/leaderboard 
+Object {queryKey: Array(1), unauthorizedBehavior: "returnNull"}
+Query Response from /api/deals: 
+Object {status: 500, statusText: "Internal Server Error", ok: false}
+Error response from /api/deals: 
+Object {status: 500, text: "{"message":"Failed to fetch deals"}"}
+
+Exception during query fetch to /api/deals: 
+TypeError {message: "Failed to execute 'text' on 'Response': body stream already read"}
+
+Query Response from /api/activity: 
+Object {status: 200, statusText: "OK", ok: true}
+Query data received from /api/activity: 
+(20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+UserAvatar: User 4 has color #0E4DA4
+Query Response from /api/leaderboard: 
+Object {status: 500, statusText: "Internal Server Error", ok: false}
+Error response from /api/leaderboard: 
+Object {status: 500, text: "{"message":"Failed to fetch leaderboard data"}"}
+
+Exception during query fetch to /api/leaderboard: 
+TypeError {message: "Failed to execute 'text' on 'Response': body stream already read"}
+
+Using /me endpoint data for avatar 
+Object {id: 4, username: "Gonz", fullName: "Brett Gonzalez", initials: "BG", email: "bgonzalez@doliveradvisors.com", …}

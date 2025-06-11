@@ -23,6 +23,7 @@ async function extractDocumentContent(document: any): Promise<DocumentContent | 
   try {
     // Check if document has fileData (base64 content stored in database)
     if (!document.fileData) {
+      console.warn(`Document ${document.fileName} has no fileData content in database`);
       return null;
     }
 
@@ -40,6 +41,7 @@ async function extractDocumentContent(document: any): Promise<DocumentContent | 
       // Read text files directly
       content = fileBuffer.toString('utf-8');
     } else {
+      console.warn(`Unsupported file type for analysis: ${extension}`);
       return null;
     }
 
@@ -51,6 +53,7 @@ async function extractDocumentContent(document: any): Promise<DocumentContent | 
       extractedData: { fileType: extension }
     };
   } catch (error) {
+    console.error(`Error extracting content from document ${document.fileName}:`, error);
     return null;
   }
 }
@@ -67,6 +70,7 @@ async function extractDealDocuments(dealId: number): Promise<DocumentContent[]> 
   for (const document of documents) {
     // Only process documents that have actual file data
     if (!document.fileData) {
+      console.warn(`Skipping document ${document.fileName} - no file data available`);
       continue;
     }
 
@@ -159,6 +163,7 @@ To enable detailed content analysis, please ensure documents are properly upload
 
     return completion.choices[0]?.message?.content || 'No analysis generated';
   } catch (error) {
+    console.error('Error performing AI analysis:', error);
     throw new Error('Failed to perform AI analysis');
   }
 }
@@ -173,6 +178,7 @@ router.post('/deals/:dealId', requireAuth, async (req: Request, res: Response) =
     const { query } = req.body;
     const userId = (req as any).user.id;
 
+    console.log(`🔍 Starting AI analysis for deal ${dealId}`);
     
     const storage = StorageFactory.getStorage();
     
@@ -188,9 +194,12 @@ router.post('/deals/:dealId', requireAuth, async (req: Request, res: Response) =
     // Perform the AI analysis with authentic data only
     const result = await performAnalysis(parseInt(dealId), documentContents, deal, query);
     
+    console.log(`✅ AI analysis completed successfully for deal ${dealId}`);
+    console.log(`📄 Analysis based on ${documentContents.length} authentic documents`);
 
     res.json({ analysis: result });
   } catch (error) {
+    console.error('Error in document analysis:', error);
     
     if (error instanceof Error && error.message.includes('No authentic document content')) {
       return res.status(400).json({ 
@@ -216,6 +225,7 @@ router.post('/documents/:documentId', requireAuth, async (req: Request, res: Res
     const { query } = req.body;
     const userId = (req as any).user.id;
 
+    console.log(`🔍 Starting analysis for document ${documentId}`);
     
     const storage = StorageFactory.getStorage();
     
@@ -243,8 +253,10 @@ router.post('/documents/:documentId', requireAuth, async (req: Request, res: Res
     // Perform analysis on the specific document
     const result = await performAnalysis(document.dealId, [documentContent], deal, query || `Analyze this document`);
     
+    console.log(`✅ Specific document analysis completed for ${document.fileName}`);
     res.json({ analysis: result });
   } catch (error) {
+    console.error('Error in specific document analysis:', error);
     
     if (error instanceof Error && error.message.includes('No authentic document content')) {
       return res.status(400).json({ 

@@ -7,6 +7,8 @@ import {
 } from "@shared/schema";
 
 // Import interface from service
+import { FundWithAllocations } from "../services/fund.service";
+import { fundService } from "../services";
 
 /**
  * Fund Controller - Handles HTTP requests and responses for fund resources
@@ -17,8 +19,10 @@ export class FundController {
    */
   async getFunds(req: Request, res: Response) {
     try {
+      const funds = await fundService.getAllFundsWithAllocations();
       return res.json(funds);
     } catch (error) {
+      console.error("Error fetching funds:", error);
       return res.status(500).json({ 
         message: error instanceof Error ? error.message : "Internal server error" 
       });
@@ -36,6 +40,7 @@ export class FundController {
         return res.status(400).json({ message: "Invalid fund ID" });
       }
 
+      const fund = await fundService.getFundWithAllocations(fundId);
       
       if (!fund) {
         return res.status(404).json({ message: "Fund not found" });
@@ -43,6 +48,7 @@ export class FundController {
       
       return res.json(fund);
     } catch (error) {
+      console.error(`Error fetching fund ${req.params.id}:`, error);
       return res.status(500).json({ 
         message: error instanceof Error ? error.message : "Internal server error" 
       });
@@ -63,8 +69,10 @@ export class FundController {
         return res.status(401).json({ message: "Authentication required" });
       }
       
+      const fund = await fundService.createFund(fundData);
       return res.status(201).json(fund);
     } catch (error) {
+      console.error("Error creating fund:", error);
       
       if (error instanceof z.ZodError) {
         return res.status(400).json({ 
@@ -94,6 +102,7 @@ export class FundController {
       const updateSchema = insertFundSchema.partial();
       const fundUpdate = updateSchema.parse(req.body);
       
+      const updatedFund = await fundService.updateFund(fundId, fundUpdate);
       
       if (!updatedFund) {
         return res.status(404).json({ message: "Fund not found" });
@@ -101,6 +110,7 @@ export class FundController {
       
       return res.json(updatedFund);
     } catch (error) {
+      console.error(`Error updating fund ${req.params.id}:`, error);
       
       if (error instanceof z.ZodError) {
         return res.status(400).json({ 
@@ -126,6 +136,7 @@ export class FundController {
         return res.status(400).json({ message: "Invalid fund ID" });
       }
 
+      const result = await fundService.deleteFund(fundId);
       
       if (!result) {
         return res.status(404).json({ message: "Fund not found" });
@@ -133,6 +144,7 @@ export class FundController {
       
       return res.status(204).end();
     } catch (error) {
+      console.error(`Error deleting fund ${req.params.id}:`, error);
       return res.status(500).json({ 
         message: error instanceof Error ? error.message : "Internal server error" 
       });

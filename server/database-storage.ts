@@ -2,7 +2,7 @@ import { db } from './db';
 import { IStorage } from './storage';
 import { StorageFactory } from './storage-factory';
 import { eq, and, sql, inArray, asc, gte, lte } from 'drizzle-orm';
-// Removed FundService import (deleted during cleanup)
+import { FundService } from './services/fund.service';
 import {
   User, InsertUser,
   Deal, InsertDeal,
@@ -40,12 +40,15 @@ export class DatabaseStorage implements IStorage {
 
   // Helper method to track errors
   private handleDbError(error: Error, operation: string): void {
+    console.error(`Database error during ${operation}:`, error);
     this.dbErrors++;
     
     // If we've hit the max errors, emit a global error event
     if (this.dbErrors >= DatabaseStorage.MAX_DB_ERRORS) {
+      console.log(`DatabaseStorage: Max errors (${this.dbErrors}) reached, database might be unavailable`);
       // We'll just log the error here rather than attempting to access StorageFactory
       // to avoid circular dependencies
+      console.error(`DATABASE_CONNECTION_CRITICAL_FAILURE: ${error.message}`);
       this.dbErrors = 0; // Reset our counter
     }
     
@@ -113,6 +116,7 @@ export class DatabaseStorage implements IStorage {
       
       return updatedUser || undefined;
     } catch (error) {
+      console.error('Error updating user:', error);
       return undefined;
     }
   }
@@ -126,6 +130,7 @@ export class DatabaseStorage implements IStorage {
       const result = await db.delete(users).where(eq(users.id, id));
       return !!result;
     } catch (error) {
+      console.error('Error deleting user:', error);
       return false;
     }
   }
@@ -159,6 +164,7 @@ export class DatabaseStorage implements IStorage {
       const [newDeal] = await db.insert(deals).values([dealData]).returning();
       return newDeal;
     } catch (error) {
+      console.error('Error creating deal:', error);
       throw error;
     }
   }
@@ -219,6 +225,7 @@ export class DatabaseStorage implements IStorage {
         
       return updatedDeal || undefined;
     } catch (error) {
+      console.error('Error updating deal:', error);
       return undefined;
     }
   }
@@ -244,6 +251,7 @@ export class DatabaseStorage implements IStorage {
       }).returning();
       return newEvent;
     } catch (error) {
+      console.error('Error creating timeline event:', error);
       throw error;
     }
   }
@@ -266,6 +274,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return updatedEvent;
     } catch (error) {
+      console.error('Error updating timeline event:', error);
       return undefined;
     }
   }
@@ -279,6 +288,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(timelineEvents.id, id));
       return true;
     } catch (error) {
+      console.error('Error deleting timeline event:', error);
       return false;
     }
   }
@@ -377,6 +387,7 @@ export class DatabaseStorage implements IStorage {
       await db.delete(miniMemos).where(eq(miniMemos.id, id));
       return true;
     } catch (error) {
+      console.error('Error deleting mini memo:', error);
       return false;
     }
   }
@@ -388,7 +399,10 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getDocument(id: number): Promise<Document | undefined> {
+    console.log(`🔍 DatabaseStorage: Fetching document ${id}`);
     const [document] = await db.select().from(documents).where(eq(documents.id, id));
+    console.log(`📄 DatabaseStorage: Raw document result:`, document);
+    console.log(`🔑 DatabaseStorage: Document keys:`, Object.keys(document || {}));
     return document || undefined;
   }
 
@@ -459,6 +473,7 @@ export class DatabaseStorage implements IStorage {
       await db.delete(funds).where(eq(funds.id, id));
       return true;
     } catch (error) {
+      console.error('Error deleting fund:', error);
       return false;
     }
   }
@@ -491,7 +506,8 @@ export class DatabaseStorage implements IStorage {
       
     // Use the FundService to update the fund AUM
     // This centralizes our AUM calculation logic
-    // Fund AUM update simplified during cleanup
+    const fundService = new FundService();
+    await fundService.updateFundAUM(allocation.fundId);
       
     return newAllocation;
   }
@@ -543,7 +559,8 @@ export class DatabaseStorage implements IStorage {
       
       // Use the FundService to recalculate and update the fund's AUM
       // This ensures consistent AUM calculation across the application
-      // Fund AUM update simplified during cleanup
+      const fundService = new FundService();
+      await fundService.updateFundAUM(fundId);
       
       // Check if this was the last allocation for this deal
       const remainingAllocations = await this.getAllocationsByDeal(dealId);
@@ -561,11 +578,13 @@ export class DatabaseStorage implements IStorage {
             .set({ stage: 'closing' })
             .where(eq(deals.id, dealId));
             
+          console.log(`[INFO] Deal ${dealId} (${deal.name}) automatically moved back to 'closing' stage after all allocations were removed`);
         }
       }
       
       return true;
     } catch (error) {
+      console.error('Error deleting fund allocation:', error);
       return false;
     }
   }
@@ -720,6 +739,7 @@ export class DatabaseStorage implements IStorage {
       throw new Error('Database not initialized');
     }
     try {
+      console.log(`Updating allocation ${id} with data:`, allocationUpdate);
       
       // Get the original allocation
       const [originalAllocation] = await db
@@ -728,9 +748,11 @@ export class DatabaseStorage implements IStorage {
         .where(eq(fundAllocations.id, id));
       
       if (!originalAllocation) {
+        console.error(`Allocation ${id} not found in database`);
         return undefined;
       }
       
+      console.log(`Found original allocation:`, originalAllocation);
       
       // Update the allocation
       const [updatedAllocation] = await db
@@ -740,14 +762,18 @@ export class DatabaseStorage implements IStorage {
         .returning();
       
       if (!updatedAllocation) {
+        console.error(`Failed to update allocation ${id}`);
         return undefined;
       }
       
+      console.log(`Successfully updated allocation ${id}:`, updatedAllocation);
       
       // Note: AUM recalculation is handled separately to avoid circular dependencies
+      console.log(`Allocation update completed for fund ${originalAllocation.fundId}`)
       
       return updatedAllocation;
     } catch (error) {
+      console.error('Error updating fund allocation:', error);
       throw error; // Re-throw so the route can handle it properly
     }
   }
@@ -1127,7 +1153,9 @@ export class DatabaseStorage implements IStorage {
         })
         .where(eq(fundAllocations.id, allocationId));
         
+      console.log(`Updated metrics for allocation ${allocationId}: MOIC=${moic.toFixed(2)}, Distributions=$${totalDistributions.toLocaleString()}`);
     } catch (error) {
+      console.error(`Error recalculating metrics for allocation ${allocationId}:`, error);
       throw error;
     }
   }

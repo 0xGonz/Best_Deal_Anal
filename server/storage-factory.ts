@@ -21,11 +21,15 @@ export class StorageFactory {
         const useMemory = process.env.USE_MEMORY_SESSIONS === "true";
         
         if (useMemory) {
+          console.log('Using MemStorage for data persistence');
           this.instance = new MemStorage();
         } else {
+          console.log('Using DatabaseStorage for data persistence');
           this.instance = new DatabaseStorage();
         }
       } catch (error) {
+        console.error('Error initializing storage:', error);
+        console.log('Falling back to MemStorage as last resort');
         this.instance = new MemStorage();
       }
     }

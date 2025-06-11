@@ -1,0 +1,58 @@
+Query Response from /api/deals/103: 
+Object {status: 200, statusText: "OK", ok: true}
+Query data received from /api/deals/103: 
+Object {id: 103, name: "Boom Supersonic", description: "First civil supersonic jet made in america.", sector: "Venture", stage: "ic_review", …}
+UserAvatar: User 4 has color #0E4DA4
+Query fetch request: /api/documents/deal/103 
+Object {queryKey: Array(1), unauthorizedBehavior: "returnNull"}
+🔍 useDealDocuments: Processing data for deal 103: undefined
+⚠️ useDealDocuments: No data received or data is not an array: undefined
+Query Response from /api/auth/me: 
+Object {status: 200, statusText: "OK", ok: true}
+Query data received from /api/auth/me: 
+Object {id: 4, username: "Gonz", fullName: "Brett Gonzalez", initials: "BG", email: "bgonzalez@doliveradvisors.com", …}
+ProtectedRoute for /deals/:id: isLoading=false, user=Gonz
+ProtectedRoute /deals/:id: Rendering component for user Gonz
+Query fetch request: /api/system/health 
+Object {queryKey: Array(1), unauthorizedBehavior: "returnNull"}
+Using /me endpoint data for avatar 
+Object {id: 4, username: "Gonz", fullName: "Brett Gonzalez", initials: "BG", email: "bgonzalez@doliveradvisors.com", …}
+Query Response from /api/system/health: 
+Object {status: 200, statusText: "OK", ok: true}
+Query data received from /api/system/health: 
+Object {status: "ok", timestamp: "2025-06-02T15:58:50.057Z", storage: "pg", databaseConnected: true, environment: "development", …}
+Query Response from /api/documents/deal/103: 
+Object {status: 200, statusText: "OK", ok: true}
+Query data received from /api/documents/deal/103: 
+(4) [{…}, {…}, {…}, {…}]
+🔍 useDealDocuments: Processing data for deal 103: 
+(4) [{…}, {…}, {…}, {…}]
+📝 useDealDocuments: Setting 4 documents in context: 
+(4) [{…}, {…}, {…}, {…}]
+🎯 useDealDocuments: Auto-selecting first document: 
+Object {id: 6, name: "Overture Passenger and Pricing Research 2024.06.pdf", fileName: "Overture Passenger and Pricing Research 2024.06.pdf", fileType: "application/pdf", downloadUrl: "/api/documents/6/download", …}
+📤 Loading PDF document: 
+Object {documentId: 6, documentName: "Overture Passenger and Pricing Research 2024.06.pdf", url: "/api/documents/6/download"}
+🔍 useDealDocuments: Processing data for deal 103: 
+(4) [{…}, {…}, {…}, {…}]
+📝 useDealDocuments: Setting 4 documents in context: 
+(4) [{…}, {…}, {…}, {…}]
+Query fetch request: /api/deals 
+Object {queryKey: Array(2), unauthorizedBehavior: "returnNull"}
+Query Response from /api/deals: 
+Object {status: 200, statusText: "OK", ok: true}
+Query data received from /api/deals: 
+(97) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+Document analysis error: 
+Error {}
+
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+ProtectedRoute for /deals/:id: isLoading=false, user=Gonz
+ProtectedRoute /deals/:id: Rendering component for user Gonz
+Using /me endpoint data for avatar 
+Object {id: 4, username: "Gonz", fullName: "Brett Gonzalez", initials: "BG", email: "bgonzalez@doliveradvisors.com", …}
+ProtectedRoute for /deals/:id: isLoading=false, user=Gonz
+ProtectedRoute /deals/:id: Rendering component for user Gonz

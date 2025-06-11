@@ -21,6 +21,7 @@ interface AuthRequest extends Request {
 router.get('/', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     // Debug session data
+    console.log(`Closing schedules GET request with session userId: ${req.session?.userId}`);
     
     // Get raw closing schedule events
     const closingEvents = await storage.getAllClosingScheduleEvents();
@@ -47,6 +48,7 @@ router.get('/', requireAuth, async (req: AuthRequest, res: Response) => {
     
     res.json(enhancedEvents);
   } catch (error) {
+    console.error('Error fetching closing schedule events:', error);
     res.status(500).json({ 
       error: 'Failed to fetch closing schedule events',
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -68,6 +70,7 @@ router.get('/deal/:dealId', requireAuth, async (req: AuthRequest, res: Response)
     const closingEvents = await storage.getClosingScheduleEventsByDeal(dealId);
     res.json(closingEvents);
   } catch (error) {
+    console.error(`Error fetching closing schedule events for deal ${req.params.dealId}:`, error);
     res.status(500).json({ error: 'Failed to fetch closing schedule events' });
   }
 });
@@ -112,6 +115,7 @@ router.post('/', requireAuth, requirePermission('create', 'closingEvent'), async
     
     res.status(201).json(closingEvent);
   } catch (error) {
+    console.error('Error creating closing schedule event:', error);
     res.status(400).json({ 
       error: 'Failed to create closing schedule event', 
       details: error instanceof Error ? error.message : 'Unknown error' 
@@ -157,6 +161,7 @@ router.patch('/:id/status', requireAuth, requirePermission('edit', 'closingEvent
     
     res.json(updatedEvent);
   } catch (error) {
+    console.error(`Error updating closing schedule event ${req.params.id}:`, error);
     res.status(500).json({ error: 'Failed to update closing schedule event' });
   }
 });
@@ -217,6 +222,7 @@ router.patch('/:id/date', requireAuth, requirePermission('edit', 'closingEvent')
     
     res.json(updatedEvent);
   } catch (error) {
+    console.error(`Error updating closing schedule event date for event ${req.params.id}:`, error);
     res.status(500).json({ error: 'Failed to update closing schedule event date' });
   }
 });
@@ -224,6 +230,7 @@ router.patch('/:id/date', requireAuth, requirePermission('edit', 'closingEvent')
 // Delete a closing schedule event - rewritten to use async/await
 router.delete('/:id', requireAuth, requirePermission('delete', 'closingEvent'), async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
+    console.log('DELETE request to /api/closing-schedules/', req.params.id);
     
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -231,6 +238,7 @@ router.delete('/:id', requireAuth, requirePermission('delete', 'closingEvent'), 
     }
     
     const userId = req.user?.id || 0; // Default to 0 if user ID is undefined
+    console.log(`User ID ${userId} attempting to delete closing schedule event ${id}`);
     
     // First get the event to ensure it exists
     const event = await storage.getClosingScheduleEvent(id);
@@ -259,8 +267,10 @@ router.delete('/:id', requireAuth, requirePermission('delete', 'closingEvent'), 
       }
     });
     
+    console.log(`Successfully deleted closing schedule event with ID ${id}`);
     return res.json({ success: true, id });
   } catch (error) {
+    console.error(`Error deleting closing schedule event ${req.params.id}:`, error);
     return res.status(500).json({ 
       message: 'Failed to delete closing schedule event',
       details: error instanceof Error ? error.message : 'Unknown error'

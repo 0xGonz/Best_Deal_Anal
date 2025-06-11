@@ -20,12 +20,6 @@ type SystemHealthResponse = {
   databaseConnected: boolean;
   environment: string;
   hybridStatus: HybridStatus | null;
-  metrics?: {
-    uptime: number;
-    requests: number;
-    errors: number;
-    errorRate: number;
-  };
 };
 
 export function DatabaseStatusAlert() {

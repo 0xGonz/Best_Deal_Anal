@@ -3,8 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, Target, Briefcase, Clock, DollarSign, PieChart } from "lucide-react";
 import { Deal } from "@/lib/types";
 import { formatCurrency, formatPercentage } from "@/lib/utils/format";
-import { FINANCIAL_CALCULATION } from "../../../../shared/constants";
-// Removed spacing constants import - using inline Tailwind classes
+import { PERCENTAGE_CALCULATION, FINANCIAL_CALCULATION, SCORE_CALCULATION, TIME_CALCULATION } from "@/lib/constants/calculation-constants";
+import { PADDING, MARGIN, GAP } from "@/lib/constants/spacing-constants";
 
 type PipelineStat = {
   label: string;
@@ -44,18 +44,18 @@ export default function PipelineStats({ deals, filteredDeals, stage }: PipelineS
   // Calculate stage-specific stats
   const stageDeals = stage !== 'all' ? filteredDeals : deals.filter(d => d.stage === 'diligence');
   
-  // Calculate actual trends based on proportions in pipeline
+  // Calculate actual trends based on proportions in pipeline using percentage calculation constants
   const totalTrend = deals.length > 0 ? 
-    Math.round((filteredDeals.length / deals.length) * FINANCIAL_CALCULATION.DECIMAL_TO_PERCENTAGE) - FINANCIAL_CALCULATION.BASE_VALUE : 0;
+    PERCENTAGE_CALCULATION.DEFAULT_ROUNDING((filteredDeals.length / deals.length) * PERCENTAGE_CALCULATION.DECIMAL_TO_PERCENTAGE) - PERCENTAGE_CALCULATION.BASE_VALUE : 0;
   const stageTrend = deals.length > 0 ? 
-    Math.round((stageDeals.length / deals.length) * FINANCIAL_CALCULATION.DECIMAL_TO_PERCENTAGE) - FINANCIAL_CALCULATION.BASE_VALUE : 0;
+    PERCENTAGE_CALCULATION.DEFAULT_ROUNDING((stageDeals.length / deals.length) * PERCENTAGE_CALCULATION.DECIMAL_TO_PERCENTAGE) - PERCENTAGE_CALCULATION.BASE_VALUE : 0;
   const valueTrend = filteredDeals.length > 0 ? 
-    Math.round((totalDealValue / filteredDeals.length) / FINANCIAL_CALCULATION.MILLION) : 0;
+    PERCENTAGE_CALCULATION.DEFAULT_ROUNDING((totalDealValue / filteredDeals.length) / FINANCIAL_CALCULATION.MILLION) : 0;
   
-  // Calculate stage conversion rate
+  // Calculate stage conversion rate (for different stages this would be calculated differently)
   const conversionRate = stage === 'all' ? 
-    (deals.filter(d => d.stage === 'invested').length / (deals.length || 1)) * FINANCIAL_CALCULATION.DECIMAL_TO_PERCENTAGE :
-    (filteredDeals.length / (deals.length || 1)) * FINANCIAL_CALCULATION.DECIMAL_TO_PERCENTAGE;
+    (deals.filter(d => d.stage === 'invested').length / (deals.length || 1)) * PERCENTAGE_CALCULATION.DECIMAL_TO_PERCENTAGE :
+    (filteredDeals.length / (deals.length || 1)) * PERCENTAGE_CALCULATION.DECIMAL_TO_PERCENTAGE;
   
   const stageLabel = stage === 'all' ? "In Diligence" : 
     stage.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -68,15 +68,15 @@ export default function PipelineStats({ deals, filteredDeals, stage }: PipelineS
   const closingCount = deals.filter(d => d.stage === 'closing').length;
   const investedCount = deals.filter(d => d.stage === 'invested').length;
   
-  // Calculate conversion percentages
+  // Calculate conversion percentages using percentage calculation constants
   const screeningPercent = deals.length > 0 ? 
-    Math.round((screeningCount / deals.length) * FINANCIAL_CALCULATION.DECIMAL_TO_PERCENTAGE) : 0;
+    PERCENTAGE_CALCULATION.DEFAULT_ROUNDING((screeningCount / deals.length) * PERCENTAGE_CALCULATION.DECIMAL_TO_PERCENTAGE) : 0;
   const diligencePercent = deals.length > 0 ? 
-    Math.round((diligenceCount / deals.length) * FINANCIAL_CALCULATION.DECIMAL_TO_PERCENTAGE) : 0;
+    PERCENTAGE_CALCULATION.DEFAULT_ROUNDING((diligenceCount / deals.length) * PERCENTAGE_CALCULATION.DECIMAL_TO_PERCENTAGE) : 0;
   const icPercent = deals.length > 0 ? 
-    Math.round((icReviewCount / deals.length) * FINANCIAL_CALCULATION.DECIMAL_TO_PERCENTAGE) : 0;
+    PERCENTAGE_CALCULATION.DEFAULT_ROUNDING((icReviewCount / deals.length) * PERCENTAGE_CALCULATION.DECIMAL_TO_PERCENTAGE) : 0;
   const investmentPercent = deals.length > 0 ? 
-    Math.round((investedCount / deals.length) * FINANCIAL_CALCULATION.DECIMAL_TO_PERCENTAGE) : 0;
+    PERCENTAGE_CALCULATION.DEFAULT_ROUNDING((investedCount / deals.length) * PERCENTAGE_CALCULATION.DECIMAL_TO_PERCENTAGE) : 0;
   
   // Calculate average days in current stage for stage-specific tabs
   const calculateAverageDaysInStage = (deals: Deal[], stageName: string): number => {
@@ -190,7 +190,7 @@ export default function PipelineStats({ deals, filteredDeals, stage }: PipelineS
           Math.round(
             (deals.filter(d => d.stage > stage).length / 
               Math.max(deals.filter(d => d.stage >= stage).length, 1)) * 
-              FINANCIAL_CALCULATION.DECIMAL_TO_PERCENTAGE
+              PERCENTAGE_CALCULATION.DECIMAL_TO_PERCENTAGE
           ),
           0 // Use 0 decimal places for cleaner whole numbers
         ),
@@ -204,7 +204,7 @@ export default function PipelineStats({ deals, filteredDeals, stage }: PipelineS
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+    <div className={`grid grid-cols-2 sm:grid-cols-4 ${GAP.MD} ${MARGIN.LAYOUT.COMPONENT}`}>
       {stats.map((stat, index) => (
         <Card key={index} className="bg-white overflow-hidden h-full">
           <CardContent className="pt-3 xs:pt-4 sm:pt-6 p-2 xs:p-3 sm:p-6 h-full flex flex-col">

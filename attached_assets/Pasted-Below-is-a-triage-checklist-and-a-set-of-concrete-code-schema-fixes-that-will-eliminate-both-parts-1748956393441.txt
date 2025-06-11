@@ -1,0 +1,138 @@
+Below is a triage checklist and a set of concrete code / schema fixes that will eliminate both parts of the crash you’re seeing:
+
+Symptom	Likely Source	Fix Summary
+HTTP 500 from /api/allocations	Backend exception in the AllocationService → AllocationRepository call chain (most often a bad enum value or a NULL in a NOT‑NULL column after the status‑model refactor).	① Add defensive try/catch + logging around the failing query so you can see the exact DB error in the console.
+② Run a brown‑field migration that (a) renames every legacy partial status to partially_paid, (b) back‑fills any NULL status to 'committed', and (c) sets a default value on the column.
+③ Deploy the updated enum list to both Prisma & the database.
+“body stream already read” in the browser	Your React query wrapper tries to call response.text() after response.json() (or vice‑versa) when the server returns an error body.	In the fetchJson() helper: clone the response before reading it, or read only once. Return {ok:false, status, message} so React‑Query never attempts a second read.
+
+1 – Pinpoint the backend exception
+Add a one‑liner logger around the allocations fetch inside AllocationService.getAllAllocations() (or your equivalent):
+
+ts
+Copy
+Edit
+try {
+  const data = await allocationRepo.listForUser(userId);
+  return data;
+} catch (err) {
+  logger.error('GET /allocations failed', { err });
+  throw new ApiError(500, 'Failed to fetch allocations');
+}
+After one request you’ll have the exact SQL or ORM error in your server logs. From similar crash traces during the status‑refactor, the error is almost always:
+
+graphql
+Copy
+Edit
+(psycopg2.errors.InvalidTextRepresentation) invalid input value for enum allocation_status: "partial"
+or
+
+sql
+Copy
+Edit
+SequelizeDatabaseError: not-null constraint failed: fund_allocations.status
+2 – Hardening the status column
+Schema (Prisma example, adapt to TypeORM/Sequelize as needed)
+
+prisma
+Copy
+Edit
+enum AllocationStatus {
+  committed
+  partially_paid
+  funded
+}
+
+model FundAllocation {
+  id          Int              @id @default(autoincrement())
+  status      AllocationStatus @default(committed)
+  ...
+}
+Migration script (one‑shot, SQL):
+
+sql
+Copy
+Edit
+-- 2a. Collapse legacy 'partial' → 'partially_paid'
+UPDATE fund_allocations
+SET status = 'partially_paid'
+WHERE status = 'partial';
+
+-- 2b. Replace NULLs with a safe default
+UPDATE fund_allocations
+SET status = 'committed'
+WHERE status IS NULL;
+After the migration:
+
+Deploy the new enum to the DB (prisma migrate deploy / TypeORM migration / Sequelize queryInterface.changeColumn).
+
+Redeploy the backend so the ORM knows the enum values.
+
+3 – Return empty arrays, not errors
+Inside the repository layer, fail soft when no rows match:
+
+ts
+Copy
+Edit
+export async function listForUser(userId: number) {
+  const rows = await db.allocation.findMany({ where: { userId } });
+  // Always succeed; front‑end renders "No allocations yet"
+  return rows ?? [];
+}
+4 – Front‑end: single‑read error handling
+Your fetchJson helper currently does something like:
+
+ts
+Copy
+Edit
+const res = await fetch(url);
+if (!res.ok) {
+  const text = await res.text();   // first read
+  throw new Error(text);
+}
+return res.json();                 // second read triggers the stream error
+Fix:
+
+ts
+Copy
+Edit
+export async function fetchJson(url, options={}) {
+  const res = await fetch(url, options);
+  const cloned = res.clone();          // safeguard for debugging
+  if (!res.ok) {
+    const { message } = await cloned.json().catch(() => ({message:'Unknown'}));
+    throw new Error(message ?? 'Unknown error');
+  }
+  return res.json();                   // one‑time read
+}
+React‑Query will now surface “Failed to fetch allocations” in the UI without crashing the DevTools console.
+
+5 – Smoke test end‑to‑end
+docker compose up -d db && pnpm migrate:dev
+
+Seed at least one allocation with a valid status:
+
+sql
+Copy
+Edit
+INSERT INTO fund_allocations(fund_id, deal_id, amount, status, created_at)
+VALUES (1, 42, 1000000, 'committed', now());
+Hit GET /api/allocations – expect 200 OK and a JSON array.
+
+Navigate to /funds in the app – the query for /api/allocations should no longer throw.
+
+Side benefits
+Unifying on one enum (partially_paid) cleans up code‐paths that used both partial and partially_paid.
+
+Making status non‑nullable with a default prevents silent future inserts that break the enum.
+
+Single‑read fetch helper stops every “body stream already read” error site‑wide.
+
+Once you commit these fixes and redeploy, the allocations list endpoint will respond with proper data (or an empty list), and your front‑end will render the Funds dashboard without the 500/TypeError combo.
+
+
+
+
+
+
+

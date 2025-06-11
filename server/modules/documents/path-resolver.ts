@@ -18,8 +18,10 @@ export class DocumentPathResolver {
     try {
       if (!fs.existsSync(this.UPLOAD_DIR)) {
         fs.mkdirSync(this.UPLOAD_DIR, { recursive: true });
+        console.log(`✅ Created persistent uploads directory: ${this.UPLOAD_DIR}`);
       }
     } catch (error) {
+      console.error('❌ Error creating upload directories:', error);
       throw error;
     }
   }
@@ -73,10 +75,12 @@ export class DocumentPathResolver {
     // Return first existing file
     for (const filePath of possiblePaths) {
       if (fs.existsSync(filePath)) {
+        console.log(`✅ Found document at: ${filePath}`);
         return filePath;
       }
     }
     
+    console.error(`❌ Document not found. Searched paths:`, possiblePaths);
     return null;
   }
   
@@ -88,6 +92,7 @@ export class DocumentPathResolver {
     
     if (!fs.existsSync(dealDir)) {
       fs.mkdirSync(dealDir, { recursive: true });
+      console.log(`✅ Created deal directory: ${dealDir}`);
     }
     
     return dealDir;
@@ -137,10 +142,12 @@ export class DocumentPathResolver {
       
       // Copy file to standard location
       fs.copyFileSync(currentPath, absoluteStandardPath);
+      console.log(`✅ Migrated document to standard path: ${absoluteStandardPath}`);
       
       return standardPath;
       
     } catch (error) {
+      console.error(`❌ Error migrating document ${document.id}:`, error);
       return null;
     }
   }

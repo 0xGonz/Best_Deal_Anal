@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-// Removed calendar service import (deleted during cleanup)
+import { calendarService } from '../services/calendar.service';
 import { asyncHandler } from '../utils/errorHandlers';
 
 /**
@@ -22,7 +22,7 @@ export class CalendarController {
         } 
       : undefined;
     
-    const events: any[] = []; // Simplified during cleanup
+    const events = await calendarService.getAllEvents(dateRange);
     
     res.status(200).json(events);
   });
@@ -31,7 +31,7 @@ export class CalendarController {
    * Get event counts by type for summary/dashboard
    */
   getEventCounts = asyncHandler(async (req: Request, res: Response) => {
-    const counts = { total: 0, upcoming: 0, past: 0 }; // Simplified during cleanup
+    const counts = await calendarService.getEventCounts();
     res.status(200).json(counts);
   });
 }

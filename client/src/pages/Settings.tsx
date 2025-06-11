@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-// Removed spacing constants import - using inline Tailwind classes
+import { PADDING, MARGIN, GAP } from "@/lib/constants/spacing-constants";
 
 export default function SettingsPage() {
   const { toast } = useToast();
@@ -19,8 +19,8 @@ export default function SettingsPage() {
 
   return (
     <AppLayout>
-      <div className="p-6 pb-20 w-full overflow-hidden">
-        <div className="mb-8">
+      <div className={`${PADDING.LAYOUT.PAGE} pb-20 w-full overflow-hidden`}>
+        <div className={`${MARGIN.LAYOUT.SECTION}`}>
           <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
           <p className="text-muted-foreground">Manage your application settings.</p>
         </div>

@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { useLocation } from "wouter";
 import { LeaderboardItem } from "@/lib/types";
 import { getDealStageBadgeClass, formatPercentage } from "@/lib/utils/format";
-import { FINANCIAL_CALCULATION } from "../../../shared/constants";
+import { FINANCIAL_CALCULATION } from "@/lib/constants/calculation-constants";
 
 export default function Leaderboard() {
   const [, navigate] = useLocation();

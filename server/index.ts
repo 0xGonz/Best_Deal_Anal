@@ -3,11 +3,11 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 const moduleUrl = import.meta.url;
 const modulePath = fileURLToPath(moduleUrl);
+console.log("🐞  Boot file:", modulePath);
 
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
-import { createServer } from "http";
-import { registerMinimalRoutes } from "./minimal-routes";
+import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { errorHandler } from "./utils/errorHandlers";
 import { pool } from "./db";
@@ -15,10 +15,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import connectPgSimple from 'connect-pg-simple';
 import memorystore from 'memorystore';
-import { DatabaseStorage } from "./database-storage";
-// Job queues removed for modular cleanup
+import { StorageFactory } from "./storage-factory";
+import { initJobQueues } from "./jobs";
 import { metricsMiddleware } from "./middleware/metrics";
-// Removed // LoggingService import - simplified logging
+import { LoggingService } from "./services";
 
 // Main async function to allow using await
 async function initialize() {
@@ -27,8 +27,8 @@ async function initialize() {
   app.use(express.urlencoded({ extended: false, limit: "1mb" }));
 
   // ─── SESSION CONFIGURATION - SINGLE POINT OF TRUTH ─────────────────────────
-  // Initialize the database storage directly
-  const storage = new DatabaseStorage();
+  // Initialize the StorageFactory to use the hybrid storage implementation
+  const storage = StorageFactory.getStorage();
 
   // Create the appropriate session store classes
   const PgSession = connectPgSimple(session);
@@ -77,7 +77,9 @@ async function initialize() {
         });
     });
     
+    console.log("Database connectivity check passed");
   } catch (error: any) {
+    console.error("Database connectivity check failed:", error.message);
     isDbHealthy = false;
   }
 
@@ -89,16 +91,19 @@ async function initialize() {
         pool, 
         tableName: "session",
         createTableIfMissing: true,
-        pruneSessionInterval: 300, // Reduced frequency to 5 minutes to prevent timeouts
-        ttl: 86400, // 24 hours session timeout
-        disableTouch: false, // Enable session touch to prevent premature expiry
+        pruneSessionInterval: 60, // Prune expired sessions every 60 seconds
+        // Add error handling to be more resilient
+        errorLog: (err) => console.error("PgSession error:", err)
       });
+      console.log("▶ Using PgSession for sessions (PostgreSQL)");
     } catch (error) {
+      console.error("Failed to create PostgreSQL session store:", error);
       if (isProd) {
         throw new Error("Cannot run in production without PostgreSQL session store");
       } else {
         // Fallback to memory store only in dev mode
         sessionStore = createMemoryStore();
+        console.log("▶ Fallback to MemoryStore for sessions due to PostgreSQL error");
       }
     }
   } else {
@@ -106,11 +111,14 @@ async function initialize() {
     sessionStore = createMemoryStore();
     
     if (forceUseMemory) {
+      console.log("▶ Using MemoryStore for sessions (explicitly requested)");
     } else {
+      console.log("▶ Using MemoryStore for sessions (database health check failed)");
     }
   }
 
   // Debug the session store to verify it remains consistent
+  console.log("⏱️  Session store is", sessionStore.constructor.name);
 
   // Add metrics middleware to track request metrics
   app.use(metricsMiddleware());
@@ -155,6 +163,7 @@ async function initialize() {
       const sessionID = req.sessionID?.substring(0, 10) + '...';
       const hasSession = !!req.session;
       const userId = req.session?.userId;
+      console.log(`Session debug [${req.method} ${req.path}]: sessionID=${sessionID}, hasSession=${hasSession}, userId=${userId}`);
     }
     next();
   });
@@ -163,6 +172,7 @@ async function initialize() {
   const uploadDir = path.join(process.cwd(), 'data/uploads');
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
+    console.log('Created persistent uploads directory:', uploadDir);
   }
   
   // Also ensure old public/uploads exists for backwards compatibility
@@ -179,38 +189,44 @@ async function initialize() {
   
   // Serve PDF worker file directly from public root
   app.use(express.static(rootPublic));
+  console.log('Configured static file serving for uploads and PDF.js worker');
 
   // Initialize background job queues
   try {
-    // Job queue initialization removed for modularity
+    initJobQueues();
+    console.log('Background job processing system initialized');
   } catch (error) {
+    console.error('Failed to initialize background jobs:', error);
+    console.log('Continuing without background processing');
   }
   
-  // Register minimal routes directly on the app
-  await registerMinimalRoutes(app);
+  const server = await registerRoutes(app);
+
+  // Error handling is centralized in routes.ts
 
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  const port = parseInt(process.env.PORT || '5000', 10);
-  const host = process.env.HOST || '0.0.0.0';
-  
-  const server = createServer(app);
-  
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  server.listen(port, host, () => {
+  // Use configurable port from environment variables
+  const port = parseInt(process.env.PORT || '5000', 10);
+  const host = process.env.HOST || '0.0.0.0';
+  server.listen({
+    port,
+    host,
+    reusePort: true,
+  }, () => {
     log(`serving on ${host}:${port}`);
   });
 }
 
 // Execute the main function
 initialize().catch(error => {
-  console.error('❌ Server initialization failed:', error);
-  console.error('Stack trace:', error.stack);
+  console.error('Failed to initialize application:', error);
   process.exit(1);
 });

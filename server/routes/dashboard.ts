@@ -86,8 +86,10 @@ router.get('/stats', requireAuth, async (req: Request, res: Response) => {
       aumTrend: totalAum > 0 ? Math.round((totalAum / 1000000) / Math.max(investedDeals, 1)) - BASELINE_AUM_PER_DEAL_MILLIONS : 0
     };
     
+    console.log('Dashboard stats: Sending response', response);
     res.json(response);
   } catch (error) {
+    console.error('Error fetching dashboard stats:', error);
     res.status(500).json({ 
       error: { 
         code: 'DASHBOARD_STATS_ERROR', 
@@ -100,10 +102,14 @@ router.get('/stats', requireAuth, async (req: Request, res: Response) => {
 
 // Helper function to get sector/industry stats to avoid code duplication
 async function getSectorStats(logPrefix: string, useIndustryField = false) {
+  console.log(`${logPrefix}: Getting storage instance`);
   const storage = StorageFactory.getStorage();
+  console.log(`${logPrefix}: Fetching deals`);
   const deals = await storage.getDeals();
+  console.log(`${logPrefix}: Retrieved ${deals ? deals.length : 0} deals`);
   
   if (!deals || deals.length === 0) {
+    console.log(`${logPrefix}: No deals found, returning empty array`);
     return [];
   }
   
@@ -134,6 +140,7 @@ async function getSectorStats(logPrefix: string, useIndustryField = false) {
   // Sort by count (descending)
   sectorStats.sort((a, b) => b.count - a.count);
   
+  console.log(`${logPrefix}: Sending response`, sectorStats);
   return sectorStats;
 }
 
@@ -143,6 +150,7 @@ router.get('/sector-stats', async (req: Request, res: Response) => {
     const stats = await getSectorStats('Sector stats');
     res.json(stats);
   } catch (error) {
+    console.error('Error fetching sector statistics:', error);
     res.status(500).json({ message: 'Failed to fetch sector statistics' });
   }
 });
@@ -153,6 +161,7 @@ router.get('/industry-stats', async (req: Request, res: Response) => {
     const stats = await getSectorStats('Industry stats', true);
     res.json(stats);
   } catch (error) {
+    console.error('Error fetching industry statistics:', error);
     res.status(500).json({ message: 'Failed to fetch industry statistics' });
   }
 });

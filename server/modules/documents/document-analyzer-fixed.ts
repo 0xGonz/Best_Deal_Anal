@@ -32,6 +32,7 @@ export class DocumentAnalyzer {
     for (const document of documents) {
       // Only process documents that have actual file data
       if (!document.fileData) {
+        console.warn(`Skipping document ${document.fileName} - no file data available`);
         continue;
       }
 
@@ -57,6 +58,7 @@ export class DocumentAnalyzer {
     try {
       // Check if document has fileData (base64 content stored in database)
       if (!document.fileData) {
+        console.warn(`Document ${document.fileName} has no fileData content in database`);
         return null;
       }
 
@@ -81,9 +83,11 @@ export class DocumentAnalyzer {
         const content = fileBuffer.toString('utf-8');
         return { content };
       } else {
+        console.warn(`Unsupported file type for analysis: ${extension}`);
         return null;
       }
     } catch (error) {
+      console.error(`Error extracting content from document ${document.fileName}:`, error);
       return null;
     }
   }
@@ -154,6 +158,7 @@ export class DocumentAnalyzer {
 
       return completion.choices[0]?.message?.content || 'No analysis generated';
     } catch (error) {
+      console.error('Error performing AI analysis:', error);
       throw new Error('Failed to perform AI analysis');
     }
   }

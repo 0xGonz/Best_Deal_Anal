@@ -9,19 +9,8 @@
  */
 
 import { StorageFactory } from '../storage-factory';
-import { TIME_MS } from '../../shared/constants';
+import { TIME_MS, DEFAULT_DURATIONS } from '../constants/time-constants';
 import { SCHEDULE_TYPES } from '../constants/status-constants';
-
-// Default durations simplified for modularity
-const DEFAULT_DURATIONS = {
-  CAPITAL_CALL_NOTICE: 14 * TIME_MS.DAY,
-  CAPITAL_CALL_DUE: 30 * TIME_MS.DAY,
-  CLOSING_PREPARATION: 60 * TIME_MS.DAY,
-  DUE_DILIGENCE: 90 * TIME_MS.DAY,
-  ALLOCATION_BUFFER_DAYS: 7,
-  CAPITAL_CALL_BUFFER_DAYS: 14,
-  CLOSING_BUFFER_DAYS: 30,
-} as const;
 
 /**
  * Get the appropriate reference date for a capital call based on allocation
@@ -46,6 +35,7 @@ export async function getAllocationReferenceDate(
     
     return fallbackDate;
   } catch (error) {
+    console.error(`Error getting allocation reference date for allocation ${allocationId}:`, error);
     return fallbackDate;
   }
 }
@@ -59,7 +49,7 @@ export async function getAllocationReferenceDate(
  */
 export function calculateDueDate(
   referenceDate: Date, 
-  daysUntilDue: number = 30
+  daysUntilDue: number = DEFAULT_DURATIONS.CAPITAL_CALL_DUE_DAYS
 ): Date {
   const dueDate = new Date(referenceDate);
   dueDate.setDate(dueDate.getDate() + daysUntilDue);
@@ -119,6 +109,7 @@ export async function synchronizeAllocationDates(
     // 1. First get the allocation to ensure it exists
     const allocation = await storage.getFundAllocation(allocationId);
     if (!allocation) {
+      console.error(`Cannot synchronize dates: Allocation ${allocationId} not found`);
       return false;
     }
     
@@ -148,6 +139,7 @@ export async function synchronizeAllocationDates(
           await storage.updateCapitalCallDates(call.id, newCallDate, newDueDate);
         }
       } catch (error) {
+        console.error(`Error updating capital call ${call.id} dates:`, error);
       }
     }
     
@@ -162,11 +154,14 @@ export async function synchronizeAllocationDates(
           await storage.updateClosingScheduleEventDate(event.id, newScheduledDate);
         }
       } catch (error) {
+        console.error(`Error updating closing schedule event ${event.id} date:`, error);
       }
     }
     
+    console.log(`Successfully synchronized dates for allocation ${allocationId}`);
     return true;
   } catch (error) {
+    console.error(`Error synchronizing dates for allocation ${allocationId}:`, error);
     return false;
   }
 }
@@ -273,6 +268,7 @@ export async function getNextIntegrationDate(
     
     return nextDate;
   } catch (error) {
+    console.error(`Error calculating next integration date for deal ${dealId}:`, error);
     return new Date(); // Return today as fallback
   }
 }

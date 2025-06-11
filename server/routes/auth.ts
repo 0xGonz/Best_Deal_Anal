@@ -78,8 +78,17 @@ router.post('/logout', asyncHandler(async (req: Request, res: Response) => {
 
 // Get current user route
 router.get('/me', asyncHandler(async (req: Request, res: Response) => {
+  console.log(`Session debug [GET /api/auth/me]: sessionID=${req.sessionID?.slice(0, 8)}..., hasSession=${!!req.session}, userId=${req.session?.userId || 'none'}, headers="${req.headers.cookie?.slice(0, 20)}"`);
   
-  // Session debugging removed during cleanup
+  // Add extended logging to help debug session issues
+  console.log('Session cookies:', req.headers.cookie);
+  console.log('Session object:', {
+    id: req.sessionID,
+    cookie: req.session?.cookie,
+    userId: req.session?.userId,
+    username: req.session?.username,
+    role: req.session?.role,
+  });
   
   const user = await getCurrentUser(req);
   
@@ -93,6 +102,7 @@ router.get('/me', asyncHandler(async (req: Request, res: Response) => {
     await storage.updateUser(user.id, { lastActive: new Date() });
   } catch (error) {
     // Log error but don't fail the request
+    console.warn('Failed to update last active timestamp:', error);
   }
   
   // Return user info (without password)
@@ -115,10 +125,17 @@ const registrationSchema = insertUserSchema.extend({
 // Register route - public registration always creates analyst users
 router.post('/register', asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Registration logic without debug logging
+    console.log('Handling public registration request', {
+      body: {
+        ...req.body,
+        password: req.body?.password ? '******' : undefined,
+        passwordConfirm: req.body?.passwordConfirm ? '******' : undefined
+      }
+    });
     
     // Check if passwords match before validation schema
     if (req.body.password !== req.body.passwordConfirm) {
+      console.error('Password mismatch in request');
       return res.status(400).json({ 
         message: 'Passwords do not match',
         path: ['passwordConfirm']
@@ -129,8 +146,10 @@ router.post('/register', asyncHandler(async (req: Request, res: Response, next: 
     let validatedData;
     try {
       validatedData = registrationSchema.parse(req.body);
+      console.log('Registration data passed schema validation');
     } catch (validationError) {
       if (validationError instanceof ZodError) {
+        console.error('Zod validation error:', validationError.errors);
         return res.status(400).json({ 
           message: formatErrors(validationError),
           errors: validationError.errors 
@@ -145,10 +164,12 @@ router.post('/register', asyncHandler(async (req: Request, res: Response, next: 
     // Self registration allows analyst, observer, intern, and partner roles
     // Only admin role is restricted and requires admin creation
     if (!userData.role || userData.role === 'admin') {
+      console.log(`Overriding requested role ${userData.role} to 'analyst' for public registration`);
       userData.role = 'analyst';
     }
     
     // Log the role assignment for security audit
+    console.log(`Public registration creating user with role: ${userData.role}`);
     
     // If initials are not provided, generate them from full name
     if (!userData.initials) {
@@ -158,6 +179,7 @@ router.post('/register', asyncHandler(async (req: Request, res: Response, next: 
         .join('')
         .slice(0, 3)
         .toUpperCase();
+      console.log(`Generated initials ${userData.initials} from fullName ${userData.fullName}`);
     }
     
     // Generate a random avatar color if not provided
@@ -166,12 +188,15 @@ router.post('/register', asyncHandler(async (req: Request, res: Response, next: 
       userData.avatarColor = colors[Math.floor(Math.random() * colors.length)];
     }
     
+    console.log(`Creating new user via public registration (role: ${userData.role})`);
     
     // Register the new user
     const user = await registerUser(req, userData);
+    console.log(`User registered successfully: ${user.username}, ID: ${user.id}`);
     
     // Check if session was properly established
     if (!req.session.userId) {
+      console.error('Session not established after registration');
       return res.status(500).json({ 
         message: 'Registration successful but session not established. Please try logging in.' 
       });
@@ -183,6 +208,7 @@ router.post('/register', asyncHandler(async (req: Request, res: Response, next: 
   } catch (err) {
     // Use type assertion for better error handling
     const error = err as Error;
+    console.error('Registration route error:', error);
     
     // Handle specific error types
     if (error instanceof AppError) {
@@ -197,6 +223,7 @@ router.post('/register', asyncHandler(async (req: Request, res: Response, next: 
       return res.status(400).json({ message: formatErrors(error) });
     } else {
       // For unknown errors, provide a generic message but log the details
+      console.error('Unknown error during registration:', error);
       return res.status(500).json({ message: 'Registration failed due to an internal error' });
     }
   }

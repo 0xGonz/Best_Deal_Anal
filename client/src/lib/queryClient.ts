@@ -13,7 +13,7 @@ export async function apiRequest(
   data?: unknown | undefined,
   isFormData: boolean = false,
 ): Promise<Response> {
-  // Debug logging removed for production performance
+  console.log(`API Request: ${method} ${url}`, data ? { data: isFormData ? 'FormData' : data } : 'No data');
   
   const options: RequestInit = {
     method,
@@ -31,9 +31,9 @@ export async function apiRequest(
   }
 
   try {
-    // Request logging removed for performance
+    console.log(`Sending fetch request to ${url} with options:`, { ...options, body: options.body ? 'BODY_DATA' : undefined });
     const res = await fetch(url, options);
-    // Response logging removed for performance
+    console.log(`API Response from ${url}:`, { status: res.status, statusText: res.statusText, ok: res.ok });
     
     // Create a clone of response before reading its body
     // This allows us to both log the error response and return the original response
@@ -68,17 +68,17 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const url = queryKey[0] as string;
-    // Debug logging removed for production performance
+    console.log(`Query fetch request: ${url}`, { queryKey, unauthorizedBehavior });
     
     try {
       const res = await fetch(url, {
         credentials: "include",
       });
       
-      // Response logging removed for performance
+      console.log(`Query Response from ${url}:`, { status: res.status, statusText: res.statusText, ok: res.ok });
       
       if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-        // 401 handling - logging removed
+        console.log(`Returning null for 401 response from ${url} as configured`);
         return null;
       }
       
@@ -93,7 +93,7 @@ export const getQueryFn: <T>(options: {
       
       await throwIfResNotOk(res);
       const data = await res.json();
-      // Data logging removed for performance
+      console.log(`Query data received from ${url}:`, data);
       return data;
     } catch (error) {
       console.error(`Exception during query fetch to ${url}:`, error);
@@ -107,8 +107,8 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "returnNull" }),
       refetchInterval: false,
       refetchOnWindowFocus: false, // Disable to prevent excessive refetching
-      staleTime: 10 * 60 * 1000, // 10 minutes - increased for /me endpoint caching
-      gcTime: 15 * 60 * 1000, // 15 minutes - balance between memory and performance
+      staleTime: 10 * 60 * 1000, // 10 minutes for better caching
+      gcTime: 15 * 60 * 1000, // 15 minutes garbage collection time (React Query v5)
       retry: (failureCount, error) => {
         // Don't retry on 4xx errors except 401
         if (error && typeof error === 'object' && 'message' in error) {
