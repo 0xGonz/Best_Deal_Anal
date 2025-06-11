@@ -1,8 +1,6 @@
 import express, { Express, Request, Response } from 'express';
-import { Server } from 'http';
-import { createServer } from 'http';
 
-export async function registerMinimalRoutes(app: Express): Promise<Server> {
+export async function registerMinimalRoutes(app: Express): Promise<void> {
   // Health check endpoint
   app.get('/health', async (req: Request, res: Response) => {
     try {
@@ -25,7 +23,5 @@ export async function registerMinimalRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create HTTP server
-  const server = createServer(app);
-  return server;
+  // Routes registered successfully
 }

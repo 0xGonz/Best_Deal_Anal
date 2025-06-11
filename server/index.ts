@@ -6,6 +6,7 @@ const modulePath = fileURLToPath(moduleUrl);
 
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
+import { createServer } from "http";
 import { registerMinimalRoutes } from "./minimal-routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { errorHandler } from "./utils/errorHandlers";
@@ -185,27 +186,24 @@ async function initialize() {
   } catch (error) {
   }
   
-  const server = await registerMinimalRoutes(app);
-
-  // Error handling is centralized in routes.ts
+  // Register minimal routes directly on the app
+  await registerMinimalRoutes(app);
 
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
+  const port = parseInt(process.env.PORT || '5000', 10);
+  const host = process.env.HOST || '0.0.0.0';
+  
+  const server = createServer(app);
+  
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  // Use configurable port from environment variables
-  const port = parseInt(process.env.PORT || '5000', 10);
-  const host = process.env.HOST || '0.0.0.0';
-  server.listen({
-    port,
-    host,
-    reusePort: true,
-  }, () => {
+  server.listen(port, host, () => {
     log(`serving on ${host}:${port}`);
   });
 }
