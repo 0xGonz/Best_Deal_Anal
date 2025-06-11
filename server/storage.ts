@@ -224,7 +224,8 @@ export class MemStorage implements IStorage {
       ...insertUser, 
       id,
       role: insertUser.role || 'analyst', // Default role if not provided
-      avatarColor: insertUser.avatarColor || null
+      avatarColor: insertUser.avatarColor || null,
+      lastActive: insertUser.lastActive || null
     };
     this.users.set(id, user);
     return user;
@@ -1023,6 +1024,48 @@ export class MemStorage implements IStorage {
       this.closingScheduleEvents.delete(id);
     }
     return exists;
+  }
+
+  // Batch operations
+  async getDealStarsBatch(dealIds: number[]): Promise<DealStar[]> {
+    return Array.from(this.dealStars.values())
+      .filter(star => dealIds.includes(star.dealId));
+  }
+
+  async getMiniMemosBatch(dealIds: number[]): Promise<MiniMemo[]> {
+    return Array.from(this.miniMemos.values())
+      .filter(memo => dealIds.includes(memo.dealId));
+  }
+
+  // Distribution methods - stub implementations for modular investment tracking
+  async createDistribution(distribution: any): Promise<any> {
+    // Placeholder implementation - would need proper schema
+    return { id: 1, ...distribution };
+  }
+
+  async getDistribution(id: number): Promise<any | undefined> {
+    // Placeholder implementation
+    return undefined;
+  }
+
+  async getDistributionsByAllocation(allocationId: number): Promise<any[]> {
+    // Placeholder implementation
+    return [];
+  }
+
+  async updateDistribution(id: number, distribution: any): Promise<any | undefined> {
+    // Placeholder implementation
+    return undefined;
+  }
+
+  async deleteDistribution(id: number): Promise<boolean> {
+    // Placeholder implementation
+    return false;
+  }
+
+  async recalculateAllocationMetrics(allocationId: number): Promise<void> {
+    // Placeholder implementation for metrics recalculation
+    return;
   }
 }
 

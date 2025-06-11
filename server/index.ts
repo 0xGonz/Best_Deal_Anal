@@ -214,8 +214,26 @@ async function initialize() {
   }
 
   // Use configurable port from environment variables
-  const port = parseInt(process.env.PORT || '5000', 10);
+  const port = parseInt(process.env.PORT || '3000', 10);
   const host = process.env.HOST || '0.0.0.0';
+  
+  // Add error handling for port conflicts
+  server.on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`Port ${port} is already in use. Trying port ${port + 1}...`);
+      server.listen({
+        port: port + 1,
+        host,
+        reusePort: true,
+      }, () => {
+        log(`serving on ${host}:${port + 1}`);
+      });
+    } else {
+      console.error('Server error:', err);
+      process.exit(1);
+    }
+  });
+  
   server.listen({
     port,
     host,
