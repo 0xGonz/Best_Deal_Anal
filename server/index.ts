@@ -14,7 +14,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import connectPgSimple from 'connect-pg-simple';
 import memorystore from 'memorystore';
-import { DatabaseStorage } from "./database-storage";
+// import { DatabaseStorage } from "./database-storage";
 // Job queues removed for modular cleanup
 import { metricsMiddleware } from "./middleware/metrics";
 // Removed // LoggingService import - simplified logging
@@ -26,8 +26,8 @@ async function initialize() {
   app.use(express.urlencoded({ extended: false, limit: "1mb" }));
 
   // ─── SESSION CONFIGURATION - SINGLE POINT OF TRUTH ─────────────────────────
-  // Initialize the StorageFactory to use the hybrid storage implementation
-  // const storage = StorageFactory.getStorage();
+  // Initialize the database storage directly
+  // const storage = new DatabaseStorage();
 
   // Create the appropriate session store classes
   const PgSession = connectPgSimple(session);
