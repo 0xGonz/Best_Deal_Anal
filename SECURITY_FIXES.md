@@ -13,7 +13,7 @@ Fixed 6 security vulnerabilities identified in security scan on June 11, 2025.
 
 **Before:**
 ```
-OPENAI_API_KEY=sk-your-openai-api-key
+OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 **After:**

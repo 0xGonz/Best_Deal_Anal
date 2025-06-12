@@ -137,7 +137,18 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
     // Process each allowed field explicitly to prevent prototype pollution
     for (const field of allowedNumericFields) {
       if (updates.hasOwnProperty(field) && updates[field] !== undefined && updates[field] !== null) {
-        sanitizedUpdates[field] = Number(updates[field]) || 0;
+        // Use explicit property assignment instead of bracket notation for security
+        const numericValue = Number(updates[field]) || 0;
+        if (field === 'amount') sanitizedUpdates.amount = numericValue;
+        else if (field === 'paidAmount') sanitizedUpdates.paidAmount = numericValue;
+        else if (field === 'calledAmount') sanitizedUpdates.calledAmount = numericValue;
+        else if (field === 'portfolioWeight') sanitizedUpdates.portfolioWeight = numericValue;
+        else if (field === 'interestPaid') sanitizedUpdates.interestPaid = numericValue;
+        else if (field === 'distributionPaid') sanitizedUpdates.distributionPaid = numericValue;
+        else if (field === 'totalReturned') sanitizedUpdates.totalReturned = numericValue;
+        else if (field === 'marketValue') sanitizedUpdates.marketValue = numericValue;
+        else if (field === 'moic') sanitizedUpdates.moic = numericValue;
+        else if (field === 'irr') sanitizedUpdates.irr = numericValue;
       }
     }
     
@@ -157,7 +168,10 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
     const allowedStringFields = ['status', 'securityType', 'notes'];
     for (const field of allowedStringFields) {
       if (updates.hasOwnProperty(field) && (typeof updates[field] === 'string' || updates[field] === null)) {
-        sanitizedUpdates[field] = updates[field];
+        // Use explicit property assignment instead of bracket notation for security
+        if (field === 'status') sanitizedUpdates.status = updates[field];
+        else if (field === 'securityType') sanitizedUpdates.securityType = updates[field];
+        else if (field === 'notes') sanitizedUpdates.notes = updates[field];
       }
     }
 
