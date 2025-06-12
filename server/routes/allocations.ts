@@ -543,16 +543,23 @@ router.get('/fund/:fundId', requireAuth, async (req: Request, res: Response) => 
     // Then fetch the allocations with updated weights
     const allocations = await storage.getAllocationsByFund(fundId);
     
-    // Get all deals to validate allocations
+    // Get all deals to validate allocations and add deal information
     const deals = await storage.getDeals();
-    const validDealIds = deals.map(deal => deal.id);
+    const dealsMap = new Map(deals.map(deal => [deal.id, deal]));
     
-    // Filter out allocations to non-existent deals
-    const validAllocations = allocations.filter(allocation => 
-      validDealIds.includes(allocation.dealId)
-    );
+    // Enrich allocations with deal information
+    const allocationsWithDealInfo = allocations
+      .filter(allocation => dealsMap.has(allocation.dealId)) // Only include valid deals
+      .map(allocation => {
+        const deal = dealsMap.get(allocation.dealId);
+        return {
+          ...allocation,
+          dealName: deal?.name || `Deal ${allocation.dealId}`,
+          dealSector: deal?.sector || 'Unknown'
+        };
+      });
     
-    res.json(validAllocations);
+    res.json(allocationsWithDealInfo);
   } catch (error) {
     console.error('Error fetching fund allocations:', error);
     res.status(500).json({ message: 'Failed to fetch allocations' });

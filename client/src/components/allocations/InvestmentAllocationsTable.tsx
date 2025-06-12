@@ -193,7 +193,7 @@ export const InvestmentAllocationsTable: React.FC<InvestmentAllocationsTableProp
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="text-xs">
-                        {allocation.securityType || 'equity'}
+                        {allocation.dealSector || allocation.securityType || 'equity'}
                       </Badge>
                     </TableCell>
                     <TableCell>
