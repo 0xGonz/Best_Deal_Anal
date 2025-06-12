@@ -105,6 +105,8 @@ export interface Fund {
   // These fields are computed on the server
   calculatedAum?: number;
   committedCapital?: number;
+  calledCapital?: number;
+  uncalledCapital?: number;
   totalFundSize?: number;
   allocationCount?: number;
 }
@@ -115,7 +117,9 @@ export interface FundAllocation {
   fundId: number;
   dealId: number;
   amount: number;
-  amountType: "percentage" | "dollar";
+  paidAmount: number;
+  calledAmount?: number;
+  amountType: "percentage" | "dollar" | "committed";
   securityType: string;
   allocationDate: string | Date;
   notes?: string | null;
@@ -128,6 +132,9 @@ export interface FundAllocation {
   moic: number;
   irr: number;
   deal?: Deal; // Related deal object
+  dealName?: string; // Deal name for display
+  dealSector?: string; // Deal sector for display
+  weight?: number; // Legacy field for compatibility
 }
 
 // Capital Call types
