@@ -88,7 +88,7 @@ export default function DealsTable({ deals, onEdit, onAllocate, onUpdateStatus, 
                     <span className="text-2xs xs:text-xs sm:text-sm font-medium text-emerald-700">
                       {deal.targetReturn 
                         ? `${deal.targetReturn}${!deal.targetReturn.includes('%') ? '%' : ''}` 
-                        : (deal.score ? `${deal.score}%` : 'N/A')}
+                        : 'N/A'}
                       {deal.projectedMultiple && 
                         <span className="ml-1 text-2xs xs:text-xs text-emerald-600">({deal.projectedMultiple}x)</span>}
                     </span>

@@ -57,6 +57,7 @@ router.get('/', requireAuth, async (req: Request, res: Response) => {
     const allDeals = await storage.getDeals();
     
     // Filter out deals in the "invested" stage as they're no longer part of the evaluation process
+    // But keep "closed" deals as they may have recent activity that should be visible
     const deals = allDeals.filter(deal => deal.stage !== 'invested');
     
     console.log(`Leaderboard: Found ${allDeals.length} total deals, ${deals.length} in active evaluation`);
