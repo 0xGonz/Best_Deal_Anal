@@ -536,10 +536,33 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getAllocationsByDeal(dealId: number): Promise<FundAllocation[]> {
-    return await db
-      .select()
+    const allocationsWithDeals = await db
+      .select({
+        id: fundAllocations.id,
+        fundId: fundAllocations.fundId,
+        dealId: fundAllocations.dealId,
+        amount: fundAllocations.amount,
+        paidAmount: fundAllocations.paidAmount,
+        amountType: fundAllocations.amountType,
+        securityType: fundAllocations.securityType,
+        allocationDate: fundAllocations.allocationDate,
+        notes: fundAllocations.notes,
+        status: fundAllocations.status,
+        portfolioWeight: fundAllocations.portfolioWeight,
+        interestPaid: fundAllocations.interestPaid,
+        distributionPaid: fundAllocations.distributionPaid,
+        totalReturned: fundAllocations.totalReturned,
+        marketValue: fundAllocations.marketValue,
+        moic: fundAllocations.moic,
+        irr: fundAllocations.irr,
+        dealName: deals.name,
+        dealSector: deals.sector
+      })
       .from(fundAllocations)
+      .leftJoin(deals, eq(fundAllocations.dealId, deals.id))
       .where(eq(fundAllocations.dealId, dealId));
+
+    return allocationsWithDeals;
   }
   
   async deleteFundAllocation(id: number): Promise<boolean> {
