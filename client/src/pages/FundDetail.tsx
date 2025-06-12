@@ -1170,17 +1170,14 @@ export default function FundDetail() {
                             <TableCell></TableCell>
                             <TableCell className="py-3 px-2 sm:px-4 text-right font-bold">
                               <span className={getCapitalViewColorClass(capitalView)}>
-                                {allocations.reduce((sum, allocation) => {
-                                  const dynamicWeight = calculateDynamicWeight(allocation, allocations, capitalView);
-                                  return sum + dynamicWeight;
-                                }, 0).toFixed(2)}%
+                                N/A
                               </span>
                             </TableCell>
                             <TableCell className="py-3 px-2 sm:px-4 text-right font-bold">
                               <span className={getCapitalViewColorClass(capitalView)}>
                                 {(() => {
-                                  const totalMetrics = calculateFundCapitalMetrics(allocations);
-                                  return formatCurrency(getDisplayAmount(totalMetrics, capitalView));
+                                  // Only display authentic database data
+                                  return 'N/A';
                                 })()}
                               </span>
                             </TableCell>
