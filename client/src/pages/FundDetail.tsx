@@ -1201,9 +1201,7 @@ export default function FundDetail() {
                               ) : '0.00'}x
                             </TableCell>
                             <TableCell className="py-3 px-2 sm:px-4 text-right font-bold text-gray-800">
-                              {allocations.length > 0 ? (
-                                (allocations.reduce((sum, allocation) => sum + (allocation.irr || 0), 0) / allocations.length).toFixed(2)
-                              ) : '0.00'}%
+                              N/A
                             </TableCell>
                             <TableCell></TableCell>
                           </TableRow>

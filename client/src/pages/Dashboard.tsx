@@ -54,40 +54,40 @@ export default function Dashboard() {
                 title: "Total Deals",
                 value: stats?.totalDeals !== undefined ? stats.totalDeals.toString() : "0",
                 icon: <Activity className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />,
-                trend: stats?.totalDealsTrend || 0,
-                trendLabel: `${stats?.activeDeals || 0} active deals`,
+                trend: stats?.totalDealsTrend ?? null,
+                trendLabel: stats?.activeDeals ? `${stats.activeDeals} active deals` : 'No active deals',
                 trendDirection: "auto" as const
               },
               {
                 title: "Active Pipeline",
                 value: stats?.activePipelinePercent !== undefined ? `${stats.activePipelinePercent}%` : "0%",
                 icon: <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />,
-                trend: stats?.activePipelineTrend || 0,
-                trendLabel: `${stats?.activeDeals || 0} of ${stats?.totalDeals || 0} deals`,
+                trend: stats?.activePipelineTrend ?? null,
+                trendLabel: (stats?.activeDeals && stats?.totalDeals) ? `${stats.activeDeals} of ${stats.totalDeals} deals` : 'No data available',
                 trendDirection: "auto" as const
               },
               {
                 title: "New Deals",
                 value: stats?.newDealsPercent !== undefined ? `${stats.newDealsPercent}%` : "0%",
                 icon: <LineChart className="h-5 w-5 sm:h-6 sm:w-6 text-info" />,
-                trend: stats?.newDealsTrend || 0,
-                trendLabel: `${stats?.newDeals || 0} of ${stats?.totalDeals || 0} deals`,
+                trend: stats?.newDealsTrend ?? null,
+                trendLabel: (stats?.newDeals && stats?.totalDeals) ? `${stats.newDeals} of ${stats.totalDeals} deals` : 'No data available',
                 trendDirection: "auto" as const
               },
               {
                 title: "In IC Review",
                 value: stats?.icReviewPercent !== undefined ? `${stats.icReviewPercent}%` : "0%",
                 icon: <Users className="h-5 w-5 sm:h-6 sm:w-6 text-warning" />,
-                trend: stats?.icReviewTrend || 0,
-                trendLabel: `${stats?.inIcReview || 0} of ${stats?.totalDeals || 0} deals`,
+                trend: stats?.icReviewTrend ?? null,
+                trendLabel: (stats?.inIcReview && stats?.totalDeals) ? `${stats.inIcReview} of ${stats.totalDeals} deals` : 'No data available',
                 trendDirection: "auto" as const
               },
               {
                 title: "Investment Rate",
                 value: stats?.investmentRate !== undefined ? `${stats.investmentRate}%` : "0%",
                 icon: <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-success" />,
-                trend: stats?.investmentRateTrend || 0,
-                trendLabel: `${stats?.investedDeals || 0} of ${stats?.totalDeals || 0} deals`,
+                trend: stats?.investmentRateTrend ?? null,
+                trendLabel: (stats?.investedDeals && stats?.totalDeals) ? `${stats.investedDeals} of ${stats.totalDeals} deals` : 'No data available',
                 trendDirection: "auto" as const
               }
             ].map((card, index) => (

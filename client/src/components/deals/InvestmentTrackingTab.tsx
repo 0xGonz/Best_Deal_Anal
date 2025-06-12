@@ -173,10 +173,8 @@ export default function InvestmentTrackingTab({ dealId }: InvestmentTrackingTabP
               </TableHeader>
               <TableBody>
                 {allocations.map((allocation) => {
-                  // Calculate MOIC
-                  const moic = allocation.amount > 0 
-                    ? (allocation.distributionPaid + (allocation.marketValue || 0)) / allocation.amount 
-                    : 0;
+                  // Only display MOIC if it exists in database
+                  const moic = allocation.moic;
 
                   return (
                     <TableRow key={allocation.id} className="hover:bg-gray-50">
@@ -215,13 +213,13 @@ export default function InvestmentTrackingTab({ dealId }: InvestmentTrackingTabP
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
                           <DollarSign className="h-3 w-3 text-green-600" />
-                          {formatCurrency(allocation.distributionPaid || 0)}
+                          {allocation.distributionPaid ? formatCurrency(allocation.distributionPaid) : 'N/A'}
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
                           <TrendingUp className="h-3 w-3 text-blue-600" />
-                          {formatCurrency(allocation.marketValue || 0)}
+                          {allocation.marketValue ? formatCurrency(allocation.marketValue) : 'N/A'}
                         </div>
                       </TableCell>
                       <TableCell className="text-right font-medium">
