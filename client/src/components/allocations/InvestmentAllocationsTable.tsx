@@ -182,7 +182,7 @@ export const InvestmentAllocationsTable: React.FC<InvestmentAllocationsTableProp
                     <TableCell className="font-medium">
                       <div>
                         <div className="font-semibold text-sm">
-                          {allocation.dealName || 'Unknown Deal'}
+                          {allocation.dealName}
                         </div>
                         {allocation.dealSector && (
                           <div className="text-xs text-gray-500">
@@ -193,7 +193,7 @@ export const InvestmentAllocationsTable: React.FC<InvestmentAllocationsTableProp
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="text-xs">
-                        {allocation.dealSector || allocation.securityType || 'equity'}
+                        {allocation.securityType || 'equity'}
                       </Badge>
                     </TableCell>
                     <TableCell>
