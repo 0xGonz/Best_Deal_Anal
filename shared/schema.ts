@@ -390,6 +390,12 @@ export type FundAllocation = FundAllocationBase & {
 };
 export type InsertFundAllocation = z.infer<typeof insertFundAllocationSchema>;
 
+// Alias for components that expect 'Allocation' type
+export type Allocation = FundAllocation & {
+  calledAmount?: number;
+  paidAmount?: number;
+};
+
 // Base type from the table
 export type CapitalCallBase = typeof capitalCalls.$inferSelect;
 
