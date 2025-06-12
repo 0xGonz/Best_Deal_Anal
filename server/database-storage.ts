@@ -519,12 +519,15 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(deals, eq(fundAllocations.dealId, deals.id))
       .where(eq(fundAllocations.fundId, fundId));
     
-    // Transform the results to include deal information
-    return results.map(result => ({
-      ...result.fund_allocations,
-      dealName: result.deals?.name || 'Unknown Deal',
-      dealSector: result.deals?.sector || 'Unknown'
-    }));
+    // Transform the results to include authentic deal information
+    // Only include allocations with valid deal references to maintain data integrity
+    return results
+      .filter(result => result.deals !== null)
+      .map(result => ({
+        ...result.fund_allocations,
+        dealName: result.deals!.name || undefined,
+        dealSector: result.deals!.sector || undefined
+      }));
   }
 
   async getAllocationsBatch(fundIds: number[]): Promise<FundAllocation[]> {
@@ -562,7 +565,12 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(deals, eq(fundAllocations.dealId, deals.id))
       .where(eq(fundAllocations.dealId, dealId));
 
-    return allocationsWithDeals;
+    // Convert null values to undefined for type consistency and ensure authentic deal data
+    return allocationsWithDeals.map(allocation => ({
+      ...allocation,
+      dealName: allocation.dealName || undefined,
+      dealSector: allocation.dealSector || undefined
+    }));
   }
   
   async deleteFundAllocation(id: number): Promise<boolean> {
