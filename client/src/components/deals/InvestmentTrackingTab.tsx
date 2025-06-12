@@ -283,7 +283,7 @@ export default function InvestmentTrackingTab({ dealId }: InvestmentTrackingTabP
                     value={editingAllocation.distributionPaid || ''}
                     onChange={(e) => setEditingAllocation({
                       ...editingAllocation, 
-                      distributionPaid: e.target.value ? parseFloat(e.target.value) : null
+                      distributionPaid: e.target.value ? parseFloat(e.target.value) : 0
                     })}
                     placeholder="0.00"
                   />
@@ -304,7 +304,7 @@ export default function InvestmentTrackingTab({ dealId }: InvestmentTrackingTabP
                     value={editingAllocation.marketValue || ''}
                     onChange={(e) => setEditingAllocation({
                       ...editingAllocation, 
-                      marketValue: e.target.value ? parseFloat(e.target.value) : null
+                      marketValue: e.target.value ? parseFloat(e.target.value) : 0
                     })}
                     placeholder="0.00"
                   />

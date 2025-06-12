@@ -290,7 +290,7 @@ export const capitalCalls = pgTable("capital_calls", {
   dueDate: timestamp("due_date").notNull(),
   paidAmount: real("paid_amount").default(0), // Amount currently paid
   paidDate: timestamp("paid_date"), // Date of the last payment
-  outstanding_amount: real("outstanding_amount").notNull(), // Remaining amount to be paid
+  outstanding_amount: numeric("outstanding_amount", { precision: 14, scale: 2 }).notNull(), // Remaining amount to be paid
   status: text("status", { enum: ["scheduled", "called", "partially_paid", "paid", "defaulted", "overdue"] }).notNull().default("scheduled"),
   notes: text("notes"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -362,7 +362,17 @@ export type InsertDealStar = z.infer<typeof insertDealStarSchema>;
 export type MiniMemo = typeof miniMemos.$inferSelect;
 export type InsertMiniMemo = z.infer<typeof insertMiniMemoSchema>;
 
-export type Fund = typeof funds.$inferSelect;
+// Base type from the table
+export type FundBase = typeof funds.$inferSelect;
+
+// Extended type with additional properties for API responses
+export type Fund = FundBase & {
+  committedCapital?: number;
+  totalFundSize?: number;
+  allocationCount?: number;
+  calledCapital?: number;
+  uncalledCapital?: number;
+};
 export type InsertFund = z.infer<typeof insertFundSchema>;
 
 // Distribution type will be defined after the table declaration
@@ -374,6 +384,8 @@ export type FundAllocationBase = typeof fundAllocations.$inferSelect;
 export type FundAllocation = FundAllocationBase & {
   fundName?: string;
   dealName?: string;
+  dealSector?: string;
+  weight?: number;
   distributions?: typeof distributions.$inferSelect[];
 };
 export type InsertFundAllocation = z.infer<typeof insertFundAllocationSchema>;
