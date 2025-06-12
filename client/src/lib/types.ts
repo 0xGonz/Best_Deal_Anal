@@ -152,6 +152,31 @@ export interface CapitalCall {
   allocation?: FundAllocation; // Related allocation
 }
 
+// Allocation type for compatibility with CapitalCallsByAllocation
+export interface Allocation {
+  id: number;
+  fundId: number;
+  dealId: number;
+  amount: number;
+  paidAmount: number;
+  calledAmount?: number;
+  amountType: "percentage" | "dollar" | "committed";
+  securityType: string;
+  allocationDate: string | Date;
+  notes?: string | null;
+  status: "committed" | "funded" | "unfunded" | "partially_paid";
+  portfolioWeight: number;
+  interestPaid: number;
+  distributionPaid: number;
+  totalReturned: number;
+  marketValue: number;
+  moic: number;
+  irr: number;
+  deal?: Deal;
+  dealName?: string;
+  dealSector?: string;
+}
+
 // Dashboard stats
 export interface DashboardStats {
   activeDeals: number;
