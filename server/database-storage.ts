@@ -514,23 +514,17 @@ export class DatabaseStorage implements IStorage {
   
   async getAllocationsByFund(fundId: number): Promise<FundAllocation[]> {
     const results = await db
-      .select({
-        // Get all allocation fields
-        allocation: fundAllocations,
-        // Get deal name and sector
-        dealName: deals.name,
-        dealSector: deals.sector
-      })
+      .select()
       .from(fundAllocations)
       .leftJoin(deals, eq(fundAllocations.dealId, deals.id))
       .where(eq(fundAllocations.fundId, fundId));
     
     // Transform the results to include deal information
     return results.map(result => ({
-      ...result.allocation,
-      dealName: result.dealName || 'Unknown Deal',
-      dealSector: result.dealSector || 'Unknown'
-    })) as any;
+      ...result.fund_allocations,
+      dealName: result.deals?.name || 'Unknown Deal',
+      dealSector: result.deals?.sector || 'Unknown'
+    }));
   }
 
   async getAllocationsBatch(fundIds: number[]): Promise<FundAllocation[]> {
