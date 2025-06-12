@@ -134,7 +134,7 @@ export default function DealDetail() {
   });
   
   // Apply computed properties to deal data
-  const deal = rawDeal ? enrichDealWithComputedProps(rawDeal) : undefined;
+  const deal = rawDeal;
   
   // Get the stars for this deal to check if current user has starred it
   const { data: stars = [] } = useQuery({

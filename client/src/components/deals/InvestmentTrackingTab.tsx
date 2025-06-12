@@ -280,10 +280,10 @@ export default function InvestmentTrackingTab({ dealId }: InvestmentTrackingTabP
                     type="number"
                     step="0.01"
                     className="pl-10"
-                    value={editingAllocation.distributionPaid || 0}
+                    value={editingAllocation.distributionPaid || ''}
                     onChange={(e) => setEditingAllocation({
                       ...editingAllocation, 
-                      distributionPaid: parseFloat(e.target.value) || 0
+                      distributionPaid: e.target.value ? parseFloat(e.target.value) : null
                     })}
                     placeholder="0.00"
                   />
@@ -301,10 +301,10 @@ export default function InvestmentTrackingTab({ dealId }: InvestmentTrackingTabP
                     type="number"
                     step="0.01"
                     className="pl-10"
-                    value={editingAllocation.marketValue || 0}
+                    value={editingAllocation.marketValue || ''}
                     onChange={(e) => setEditingAllocation({
                       ...editingAllocation, 
-                      marketValue: parseFloat(e.target.value) || 0
+                      marketValue: e.target.value ? parseFloat(e.target.value) : null
                     })}
                     placeholder="0.00"
                   />

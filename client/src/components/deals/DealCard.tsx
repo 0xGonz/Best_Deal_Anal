@@ -33,7 +33,7 @@ export default function DealCard({ deal: rawDeal, compact = false, onEdit, onAll
   const { canEdit, canCreate } = usePermissions();
 
   // Enrich deal with computed properties
-  const deal = enrichDealWithComputedProps(rawDeal);
+  const deal = rawDeal;
 
   // Get users to show avatars
   const { data: users = [] } = useQuery<User[]>({

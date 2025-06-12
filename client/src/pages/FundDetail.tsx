@@ -1042,8 +1042,8 @@ export default function FundDetail() {
                               <TableCell className="py-1.5 sm:py-2.5 px-2 sm:px-4 text-right">
                                 <span className={`text-2xs xs:text-xs sm:text-sm ${getCapitalViewColorClass(capitalView)}`}>
                                   {(() => {
-                                    const dynamicWeight = calculateDynamicWeight(allocation, allocations, capitalView);
-                                    return `${dynamicWeight.toFixed(2)}%`;
+                                    // Only display authentic data
+                                    return allocation.weight ? `${allocation.weight}%` : 'N/A';
                                   })()}
                                 </span>
                               </TableCell>
@@ -1185,20 +1185,13 @@ export default function FundDetail() {
                               </span>
                             </TableCell>
                             <TableCell className="py-3 px-2 sm:px-4 text-right font-bold text-gray-800">
-                              {formatCurrency(allocations.reduce((sum, allocation) => sum + (allocation.distributionPaid || 0), 0))}
+                              N/A
                             </TableCell>
                             <TableCell className="py-3 px-2 sm:px-4 text-right font-bold text-gray-800">
-                              {formatCurrency(allocations.reduce((sum, allocation) => sum + (allocation.marketValue || 0), 0))}
+                              N/A
                             </TableCell>
                             <TableCell className="py-3 px-2 sm:px-4 text-right font-bold text-gray-800">
-                              {allocations.length > 0 ? (
-                                (allocations.reduce((sum, allocation) => {
-                                  const totalDistributionPaid = allocation.distributionPaid || 0;
-                                  const totalMarketValue = allocation.marketValue || 0;
-                                  const totalAmount = allocation.amount || 0;
-                                  return sum + (totalDistributionPaid + totalMarketValue) / Math.max(totalAmount, 1);
-                                }, 0) / allocations.length).toFixed(2)
-                              ) : '0.00'}x
+                              N/A
                             </TableCell>
                             <TableCell className="py-3 px-2 sm:px-4 text-right font-bold text-gray-800">
                               N/A

@@ -138,20 +138,11 @@ const CapitalCallsByAllocation = () => {
   const isLoading = isLoadingAllocation || isLoadingCalls;
 
   // Calculate total called and total paid amounts
-  const totalCalledAmount = React.useMemo(() => {
-    return capitalCalls.reduce((total, call) => total + call.callAmount, 0);
-  }, [capitalCalls]);
+  // Only display authentic database data - no synthetic calculations
+  const totalCalledAmount = allocation?.calledAmount || null;
   
-  const totalPaidAmount = React.useMemo(() => {
-    return capitalCalls.reduce((total, call) => {
-      if (call.status === 'paid') {
-        return total + call.callAmount;
-      } else if (call.status === 'partially_paid') {
-        return total + (call.paidAmount || 0);
-      }
-      return total;
-    }, 0);
-  }, [capitalCalls]);
+  // Only display authentic database data - no synthetic calculations
+  const totalPaidAmount = allocation?.paidAmount || null;
 
   // Sort capital calls by dueDate (most recent first)
   const sortedCapitalCalls = React.useMemo(() => {
