@@ -6,6 +6,11 @@
  */
 export class AllocationStatusService {
   
+  static async updateAllocationStatus(allocationId: number): Promise<void> {
+    // Implementation will be added to update allocation status based on payments
+    // This is a stub for the investment workflow service
+  }
+  
   /**
    * Calculate the correct status based on amount and paidAmount
    * This ensures data consistency across the system

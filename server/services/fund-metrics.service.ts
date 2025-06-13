@@ -14,6 +14,18 @@ export class FundMetricsService {
     this.storage = storage;
   }
 
+  static async recalculateAllMetrics(fundId: number): Promise<void> {
+    const storage = new DatabaseStorage();
+    const service = new FundMetricsService(storage);
+    await service.syncFundMetrics(fundId);
+  }
+
+  static async recalculateFundCapitalMetrics(fundId: number): Promise<void> {
+    const storage = new DatabaseStorage();
+    const service = new FundMetricsService(storage);
+    await service.syncFundMetrics(fundId);
+  }
+
   /**
    * Calculates real-time fund metrics from allocations
    */
@@ -51,16 +63,13 @@ export class FundMetricsService {
   /**
    * Updates fund metrics in the database to match allocation reality
    */
-  async syncFundMetrics(fundId: number) {
+  async updateFundMetrics(fundId: number) {
     const metrics = await this.calculateFundMetrics(fundId);
     
     // Update the fund record with calculated metrics
     await this.storage.updateFund(fundId, {
-      committedCapital: metrics.totalCommittedCapital,
-      calledCapital: metrics.calledCapital,
-      uncalledCapital: metrics.uncalledCapital,
-      allocationCount: metrics.allocationCount,
-      totalFundSize: metrics.totalCommittedCapital // Keep these in sync
+      // Only update fields that exist in the schema
+      aum: metrics.totalCommittedCapital
     });
 
     console.log(`📊 Synced metrics for fund ${fundId}:`, {
