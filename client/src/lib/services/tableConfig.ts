@@ -75,7 +75,7 @@ export const COLUMN_DEFINITIONS = {
     sortable: true
   },
   allocationSector: {
-    key: 'securityType',
+    key: 'dealSector',
     label: 'Sector',
     align: 'left' as const,
     responsive: 'always' as const,
