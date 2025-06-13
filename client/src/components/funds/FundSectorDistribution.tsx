@@ -100,23 +100,23 @@ const FundSectorDistribution: React.FC<FundSectorDistributionProps> = ({
       return [];
     }
     
-    // Filter to include only funded allocations with weights
-    const fundedAllocations = allocations.filter(allocation => 
-      allocation && allocation.status === 'funded'
+    // Include all allocations, not just funded ones, to show complete portfolio distribution
+    const validAllocations = allocations.filter(allocation => 
+      allocation && allocation.dealSector && allocation.amount > 0
     );
     
-    // If no funded allocations, show nothing
-    if (fundedAllocations.length === 0) {
+    // If no valid allocations with sector data, show nothing
+    if (validAllocations.length === 0) {
       return [];
     }
     
-    // Group by sector and sum amounts
+    // Group by actual deal sector and sum amounts
     const sectorTotals = new Map<string, number>();
-    const totalAmount = fundedAllocations.reduce((sum, alloc) => sum + (alloc.amount || 0), 0);
+    const totalAmount = validAllocations.reduce((sum, alloc) => sum + (alloc.amount || 0), 0);
     
-    fundedAllocations.forEach(allocation => {
-      // Use the allocation's security type as sector
-      const sector = allocation.securityType || "Other";
+    validAllocations.forEach(allocation => {
+      // Use the actual deal sector from the allocation data
+      const sector = allocation.dealSector || "Other";
       const currentTotal = sectorTotals.get(sector) || 0;
       
       sectorTotals.set(sector, currentTotal + (allocation.amount || 0));

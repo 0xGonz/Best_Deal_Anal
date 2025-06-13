@@ -1168,40 +1168,70 @@ export default function FundDetail() {
                         })}
                         
                         {/* Dynamic Total Row */}
-                        {allocations && allocations.length > 0 && (
-                          <TableRow className="bg-gray-50 border-t-2 border-gray-200 font-semibold">
-                            <TableCell className="py-3 px-2 sm:px-4 font-bold text-gray-800">TOTAL</TableCell>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
-                            <TableCell className="py-3 px-2 sm:px-4 text-right font-bold">
-                              <span className={getCapitalViewColorClass(capitalView)}>
-                                N/A
-                              </span>
-                            </TableCell>
-                            <TableCell className="py-3 px-2 sm:px-4 text-right font-bold">
-                              <span className={getCapitalViewColorClass(capitalView)}>
-                                {(() => {
-                                  // Only display authentic database data
-                                  return 'N/A';
-                                })()}
-                              </span>
-                            </TableCell>
-                            <TableCell className="py-3 px-2 sm:px-4 text-right font-bold text-gray-800">
-                              N/A
-                            </TableCell>
-                            <TableCell className="py-3 px-2 sm:px-4 text-right font-bold text-gray-800">
-                              N/A
-                            </TableCell>
-                            <TableCell className="py-3 px-2 sm:px-4 text-right font-bold text-gray-800">
-                              N/A
-                            </TableCell>
-                            <TableCell className="py-3 px-2 sm:px-4 text-right font-bold text-gray-800">
-                              N/A
-                            </TableCell>
-                            <TableCell></TableCell>
-                          </TableRow>
-                        )}
+                        {allocations && allocations.length > 0 && (() => {
+                          // Calculate totals from actual allocation data
+                          const totalWeight = allocations.reduce((sum, allocation) => sum + (allocation.portfolioWeight || 0), 0);
+                          const totalCommitted = allocations.reduce((sum, allocation) => sum + (allocation.amount || 0), 0);
+                          const totalPaid = allocations.reduce((sum, allocation) => sum + (allocation.paidAmount || 0), 0);
+                          const totalCalled = allocations.reduce((sum, allocation) => {
+                            // Calculate called amount based on status
+                            if (allocation.status === 'funded') return sum + (allocation.amount || 0);
+                            if (allocation.status === 'partially_paid') return sum + (allocation.paidAmount || 0);
+                            return sum;
+                          }, 0);
+                          const totalUncalled = totalCommitted - totalCalled;
+                          const totalDistributions = allocations.reduce((sum, allocation) => sum + (allocation.distributionPaid || 0), 0);
+                          const totalMarketValue = allocations.reduce((sum, allocation) => sum + (allocation.marketValue || 0), 0);
+                          
+                          // Calculate display amount based on capital view
+                          let displayTotalAmount = totalCommitted;
+                          if (capitalView === 'called') displayTotalAmount = totalCalled;
+                          if (capitalView === 'uncalled') displayTotalAmount = totalUncalled;
+                          
+                          // Calculate weighted average MOIC
+                          const totalMoic = allocations.reduce((sum, allocation) => {
+                            const moic = allocation.marketValue && allocation.amount 
+                              ? allocation.marketValue / allocation.amount 
+                              : 1;
+                            return sum + (moic * (allocation.amount || 0));
+                          }, 0);
+                          const weightedAvgMoic = totalCommitted > 0 ? totalMoic / totalCommitted : 1;
+                          
+                          // Calculate weighted average IRR
+                          const totalIrr = allocations.reduce((sum, allocation) => {
+                            return sum + ((allocation.irr || 0) * (allocation.amount || 0));
+                          }, 0);
+                          const weightedAvgIrr = totalCommitted > 0 ? totalIrr / totalCommitted : 0;
+                          
+                          return (
+                            <TableRow className="bg-gray-50 border-t-2 border-gray-200 font-semibold">
+                              <TableCell className="py-3 px-2 sm:px-4 font-bold text-gray-800">TOTAL</TableCell>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
+                              <TableCell className="py-3 px-2 sm:px-4 text-right font-bold text-gray-800">
+                                {totalWeight.toFixed(2)}%
+                              </TableCell>
+                              <TableCell className="py-3 px-2 sm:px-4 text-right font-bold">
+                                <span className={getCapitalViewColorClass(capitalView)}>
+                                  {formatCurrency(displayTotalAmount)}
+                                </span>
+                              </TableCell>
+                              <TableCell className="py-3 px-2 sm:px-4 text-right font-bold text-gray-800">
+                                {formatCurrency(totalDistributions)}
+                              </TableCell>
+                              <TableCell className="py-3 px-2 sm:px-4 text-right font-bold text-gray-800">
+                                {formatCurrency(totalMarketValue)}
+                              </TableCell>
+                              <TableCell className="py-3 px-2 sm:px-4 text-right font-bold text-gray-800">
+                                {weightedAvgMoic.toFixed(2)}x
+                              </TableCell>
+                              <TableCell className="py-3 px-2 sm:px-4 text-right font-bold text-gray-800">
+                                {weightedAvgIrr.toFixed(2)}%
+                              </TableCell>
+                              <TableCell></TableCell>
+                            </TableRow>
+                          );
+                        })()}
                       </TableBody>
                         </Table>
                       </div>
