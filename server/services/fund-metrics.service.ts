@@ -63,7 +63,7 @@ export class FundMetricsService {
   /**
    * Updates fund metrics in the database to match allocation reality
    */
-  async updateFundMetrics(fundId: number) {
+  async syncFundMetrics(fundId: number) {
     const metrics = await this.calculateFundMetrics(fundId);
     
     // Update the fund record with calculated metrics
