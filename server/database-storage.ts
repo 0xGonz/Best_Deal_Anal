@@ -514,20 +514,37 @@ export class DatabaseStorage implements IStorage {
   
   async getAllocationsByFund(fundId: number): Promise<FundAllocation[]> {
     const results = await db
-      .select()
+      .select({
+        id: fundAllocations.id,
+        fundId: fundAllocations.fundId,
+        dealId: fundAllocations.dealId,
+        amount: fundAllocations.amount,
+        paidAmount: fundAllocations.paidAmount,
+        amountType: fundAllocations.amountType,
+        securityType: fundAllocations.securityType,
+        allocationDate: fundAllocations.allocationDate,
+        notes: fundAllocations.notes,
+        status: fundAllocations.status,
+        portfolioWeight: fundAllocations.portfolioWeight,
+        interestPaid: fundAllocations.interestPaid,
+        distributionPaid: fundAllocations.distributionPaid,
+        totalReturned: fundAllocations.totalReturned,
+        marketValue: fundAllocations.marketValue,
+        moic: fundAllocations.moic,
+        irr: fundAllocations.irr,
+        dealName: deals.name,
+        dealSector: deals.sector
+      })
       .from(fundAllocations)
       .leftJoin(deals, eq(fundAllocations.dealId, deals.id))
       .where(eq(fundAllocations.fundId, fundId));
     
-    // Transform the results to include authentic deal information
-    // Only include allocations with valid deal references to maintain data integrity
-    return results
-      .filter(result => result.deals !== null)
-      .map(result => ({
-        ...result.fund_allocations,
-        dealName: result.deals!.name || undefined,
-        dealSector: result.deals!.sector || undefined
-      }));
+    // Transform results to include deal information, preserving all allocations
+    return results.map(result => ({
+      ...result,
+      dealName: result.dealName ?? undefined,
+      dealSector: result.dealSector ?? undefined
+    }));
   }
 
   
