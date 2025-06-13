@@ -1,9 +1,8 @@
-
 import { z } from 'zod';
 
 export class InputValidator {
   static sanitizeString(input: string): string {
-    return input.replace(/<script[^<]*(?:(?!</script>)<[^<]*)*</script>/gi, '')
+    return input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
                 .replace(/[<>'"&]/g, '');
   }
 

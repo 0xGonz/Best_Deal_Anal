@@ -10,7 +10,7 @@ export class SecureFileHandler {
 
   static sanitizePath(filePath: string): string {
     // Remove directory traversal attempts
-    const normalized = path.normalize(filePath).replace(/^(..[/\])+/, '');
+    const normalized = path.normalize(filePath).replace(/^(\.\.[\\/])+/, '');
     
     // Ensure path is within allowed directories
     const resolvedPath = path.resolve(process.cwd(), normalized);
