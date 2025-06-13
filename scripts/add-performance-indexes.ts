@@ -64,16 +64,16 @@ async function addPerformanceIndexes() {
       ON payments(capital_call_id);
     `);
     
-    // Index for activity feed queries
+    // Index for timeline events (activity replacement)
     await db.execute(`
-      CREATE INDEX IF NOT EXISTS idx_activity_created_at 
-      ON activity(created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_timeline_events_created_at 
+      ON timeline_events(created_at DESC);
     `);
     
-    // Index for activity by deal_id
+    // Index for timeline events by deal_id
     await db.execute(`
-      CREATE INDEX IF NOT EXISTS idx_activity_deal_id 
-      ON activity(deal_id);
+      CREATE INDEX IF NOT EXISTS idx_timeline_events_deal_id 
+      ON timeline_events(deal_id);
     `);
     
     // Index for users by role
@@ -93,21 +93,21 @@ async function addPerformanceIndexes() {
     // Analyze tables to update statistics
     console.log('📊 Updating table statistics...');
     
-    await storage.db.execute(`ANALYZE deals;`);
-    await storage.db.execute(`ANALYZE fund_allocations;`);
-    await storage.db.execute(`ANALYZE capital_calls;`);
-    await storage.db.execute(`ANALYZE payments;`);
-    await storage.db.execute(`ANALYZE activity;`);
-    await storage.db.execute(`ANALYZE users;`);
-    await storage.db.execute(`ANALYZE funds;`);
+    await db.execute(`ANALYZE deals;`);
+    await db.execute(`ANALYZE fund_allocations;`);
+    await db.execute(`ANALYZE capital_calls;`);
+    await db.execute(`ANALYZE payments;`);
+    await db.execute(`ANALYZE timeline_events;`);
+    await db.execute(`ANALYZE users;`);
+    await db.execute(`ANALYZE funds;`);
     
     console.log('✅ Table statistics updated');
     
     // Show index usage
-    const indexInfo = await storage.db.execute(`
+    const indexInfo = await db.execute(`
       SELECT schemaname, tablename, indexname, indexdef 
       FROM pg_indexes 
-      WHERE tablename IN ('deals', 'fund_allocations', 'capital_calls', 'payments', 'activity', 'users', 'funds')
+      WHERE tablename IN ('deals', 'fund_allocations', 'capital_calls', 'payments', 'timeline_events', 'users', 'funds')
       ORDER BY tablename, indexname;
     `);
     
@@ -132,8 +132,7 @@ async function main() {
   }
 }
 
-if (require.main === module) {
-  main();
-}
+// Run if this file is executed directly
+main();
 
 export { addPerformanceIndexes };
