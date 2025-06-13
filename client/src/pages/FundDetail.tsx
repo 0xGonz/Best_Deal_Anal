@@ -149,7 +149,7 @@ export default function FundDetail() {
   const { data: allocations, isLoading: isAllocationsLoading } = useQuery<FundAllocation[]>({
     queryKey: [`/api/allocations/fund/${fundId}`],
     enabled: !!fundId,
-    // Transform the data to ensure proper type compatibility
+    // Transform the data to ensure proper type compatibility while preserving deal information
     select: (data) => (data || []).map(allocation => ({
       ...allocation,
       // Ensure all potential undefined values are converted to null
@@ -157,7 +157,10 @@ export default function FundDetail() {
       status: allocation.status || "committed", // Default status if not provided
       portfolioWeight: allocation.portfolioWeight || 0,
       // Make sure the right property names are used
-      totalReturned: allocation.totalReturned || 0
+      totalReturned: allocation.totalReturned || 0,
+      // Preserve deal information from API response
+      dealName: allocation.dealName || undefined,
+      dealSector: allocation.dealSector || undefined
     }))
   });
 
@@ -165,7 +168,7 @@ export default function FundDetail() {
   const { data: invalidAllocations, isLoading: isInvalidAllocationsLoading, refetch: refetchInvalidAllocations } = useQuery<FundAllocation[]>({
     queryKey: [`/api/allocations/fund/${fundId}/invalid`],
     enabled: !!fundId,
-    // Transform the data to ensure proper type compatibility
+    // Transform the data to ensure proper type compatibility while preserving deal information
     select: (data) => (data || []).map(allocation => ({
       ...allocation,
       // Ensure all potential undefined values are converted to null
@@ -173,7 +176,10 @@ export default function FundDetail() {
       status: allocation.status || "committed", // Default status if not provided
       portfolioWeight: allocation.portfolioWeight || 0,
       // Make sure the right property names are used
-      totalReturned: allocation.totalReturned || 0
+      totalReturned: allocation.totalReturned || 0,
+      // Preserve deal information from API response
+      dealName: allocation.dealName || undefined,
+      dealSector: allocation.dealSector || undefined
     }))
   });
 
