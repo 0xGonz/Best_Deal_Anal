@@ -655,6 +655,5 @@ async function main() {
   console.log('\n🎉 All 27 critical issues have been systematically resolved!');
 }
 
-if (require.main === module) {
-  main().catch(console.error);
-}
+// Run the script
+main().catch(console.error);
