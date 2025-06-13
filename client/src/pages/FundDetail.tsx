@@ -1015,11 +1015,11 @@ export default function FundDetail() {
                             >
                               <TableCell className="py-1.5 sm:py-2.5 px-2 sm:px-4">
                                 <div className="font-medium text-xs sm:text-sm md:text-base text-neutral-900 truncate group-hover:text-blue-700 transition-colors">
-                                  {deal?.name || "Unknown Deal"}
+                                  {allocation.dealName || "Unknown Deal"}
                                 </div>
                               </TableCell>
                               <TableCell className="py-1.5 sm:py-2.5 px-2 sm:px-4">
-                                <span className="text-2xs xs:text-xs sm:text-sm">{allocation.securityType || "N/A"}</span>
+                                <span className="text-2xs xs:text-xs sm:text-sm">{allocation.dealSector || "N/A"}</span>
                               </TableCell>
                               <TableCell className="py-1.5 sm:py-2.5 px-2 sm:px-4">
                                 <span className="text-2xs xs:text-xs sm:text-sm">
