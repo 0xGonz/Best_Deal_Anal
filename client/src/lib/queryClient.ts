@@ -117,9 +117,9 @@ export const queryClient = new QueryClient({
             return false;
           }
         }
-        return failureCount < 2;
+        return failureCount < 3; // Increased retry count for better reliability
       },
-      retryDelay: 1000,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000), // Exponential backoff with cap
     },
     mutations: {
       retry: 1,
