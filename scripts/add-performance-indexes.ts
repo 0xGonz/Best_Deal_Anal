@@ -1,72 +1,139 @@
 /**
  * Performance optimization script
- * Adds database indexes to eliminate N+1 queries identified in the audit
+ * Adds database indexes to eliminate slow queries identified in the analysis
  */
 
-import { pool } from '../server/db.js';
+import { db } from '../server/db';
 
 async function addPerformanceIndexes() {
-  const client = await pool.connect();
+  
+  console.log('🚀 Adding performance indexes...');
   
   try {
-    console.log('Adding performance indexes...');
-    
-    // Index for capital_calls allocation_id and status - fixes N+1 queries
-    await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_capital_calls_allocation_status 
-      ON capital_calls (allocation_id, status);
+    // Index for deal queries by stage
+    await db.execute(`
+      CREATE INDEX IF NOT EXISTS idx_deals_stage 
+      ON deals(stage);
     `);
-    console.log('✓ Added index: capital_calls (allocation_id, status)');
     
-    // Index for fund_allocations fund_id - speeds up fund queries
-    await client.query(`
+    // Index for deal queries by creation date
+    await db.execute(`
+      CREATE INDEX IF NOT EXISTS idx_deals_created_at 
+      ON deals(created_at);
+    `);
+    
+    // Index for fund allocations by fund_id
+    await db.execute(`
       CREATE INDEX IF NOT EXISTS idx_fund_allocations_fund_id 
-      ON fund_allocations (fund_id);
+      ON fund_allocations(fund_id);
     `);
-    console.log('✓ Added index: fund_allocations (fund_id)');
     
-    // Index for fund_allocations deal_id - speeds up deal queries
-    await client.query(`
+    // Index for fund allocations by deal_id
+    await db.execute(`
       CREATE INDEX IF NOT EXISTS idx_fund_allocations_deal_id 
-      ON fund_allocations (deal_id);
+      ON fund_allocations(deal_id);
     `);
-    console.log('✓ Added index: fund_allocations (deal_id)');
     
-    // Composite index for status-based queries
-    await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_fund_allocations_status_amount 
-      ON fund_allocations (status, amount);
+    // Index for fund allocations by status
+    await db.execute(`
+      CREATE INDEX IF NOT EXISTS idx_fund_allocations_status 
+      ON fund_allocations(status);
     `);
-    console.log('✓ Added index: fund_allocations (status, amount)');
     
-    // Index for timeline events by deal_id
-    await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_timeline_events_deal_id 
-      ON timeline_events (deal_id, created_at DESC);
+    // Composite index for fund allocations queries
+    await db.execute(`
+      CREATE INDEX IF NOT EXISTS idx_fund_allocations_fund_status 
+      ON fund_allocations(fund_id, status);
     `);
-    console.log('✓ Added index: timeline_events (deal_id, created_at)');
     
-    console.log('All performance indexes added successfully!');
+    // Index for capital calls by allocation_id
+    await db.execute(`
+      CREATE INDEX IF NOT EXISTS idx_capital_calls_allocation_id 
+      ON capital_calls(allocation_id);
+    `);
+    
+    // Index for capital calls by due_date
+    await db.execute(`
+      CREATE INDEX IF NOT EXISTS idx_capital_calls_due_date 
+      ON capital_calls(due_date);
+    `);
+    
+    // Index for payments by capital_call_id
+    await db.execute(`
+      CREATE INDEX IF NOT EXISTS idx_payments_capital_call_id 
+      ON payments(capital_call_id);
+    `);
+    
+    // Index for activity feed queries
+    await db.execute(`
+      CREATE INDEX IF NOT EXISTS idx_activity_created_at 
+      ON activity(created_at DESC);
+    `);
+    
+    // Index for activity by deal_id
+    await db.execute(`
+      CREATE INDEX IF NOT EXISTS idx_activity_deal_id 
+      ON activity(deal_id);
+    `);
+    
+    // Index for users by role
+    await db.execute(`
+      CREATE INDEX IF NOT EXISTS idx_users_role 
+      ON users(role);
+    `);
+    
+    // Index for sessions optimization
+    await db.execute(`
+      CREATE INDEX IF NOT EXISTS idx_session_expire 
+      ON session(expire);
+    `);
+    
+    console.log('✅ Performance indexes added successfully');
+    
+    // Analyze tables to update statistics
+    console.log('📊 Updating table statistics...');
+    
+    await storage.db.execute(`ANALYZE deals;`);
+    await storage.db.execute(`ANALYZE fund_allocations;`);
+    await storage.db.execute(`ANALYZE capital_calls;`);
+    await storage.db.execute(`ANALYZE payments;`);
+    await storage.db.execute(`ANALYZE activity;`);
+    await storage.db.execute(`ANALYZE users;`);
+    await storage.db.execute(`ANALYZE funds;`);
+    
+    console.log('✅ Table statistics updated');
+    
+    // Show index usage
+    const indexInfo = await storage.db.execute(`
+      SELECT schemaname, tablename, indexname, indexdef 
+      FROM pg_indexes 
+      WHERE tablename IN ('deals', 'fund_allocations', 'capital_calls', 'payments', 'activity', 'users', 'funds')
+      ORDER BY tablename, indexname;
+    `);
+    
+    console.log('\n📋 Current indexes:');
+    indexInfo.forEach((index: any) => {
+      console.log(`  ${index.tablename}.${index.indexname}`);
+    });
     
   } catch (error) {
-    console.error('Error adding performance indexes:', error);
+    console.error('❌ Error adding indexes:', error);
     throw error;
-  } finally {
-    client.release();
   }
 }
 
-// Execute if run directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  addPerformanceIndexes()
-    .then(() => {
-      console.log('Performance optimization completed');
-      process.exit(0);
-    })
-    .catch((error) => {
-      console.error('Performance optimization failed:', error);
-      process.exit(1);
-    });
+async function main() {
+  try {
+    await addPerformanceIndexes();
+    console.log('\n🎉 Performance optimization completed successfully');
+  } catch (error) {
+    console.error('💥 Performance optimization failed:', error);
+    process.exit(1);
+  }
+}
+
+if (require.main === module) {
+  main();
 }
 
 export { addPerformanceIndexes };
