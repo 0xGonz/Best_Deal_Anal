@@ -532,10 +532,40 @@ export class DatabaseStorage implements IStorage {
 
   async getAllocationsBatch(fundIds: number[]): Promise<FundAllocation[]> {
     if (fundIds.length === 0) return [];
-    return await db
-      .select()
+    
+    // Fix N+1 query issue by using a single query with IN clause
+    const results = await db
+      .select({
+        id: fundAllocations.id,
+        fundId: fundAllocations.fundId,
+        dealId: fundAllocations.dealId,
+        amount: fundAllocations.amount,
+        paidAmount: fundAllocations.paidAmount,
+        amountType: fundAllocations.amountType,
+        securityType: fundAllocations.securityType,
+        allocationDate: fundAllocations.allocationDate,
+        notes: fundAllocations.notes,
+        status: fundAllocations.status,
+        portfolioWeight: fundAllocations.portfolioWeight,
+        interestPaid: fundAllocations.interestPaid,
+        distributionPaid: fundAllocations.distributionPaid,
+        totalReturned: fundAllocations.totalReturned,
+        marketValue: fundAllocations.marketValue,
+        moic: fundAllocations.moic,
+        irr: fundAllocations.irr,
+        dealName: deals.name,
+        dealSector: deals.sector
+      })
       .from(fundAllocations)
+      .leftJoin(deals, eq(fundAllocations.dealId, deals.id))
       .where(inArray(fundAllocations.fundId, fundIds));
+
+    // Fix type consistency: ensure null values become undefined consistently
+    return results.map(result => ({
+      ...result,
+      dealName: result.dealName ?? undefined,
+      dealSector: result.dealSector ?? undefined
+    }));
   }
   
   async getAllocationsByDeal(dealId: number): Promise<FundAllocation[]> {
