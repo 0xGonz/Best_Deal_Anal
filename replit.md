@@ -106,15 +106,14 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
-- June 25, 2025: ALLOCATION STATUS COORDINATION FULLY FIXED - committed vs partially_paid vs funded workflow now works correctly
-- June 25, 2025: Capital call synchronization restored - automatic updates between capital calls and allocation status
-- June 25, 2025: Database triggers corrected - removed references to non-existent updated_at column
-- June 25, 2025: Status logic implemented - proper transitions based on actual payment amounts vs committed amounts
-- June 25, 2025: Data inconsistencies resolved - capital calls marked 'paid' with 0 amount now corrected
-- June 25, 2025: API data freshness ensured - no more stale cache issues affecting allocation status display
-- June 25, 2025: Called vs uncalled capital coordination - accurately reflects payment status and workflow state
+- June 25, 2025: ALLOCATION STATUS LOGIC CORRECTED - 100% called capital now properly shows as "funded" status
+- June 25, 2025: Business workflow implemented - funded = 100% called, partially_paid = some called, committed = uncalled
+- June 25, 2025: Auto-sync service disabled - was causing incorrect status overwrites with flawed payment-only logic
+- June 25, 2025: Database triggers updated - now correctly treat 100% called allocations as funded regardless of payment timing
+- June 25, 2025: App SPV and Scarlet Ventures now show "funded" status when 100% capital called
+- June 25, 2025: Status coordination between capital calls and allocations fully operational
 - June 25, 2025: Type safety enforced - All money fields use NUMERIC to prevent string concatenation bugs
-- June 25, 2025: Production-ready allocation management with real-time status synchronization
+- June 25, 2025: Production-ready allocation management with correct business logic implementation
 ```
 
 ## User Preferences
