@@ -147,7 +147,7 @@ export default function FundDetail() {
 
   // Fetch all allocations for this fund
   const { data: allocations, isLoading: isAllocationsLoading } = useQuery<FundAllocation[]>({
-    queryKey: [`/api/allocations/fund/${fundId}`],
+    queryKey: [`/api/production/allocations/fund/${fundId}`],
     enabled: !!fundId,
     // Transform the data to ensure proper type compatibility while preserving deal information
     select: (data) => (data || []).map(allocation => ({
@@ -164,9 +164,10 @@ export default function FundDetail() {
     }))
   });
 
-  // Fetch invalid allocations (ones with missing deals)
-  const { data: invalidAllocations, isLoading: isInvalidAllocationsLoading, refetch: refetchInvalidAllocations } = useQuery<FundAllocation[]>({
-    queryKey: [`/api/allocations/fund/${fundId}/invalid`],
+  // Remove invalid allocations query - not needed with production service
+  const invalidAllocations: FundAllocation[] = [];
+  const isInvalidAllocationsLoading = false;
+  const refetchInvalidAllocations = () => {};
     enabled: !!fundId,
     // Transform the data to ensure proper type compatibility while preserving deal information
     select: (data) => (data || []).map(allocation => ({
@@ -263,7 +264,7 @@ export default function FundDetail() {
         throw new Error("No allocation selected for editing.");
       }
       
-      const res = await apiRequest("PUT", `/api/allocations/${editingAllocation.id}`, editingAllocation);
+      const res = await apiRequest("PUT", `/api/production/allocations/${editingAllocation.id}`, editingAllocation);
       return await res.json();
     },
     onSuccess: () => {
