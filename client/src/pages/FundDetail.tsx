@@ -168,21 +168,6 @@ export default function FundDetail() {
   const invalidAllocations: FundAllocation[] = [];
   const isInvalidAllocationsLoading = false;
   const refetchInvalidAllocations = () => {};
-    enabled: !!fundId,
-    // Transform the data to ensure proper type compatibility while preserving deal information
-    select: (data) => (data || []).map(allocation => ({
-      ...allocation,
-      // Ensure all potential undefined values are converted to null
-      notes: allocation.notes || null,
-      status: allocation.status || "committed", // Default status if not provided
-      portfolioWeight: allocation.portfolioWeight || 0,
-      // Make sure the right property names are used
-      totalReturned: allocation.totalReturned || 0,
-      // Preserve deal information from API response
-      dealName: allocation.dealName || undefined,
-      dealSector: allocation.dealSector || undefined
-    }))
-  });
 
   // Get invested deals only (for allocation creation and reference)
   const { data: deals } = useQuery({
@@ -213,7 +198,7 @@ export default function FundDetail() {
         throw new Error("Please select a security type.");
       }
 
-      const res = await apiRequest("POST", "/api/allocations", newAllocationData);
+      const res = await apiRequest("POST", "/api/production/allocations", newAllocationData);
       return await res.json();
     },
     onSuccess: () => {
@@ -239,7 +224,7 @@ export default function FundDetail() {
       });
       setIsNewAllocationDialogOpen(false);
       // Invalidate allocations query to refresh the data
-      queryClient.invalidateQueries({ queryKey: [`/api/allocations/fund/${fundId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/production/allocations/fund/${fundId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/funds/${fundId}`] });
       refetchInvalidAllocations(); // Explicitly refetch invalid allocations
     },
