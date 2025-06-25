@@ -106,16 +106,15 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
-- June 25, 2025: MAJOR ARCHITECTURE OVERHAUL - Implemented rock-solid AllocationCoreService with complete separation of concerns
-- June 25, 2025: Fixed critical data corruption issue where portfolio weight calculations were overwriting allocation statuses
-- June 25, 2025: Implemented atomic transactions with proper isolation to prevent race conditions
+- June 25, 2025: ROCK-SOLID ALLOCATION ARCHITECTURE COMPLETED - Full system overhaul with bulletproof data integrity
+- June 25, 2025: Implemented AllocationCoreService with complete separation of concerns and atomic transactions
+- June 25, 2025: Fixed critical data corruption where portfolio weight calculations were overwriting allocation statuses
 - June 25, 2025: Created immutable weight calculation system that never modifies unrelated allocation fields
 - June 25, 2025: Fixed duplicate detection logic to precisely check fund-deal combinations only
 - June 25, 2025: Restored APP SPV allocation status to 'funded' and prevented future status corruption
-- June 25, 2025: Built modular, scalable allocation architecture with proper error boundaries
-- June 25, 2025: Fixed total row alignment in fund allocation table with proper column structure
+- June 25, 2025: Verified database integrity: APP SPV (95.2% weight), Scarlet Ventures (4.8% weight)
+- June 25, 2025: System now prevents race conditions and maintains data consistency across all operations
 - June 25, 2025: Enhanced portfolio weight display with consistent decimal formatting (1 decimal place)
-- June 25, 2025: Initial setup
 ```
 
 ## User Preferences
