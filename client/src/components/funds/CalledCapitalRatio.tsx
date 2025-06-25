@@ -175,34 +175,23 @@ const CalledCapitalRatio: React.FC<CalledCapitalRatioProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Calculate called vs uncalled capital based on actual payment data
+  // Calculate called vs uncalled capital based on actual capital call data
   const capitalData = React.useMemo((): CapitalDataItem[] => {
     // Handle null or undefined allocations to avoid runtime errors
     if (!allocations || allocations.length === 0) {
       return [];
     }
     
-    // Use server-provided values when available, otherwise fall back to calculated values
-    let calledAmount: number;
-    let uncalledAmount: number;
+    // Use actual capital call data from enhanced API response
+    const calledAmount = allocations.reduce((sum, allocation) => {
+      return sum + (Number(allocation.calledAmount) || 0);
+    }, 0);
     
-    if (calledCapital !== undefined && uncalledCapital !== undefined) {
-      // Use the server-calculated values (based on actual payments) when available
-      calledAmount = calledCapital;
-      uncalledAmount = uncalledCapital;
-    } else {
-      // Fallback calculation based on allocation status
-      // This is less accurate but serves as a backup when server values aren't provided
-      calledAmount = allocations
-        .filter(allocation => allocation && allocation.status === 'funded')
-        .reduce((sum, allocation) => sum + (allocation.amount || 0), 0);
-      
-      const committedAmount = allocations
-        .filter(allocation => allocation && allocation.status === 'committed')
-        .reduce((sum, allocation) => sum + (allocation.amount || 0), 0);
-        
-      uncalledAmount = committedAmount;
-    }
+    const committedAmount = allocations.reduce((sum, allocation) => {
+      return sum + (allocation.amount || 0);
+    }, 0);
+    
+    const uncalledAmount = committedAmount - calledAmount;
     
     // In case there are no allocations yet
     if (calledAmount === 0 && uncalledAmount === 0) {

@@ -223,7 +223,7 @@ router.post('/', requireAuth, requirePermission('create', 'allocation'), async (
   }
 });
 
-// GET /api/allocations/fund/:fundId - Get all allocations for a specific fund (ROCK SOLID)
+// GET /api/allocations/fund/:fundId - Get all allocations with accurate capital call metrics
 router.get('/fund/:fundId', requireAuth, requireFundAccess(), async (req: Request, res: Response) => {
   try {
     const fundId = Number(req.params.fundId);
@@ -232,19 +232,35 @@ router.get('/fund/:fundId', requireAuth, requireFundAccess(), async (req: Reques
       return res.status(400).json({ error: 'Invalid fund ID' });
     }
 
-    console.log(`Getting allocations for fund ${fundId} with rock-solid architecture`);
+    console.log(`Getting allocations for fund ${fundId} with accurate capital call metrics`);
     
-    // Use the new core service for consistent data retrieval
-    const allocations = await allocationCoreService.getFundAllocations(fundId);
+    // Sync paid amounts to ensure data consistency
+    await capitalCallMetricsService.syncAllocationPaidAmounts(fundId);
     
-    console.log(`Retrieved ${allocations.length} allocations for fund ${fundId}`);
+    // Get allocations with accurate capital call data
+    const allocations = await storage.getAllocationsByFund(fundId);
+    const metrics = await capitalCallMetricsService.calculateFundMetrics(fundId);
     
-    res.json(allocations);
+    // Enhance allocations with accurate metrics from actual capital calls
+    const enhancedAllocations = allocations.map(allocation => {
+      const metric = metrics.find(m => m.allocationId === allocation.id);
+      return {
+        ...allocation,
+        calledAmount: metric?.calledAmount || 0,
+        calledPercentage: metric?.calledPercentage || 0,
+        paidAmount: metric?.paidAmount || allocation.paidAmount || 0,
+        paidPercentage: metric?.paidPercentage || 0
+      };
+    });
+    
+    console.log(`Found ${enhancedAllocations.length} allocations with accurate metrics for fund ${fundId}`);
+    
+    res.json(enhancedAllocations);
   } catch (error) {
-    console.error('Error getting fund allocations:', error);
-    res.status(500).json({ 
-      error: 'Failed to get fund allocations',
-      message: error instanceof Error ? error.message : String(error)
+    console.error('Error fetching fund allocations:', error);
+    return res.status(500).json({ 
+      error: 'Failed to fetch allocations',
+      details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
