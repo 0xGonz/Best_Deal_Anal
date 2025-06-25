@@ -301,7 +301,7 @@ export default function FundDetail() {
         throw new Error("No allocation selected for deletion.");
       }
       
-      const res = await apiRequest("DELETE", `/api/allocations/${editingAllocation.id}`);
+      const res = await apiRequest("DELETE", `/api/production/allocations/${editingAllocation.id}`);
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.message || "Failed to delete allocation");
@@ -319,7 +319,7 @@ export default function FundDetail() {
       setEditingAllocation(null);
       
       // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: [`/api/allocations/fund/${fundId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/production/allocations/fund/${fundId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/funds/${fundId}`] });
     },
     onError: (error) => {
@@ -353,7 +353,7 @@ export default function FundDetail() {
   // Mark allocation status mutation
   const updateAllocationStatusMutation = useMutation({
     mutationFn: async ({ allocationId, status }: { allocationId: number; status: "funded" | "unfunded" | "committed" | "partially_paid" }) => {
-      return apiRequest("PATCH", `/api/allocations/${allocationId}`, {
+      return apiRequest("PATCH", `/api/production/allocations/${allocationId}`, {
         status
       });
     },
@@ -375,7 +375,7 @@ export default function FundDetail() {
       });
       
       // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: [`/api/allocations/fund/${fundId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/production/allocations/fund/${fundId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/funds/${fundId}`] });
     },
     onError: (error) => {
