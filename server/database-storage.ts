@@ -623,13 +623,14 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getAllocationsByDeal(dealId: number): Promise<FundAllocation[]> {
-    const allocationsWithDeals = await db
+    const allocationsWithDetails = await db
       .select({
         id: fundAllocations.id,
         fundId: fundAllocations.fundId,
         dealId: fundAllocations.dealId,
         amount: fundAllocations.amount,
         paidAmount: fundAllocations.paidAmount,
+        calledAmount: fundAllocations.calledAmount,
         amountType: fundAllocations.amountType,
         securityType: fundAllocations.securityType,
         allocationDate: fundAllocations.allocationDate,
@@ -642,18 +643,54 @@ export class DatabaseStorage implements IStorage {
         marketValue: fundAllocations.marketValue,
         moic: fundAllocations.moic,
         irr: fundAllocations.irr,
+        // Include fund details
+        fundName: funds.name,
+        fundDescription: funds.description,
+        fundVintage: funds.vintage,
+        // Include deal details
         dealName: deals.name,
         dealSector: deals.sector
       })
       .from(fundAllocations)
+      .leftJoin(funds, eq(fundAllocations.fundId, funds.id))
       .leftJoin(deals, eq(fundAllocations.dealId, deals.id))
       .where(eq(fundAllocations.dealId, dealId));
 
-    // Convert null values to undefined for type consistency and ensure authentic deal data
-    return allocationsWithDeals.map(allocation => ({
-      ...allocation,
-      dealName: allocation.dealName || undefined,
-      dealSector: allocation.dealSector || undefined
+    console.log(`Database query returned ${allocationsWithDetails.length} allocations for deal ${dealId}`);
+
+    // Convert to proper format with fund and deal information embedded
+    return allocationsWithDetails.map(allocation => ({
+      id: allocation.id,
+      fundId: allocation.fundId,
+      dealId: allocation.dealId,
+      amount: allocation.amount,
+      paidAmount: allocation.paidAmount || 0,
+      calledAmount: allocation.calledAmount || 0,
+      amountType: allocation.amountType,
+      securityType: allocation.securityType,
+      allocationDate: allocation.allocationDate,
+      notes: allocation.notes,
+      status: allocation.status,
+      portfolioWeight: allocation.portfolioWeight || 0,
+      interestPaid: allocation.interestPaid || 0,
+      distributionPaid: allocation.distributionPaid || 0,
+      totalReturned: allocation.totalReturned || 0,
+      marketValue: allocation.marketValue || 0,
+      moic: allocation.moic || 1,
+      irr: allocation.irr || 0,
+      // Embedded fund info for frontend display
+      fund: allocation.fundName ? {
+        id: allocation.fundId,
+        name: allocation.fundName,
+        description: allocation.fundDescription,
+        vintage: allocation.fundVintage
+      } : null,
+      // Embedded deal info for consistency
+      deal: allocation.dealName ? {
+        id: allocation.dealId,
+        name: allocation.dealName,
+        sector: allocation.dealSector
+      } : null
     }));
   }
   

@@ -33,6 +33,39 @@ async function recalculatePortfolioWeights(fundId: number): Promise<void> {
 
 // Multi-fund allocation endpoints
 
+// GET /api/allocations/deal/:dealId - Get all allocations for a specific deal
+router.get('/deal/:dealId', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const dealId = parseInt(req.params.dealId);
+    
+    if (isNaN(dealId)) {
+      return res.status(400).json({ error: 'Invalid deal ID' });
+    }
+
+    console.log(`Getting allocations for deal ${dealId}`);
+    
+    // Get all allocations for this deal with fund information
+    const allocations = await storage.getAllocationsByDeal(dealId);
+    
+    // The database storage already includes fund details, but let's ensure consistency
+    const enrichedAllocations = allocations.map(allocation => ({
+      ...allocation,
+      // Ensure fund information is available
+      fund: allocation.fund || null
+    }));
+    
+    console.log(`Retrieved ${enrichedAllocations.length} allocations for deal ${dealId}`);
+    
+    res.json(enrichedAllocations);
+  } catch (error) {
+    console.error('Error getting deal allocations:', error);
+    res.status(500).json({ 
+      error: 'Failed to get deal allocations',
+      message: error instanceof Error ? error.message : String(error)
+    });
+  }
+});
+
 // GET /api/allocations/deal/:dealId/summary - Get allocation summary for a deal across all funds
 router.get('/deal/:dealId/summary', requireAuth, async (req: Request, res: Response) => {
   try {
