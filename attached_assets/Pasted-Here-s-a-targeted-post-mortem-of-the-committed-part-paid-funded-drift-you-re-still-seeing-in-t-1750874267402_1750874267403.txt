@@ -1,0 +1,117 @@
+Here’s a targeted post-mortem of the “committed / part-paid / funded” drift you’re still seeing in the DealFlowLifecycle repo you just uploaded (v 28). I walked the code-paths that fire after a deal is marked invested and is then allocated to one or more funds, tracing every write that can touch committed, called, or funded amounts.
+
+TL;DR – Three independent bugs keep your numbers from lining up:
+1️⃣ payments can post before a capital-call,
+2️⃣ the funded math still mixes strings & numbers in one edge-path, and
+3️⃣ the “invested-deal” hook double-counts allocations on large imports.
+Fixing any one helps, but you need all three for perfect totals.
+
+1 Lifecycle refresher (happy path)
+scss
+Copy
+Edit
+   DEAL (invested) ──┐
+                     │ 1  Allocation(s) created
+                     ▼
+        FUND_ALLOCATIONS (committed)
+                     │ 2  Capital call(s) created
+                     ▼
+           CAPITAL_CALLS (called)
+                     │ 3  Payments recorded
+                     ▼
+             PAYMENTS (funded)
+Totals (committed_amount, called_amount, funded_amount) are derived columns meant to be in sync with their child tables.
+
+2 What breaks in v 28
+2.1 Payments still allowed before a capital call
+File: payment.controller.ts → recordPayment
+
+ts
+Copy
+Edit
+if (!payload.capitalCallId) {
+  // create an "ad-hoc" payment directly on the allocation
+}
+That branch writes to allocation.fundedAmount immediately.
+A later capital-call recalculates calledAmount but never revisits fundedAmount, so you get:
+
+committed	called	funded
+1 000 000	0	400 000
+
+(exactly the mis-sync you described earlier)
+
+2.2 One remaining string-math edge path
+File: allocation.service.ts → applyPaymentToAllocation (new in v 28)
+
+ts
+Copy
+Edit
+allocation.fundedAmount = allocation.fundedAmount + paymentAmount;
+fundedAmount is typed as number in the service but still comes off the DB layer as string when Drizzle’s select().execute() shortcut is used. When TypeScript sees string + number it defaults to string concatenation.
+
+Result:
+"400000" + 600000 → "400000600000" → cast to Number() later → NaN, which your UI component converts to 0.
+
+2.3 Double-allocation on “invested” Webhook
+When you flag a deal as invested, a webhook (onDealInvested) bulk-allocates that same deal to every open fund that has the “auto-allocate” flag. If you then manually allocate the deal as well (common during testing), you end up with two fund_allocations rows sharing one deal ID. Your roll-up query:
+
+sql
+Copy
+Edit
+SELECT SUM(committed_amount) FROM fund_allocations WHERE deal_id = $1;
+sees both rows and doubles committed, called and funded totals in the fund dashboard—but the “allocation detail” view shows each row separately, so the user sees conflicting numbers.
+
+3 Why these three bugs survive unit tests
+Bug	Unit coverage today	Why it slipped through
+Premature payment	Tests create a call first, then pay.	
+String math	Most tests pull allocations via repository.findById() (typed number). The select() shortcut only appears in one prod-only service.	
+Double-allocation	Seed data uses a single-fund config, so webhook & manual routes never hit the same fund.	
+
+4 Systematic, scalable fixes (design-level)
+4.1 Enforce Call → Pay at the DB level
+Add NOT NULL FK payments.capital_call_id.
+
+Remove “ad-hoc payment” branch; force callers to create a €0 “catch-up call” first if needed.
+
+4.2 Normalize money types end-to-end
+Postgres NUMERIC(18,2)
+
+Drizzle mapping → Decimal (or number with mode: 'bigint' flag).
+
+Never return money columns through raw select(); wrap in a repository that parses to number/Decimal uniformly.
+
+4.3 Write-once allocation per (fund, deal)
+Unique key: UNIQUE(fund_id, deal_id) (you added the migration earlier; wire it into Drizzle models).
+
+onDealInvested checks for existing allocation first; if present, it updates committed amount instead of inserting.
+
+4.4 Reactive totals, not stored cols
+Move called_amount & funded_amount to generated columns:
+
+sql
+Copy
+Edit
+ALTER TABLE fund_allocations
+  ADD COLUMN called_amount NUMERIC(18,2) GENERATED ALWAYS AS
+  (COALESCE((SELECT SUM(amount) FROM capital_calls c WHERE c.allocation_id = id),0)) STORED;
+DB now stays consistent even if a new micro-service adds calls/payments later.
+
+4.5 Guard rails in the FSM
+Your new AllocationStateMachine should refuse PAYMENT_RECEIVED if current state < partially_called. That eliminates whole categories of drift.
+
+5 Smoke test scenario (add it to Cypress)
+Create deal → invest.
+
+Auto-allocation creates commitment 1M (status = committed).
+
+Without creating a call, try to POST a payment (should 409).
+
+Create capital call 400k, then post payment 400k.
+
+Expect: committed = 1M, called = 400k, funded = 400k, status = partially_called and partially_funded.
+
+Create second call 600k, pay 600k.
+
+Expect: called = funded = committed = 1M, status = funded.
+
+Run that on every PR; you’ll catch all three bugs if they reappear.
