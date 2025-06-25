@@ -113,8 +113,9 @@ This repository contains a full-stack investment lifecycle management platform b
 - June 25, 2025: Fixed duplicate detection logic to precisely check fund-deal combinations only
 - June 25, 2025: Restored APP SPV allocation status to 'funded' and prevented future status corruption
 - June 25, 2025: Verified database integrity: APP SPV (95.2% weight), Scarlet Ventures (4.8% weight)
+- June 25, 2025: CRITICAL BUG FIX - Fixed capital calls API validation preventing new allocation creation
 - June 25, 2025: System now prevents race conditions and maintains data consistency across all operations
-- June 25, 2025: Enhanced portfolio weight display with consistent decimal formatting (1 decimal place)
+- June 25, 2025: Allocation workflow fully operational - users can now create new allocations with immediate payments
 ```
 
 ## User Preferences

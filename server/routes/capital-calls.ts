@@ -83,8 +83,9 @@ router.get('/', requireAuth, async (req, res) => {
 
 // Schema for validation with additional validation rules
 const createCapitalCallSchema = insertCapitalCallSchema.extend({
+  allocationId: z.number().positive("Allocation ID is required"),
   callAmount: z.number().positive("Call amount must be greater than 0"),
-  amountType: z.enum(["percentage", "dollar"]),
+  amountType: z.enum(["percentage", "dollar"]).optional(),
   callDate: z.string().or(z.date()),
   dueDate: z.string().or(z.date())
 });
