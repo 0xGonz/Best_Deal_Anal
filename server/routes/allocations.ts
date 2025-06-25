@@ -242,10 +242,10 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
     // Skip audit logging temporarily to avoid date serialization issues
     console.log(`Allocation ${id} updated successfully - audit logging skipped`)
 
-    // Trigger portfolio weight recalculation (with error handling)
+    // Trigger modular portfolio weight recalculation (with error handling)
     try {
       await recalculatePortfolioWeights(result.fundId);
-      console.log(`Portfolio weights recalculated for fund ${result.fundId}`);
+      console.log(`Modular portfolio weights recalculated for fund ${result.fundId}`);
     } catch (weightError) {
       console.error(`Error recalculating portfolio weights for fund ${result.fundId}:`, weightError);
       // Don't fail the update if weight calculation fails
@@ -274,12 +274,12 @@ router.get('/', requireAuth, async (req: Request, res: Response) => {
     let allAllocations: Array<any> = [];
     
     for (const fund of funds) {
-      // First make sure portfolio weights are up to date for each fund
+      // Ensure modular portfolio weights are current for scalable calculations
       await recalculatePortfolioWeights(fund.id);
       
-      // Then fetch the allocations with updated weights
+      // Fetch allocations with updated weights
       const fundAllocations = await storage.getAllocationsByFund(fund.id);
-      // Add fund name to each allocation
+      // Enhance with fund metadata
       const enhancedAllocations = fundAllocations.map(allocation => ({
         ...allocation,
         fundName: fund.name

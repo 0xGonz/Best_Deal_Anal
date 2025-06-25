@@ -66,31 +66,65 @@ export class AllocationService {
   /**
    * Recalculates portfolio weights based on commitments (not funding status)
    * This ensures scalable and authentic portfolio weight calculation
+   * Modular design supports different allocation sizes and fund configurations
    */
   async recalculatePortfolioWeights(fundId: number): Promise<void> {
     try {
       const allocations = await this.storage.getAllocationsByFund(fundId);
-      if (!allocations || allocations.length === 0) return;
+      if (!allocations || allocations.length === 0) {
+        console.log(`No allocations found for fund ${fundId}, skipping weight calculation`);
+        return;
+      }
 
       // Calculate total committed capital (all active allocations)
-      const totalCommittedCapital = allocations
-        .filter(a => a.status !== 'written_off')
-        .reduce((sum, a) => sum + a.amount, 0);
+      const activeAllocations = allocations.filter(a => a.status !== 'written_off');
+      const totalCommittedCapital = activeAllocations.reduce((sum, a) => sum + (a.amount || 0), 0);
 
-      if (totalCommittedCapital <= 0) return;
+      if (totalCommittedCapital <= 0) {
+        console.log(`Fund ${fundId} has no committed capital, setting all weights to 0`);
+        // Set all weights to 0 if no committed capital
+        for (const allocation of allocations) {
+          await this.storage.updateFundAllocation(allocation.id, { portfolioWeight: 0 });
+        }
+        return;
+      }
 
-      // Update portfolio weights based on commitment amounts
+      // Calculate and update portfolio weights with precision
+      const updatedWeights: Array<{id: number, amount: number, weight: number}> = [];
+      
       for (const allocation of allocations) {
-        const weight = allocation.status !== 'written_off' 
-          ? (allocation.amount / totalCommittedCapital) * 100 
-          : 0;
+        let weight = 0;
+        
+        if (allocation.status !== 'written_off' && allocation.amount > 0) {
+          // Calculate weight as percentage with 2 decimal precision
+          weight = Math.round((allocation.amount / totalCommittedCapital) * 10000) / 100;
+        }
         
         await this.storage.updateFundAllocation(allocation.id, { portfolioWeight: weight });
+        updatedWeights.push({
+          id: allocation.id,
+          amount: allocation.amount,
+          weight: weight
+        });
       }
       
-      console.log(`Recalculated portfolio weights for fund ${fundId} with total committed capital: $${totalCommittedCapital.toLocaleString()}`);
+      // Detailed logging for modular debugging
+      console.log(`Portfolio weights recalculated for fund ${fundId}:`);
+      console.log(`  Total committed capital: $${totalCommittedCapital.toLocaleString()}`);
+      console.log(`  Active allocations: ${activeAllocations.length}`);
+      updatedWeights.forEach(({id, amount, weight}) => {
+        console.log(`    Allocation ${id}: $${amount.toLocaleString()} = ${weight}%`);
+      });
+      
+      // Verify weights sum to approximately 100%
+      const totalWeight = updatedWeights.reduce((sum, w) => sum + w.weight, 0);
+      if (Math.abs(totalWeight - 100) > 0.1) {
+        console.warn(`Portfolio weights for fund ${fundId} sum to ${totalWeight}% instead of 100%`);
+      }
+      
     } catch (error) {
       console.error(`Error recalculating portfolio weights for fund ${fundId}:`, error);
+      throw error; // Re-throw to allow calling code to handle
     }
   }
 
