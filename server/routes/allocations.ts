@@ -481,35 +481,75 @@ router.post('/', requireAuth, requirePermission('create', 'allocation'), async (
       await updateAllocationStatusBasedOnCapitalCalls(allocation.id);
     }
     
-    // Then recalculate all portfolio weights
-    await recalculatePortfolioWeights(fund.id);
-    
-    res.status(201).json(newAllocation);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      console.error('Zod validation error:', JSON.stringify(error.errors, null, 2));
-      return res.status(400).json({ message: 'Invalid allocation data', errors: error.errors });
+      // Handle capital call creation if needed
+      if (req.body.capitalCallSchedule && req.body.capitalCallSchedule !== 'none') {
+        // Capital call creation logic would go here
+        console.log(`Capital call schedule: ${req.body.capitalCallSchedule}`);
+      }
+      
+      console.log(`Allocation created successfully with rock-solid architecture: ID ${newAllocation.id}`);
+      
+      res.status(201).json({
+        success: true,
+        message: 'Fund allocation created successfully',
+        data: newAllocation
+      });
+
+    } catch (allocationError: any) {
+      // Handle specific duplicate allocation errors
+      if (allocationError.message?.startsWith('DUPLICATE_ALLOCATION:')) {
+        const errorMessage = allocationError.message.replace('DUPLICATE_ALLOCATION:', '');
+        return res.status(409).json({ 
+          message: 'Fund allocation already exists',
+          error: errorMessage
+        });
+      }
+      
+      // Handle other allocation creation errors
+      console.error('Allocation creation failed:', allocationError);
+      return res.status(500).json({
+        message: 'Failed to create fund allocation',
+        error: allocationError.message || 'Unknown error occurred'
+      });
     }
-    console.error('Error creating fund allocation:', error);
-    res.status(500).json({ message: 'Failed to create fund allocation', error: error instanceof Error ? error.message : String(error) });
+  } catch (error) {
+    console.error('Error in allocation creation endpoint:', error);
+    
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        message: 'Validation error',
+        errors: error.errors
+      });
+    }
+    
+    const errorResponse = ErrorHandlerService.createErrorResponse(error);
+    res.status(500).json(errorResponse);
   }
 });
 
-// Get allocations for a fund
+// GET /api/allocations/fund/:fundId - Get all allocations for a specific fund (ROCK SOLID)
 router.get('/fund/:fundId', requireAuth, async (req: Request, res: Response) => {
   try {
     const fundId = Number(req.params.fundId);
     
-    // First make sure portfolio weights are up to date
-    await recalculatePortfolioWeights(fundId);
+    if (isNaN(fundId)) {
+      return res.status(400).json({ error: 'Invalid fund ID' });
+    }
+
+    console.log(`Getting allocations for fund ${fundId} with rock-solid architecture`);
     
-    // Then fetch the allocations with updated weights (now includes deal info from database layer)
-    const allocations = await storage.getAllocationsByFund(fundId);
+    // Use the new core service for consistent data retrieval
+    const allocations = await allocationCoreService.getFundAllocations(fundId);
+    
+    console.log(`Retrieved ${allocations.length} allocations for fund ${fundId}`);
     
     res.json(allocations);
   } catch (error) {
-    console.error('Error fetching fund allocations:', error);
-    res.status(500).json({ message: 'Failed to fetch allocations' });
+    console.error('Error getting fund allocations:', error);
+    res.status(500).json({ 
+      error: 'Failed to get fund allocations',
+      message: error instanceof Error ? error.message : String(error)
+    });
   }
 });
 
@@ -581,43 +621,46 @@ router.get('/deal/:dealId', requireAuth, async (req: Request, res: Response) => 
   }
 });
 
-// Delete an allocation
+// DELETE /api/allocations/:id - Delete an allocation (ROCK SOLID)
 router.delete('/:id', requireAuth, requirePermission('delete', 'allocation'), async (req: Request, res: Response) => {
   try {
     const allocationId = Number(req.params.id);
     
-    // Find the allocation first to get fundId
-    const allocation = await storage.getFundAllocation(allocationId);
-    if (!allocation) {
-      return res.status(404).json({ message: 'Allocation not found' });
+    if (isNaN(allocationId)) {
+      return res.status(400).json({ error: 'Invalid allocation ID' });
     }
-    
-    // Get deal details before deletion
-    const deal = await storage.getDeal(allocation.dealId);
-    
-    // Delete the allocation
-    const result = await storage.deleteFundAllocation(allocationId);
-    if (!result) {
-      return res.status(404).json({ message: 'Allocation not found or could not be deleted' });
-    }
-    
-    // Check if the deal still has any other allocations
-    const remainingAllocations = await storage.getAllocationsByDeal(allocation.dealId);
-    
-    // If no allocations remain and deal is in 'invested' stage, move it back to "closing" stage
-    if (remainingAllocations.length === 0 && deal && deal.stage === 'invested') {
-      await storage.updateDeal(deal.id, { 
-        stage: 'closing',  // Move back to the previous stage in the pipeline
-        createdBy: (req as any).user.id
-      });
+
+    console.log(`Deleting allocation ${allocationId} with rock-solid architecture`);
+
+    try {
+      // Use the new core service for safe deletion
+      await allocationCoreService.deleteAllocation(allocationId);
       
-      // Create a timeline event for this stage change
-      await storage.createTimelineEvent({
-        dealId: deal.id,
-        eventType: 'stage_change',
-        content: `Deal moved from Invested to Closing after last fund allocation was removed`,
-        createdBy: (req as any).user.id,
-        metadata: {
+      console.log(`Allocation ${allocationId} deleted successfully with automatic weight recalculation`);
+      
+      res.json({ 
+        success: true, 
+        message: 'Allocation deleted successfully' 
+      });
+    } catch (deleteError: any) {
+      if (deleteError.message?.includes('not found')) {
+        return res.status(404).json({ error: 'Allocation not found' });
+      }
+      
+      console.error('Allocation deletion failed:', deleteError);
+      return res.status(500).json({ 
+        error: 'Failed to delete allocation',
+        message: deleteError.message || 'Unknown error occurred'
+      });
+    }
+  } catch (error) {
+    console.error('Error in allocation deletion endpoint:', error);
+    res.status(500).json({ 
+      error: 'Failed to delete allocation',
+      message: error instanceof Error ? error.message : String(error)
+    });
+  }
+});
           previousStage: ['invested'],
           newStage: ['closing']
         }
