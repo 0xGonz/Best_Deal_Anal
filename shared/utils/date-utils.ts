@@ -229,3 +229,24 @@ export function addBusinessDaysWithHolidays(date: Date, days: number): Date {
   
   return normalizeToNoonUTC(result);
 }
+
+/**
+ * Create normalized date (alias for normalizeToNoonUTC for backwards compatibility)
+ */
+export function createNormalizedDate(date: Date | string): Date {
+  return normalizeToNoonUTC(date);
+}
+
+/**
+ * Calculate due date by adding business days
+ */
+export function calculateDueDate(startDate: Date, businessDays: number): Date {
+  return addBusinessDaysWithHolidays(startDate, businessDays);
+}
+
+/**
+ * Format date for database storage
+ */
+export function formatForDatabase(date: Date): string {
+  return normalizeToNoonUTC(date).toISOString();
+}

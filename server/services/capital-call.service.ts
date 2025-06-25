@@ -12,7 +12,7 @@ import {
 import { addMonths, addQuarters, addYears, addDays } from 'date-fns';
 import { normalizeToNoonUTC, formatToNoonUTC } from '@shared/utils/date-utils';
 import { capitalCallsConfig } from '../config/capital-calls-config';
-import { createNormalizedDate, calculateDueDate, formatForDatabase } from '../utils/date-utils';
+import { createNormalizedDate, calculateDueDate, formatForDatabase } from '@shared/utils/date-utils';
 import { batchQueryService } from './batch-query.service';
 
 // Define allocation statuses for use in the service
