@@ -64,10 +64,10 @@ export class CapitalCallService {
       capitalCall.paidAmount || 0
     );
     
-    // Create the capital call with calculated outstanding amount
+    // Create the capital call with calculated outstanding amount (as string for database compatibility)
     const enrichedCapitalCall = {
       ...capitalCall,
-      outstanding_amount: outstandingAmount,
+      outstanding_amount: String(outstandingAmount),
       paidAmount: capitalCall.paidAmount || 0
     };
     
@@ -260,7 +260,7 @@ export class CapitalCallService {
         dueDate: normalizedDueDate, // Use normalized due date
         status: 'scheduled',
         paidAmount: capitalCallsConfig.getInitialPaidAmount(),
-        outstanding_amount: callAmount, // Full amount outstanding - match DB column name
+        outstanding_amount: String(callAmount), // Full amount outstanding - match DB column name
         notes: `Scheduled payment ${i + 1} of ${callCount}`
       });
       
@@ -391,7 +391,7 @@ export class CapitalCallService {
     const updatedCall = await storage.updateCapitalCall(capitalCallId, {
       ...currentCall,
       paidAmount: newPaidAmount,
-      outstanding_amount: newOutstanding,
+      outstanding_amount: String(newOutstanding),
       status: newStatus,
       paidDate: normalizedPaymentDate
     });

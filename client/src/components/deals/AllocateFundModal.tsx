@@ -93,7 +93,7 @@ export default function AllocateFundModal({ isOpen, onClose, dealId, dealName }:
           callDate: formatDateForAPI(data.fundingDate),
           dueDate: formatDateForAPI(data.fundingDate),
           status: 'paid',
-          outstanding_amount: PAYMENT_DEFAULTS.FULL_OUTSTANDING, // Payment is complete, so outstanding amount is 0
+          outstanding_amount: "0", // Payment is complete, so outstanding amount is 0
           notes: `Immediate payment at commitment - ${data.paymentOption === 'pay_immediately' ? 'Full funding' : 'Partial funding'}`
         };
         
