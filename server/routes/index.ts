@@ -4,6 +4,7 @@ import { versioningMiddleware } from "../middleware/versioning";
 import { standardRateLimiter, authRateLimiter, apiRateLimiter } from "../middleware/rateLimit";
 import v1Routes from './v1';
 import { systemRouter } from './system';
+import syncRoutes from './sync';
 
 // Create a simple auth middleware
 const authenticate = (req: Request, res: Response, next: NextFunction) => {
@@ -42,6 +43,9 @@ export function registerRoutes(app: Express): Server {
   
   // System routes with standard rate limiting
   app.use('/api/system', standardRateLimiter, systemRouter);
+  
+  // Sync routes for data integrity (admin only)
+  app.use('/api/sync', standardRateLimiter, syncRoutes);
   
   // API Documentation route with standard rate limiting
   app.get('/api', standardRateLimiter, (req, res) => {

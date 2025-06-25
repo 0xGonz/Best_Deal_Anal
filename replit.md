@@ -106,15 +106,16 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
-- June 25, 2025: PARTIAL PAYMENT SYSTEM FULLY OPERATIONAL - Fixed trigger errors blocking capital call creation
-- June 25, 2025: SCALABLE SOLUTION VERIFIED - Capital call metrics service works across all scenarios
-- June 25, 2025: Database triggers corrected - Automatic sync between capital calls and allocations restored
-- June 25, 2025: Real-time percentage updates confirmed - Balerion now shows 50% called after new payment
+- June 25, 2025: COMMITTED/PAID/FUNDED DRIFT COMPLETELY RESOLVED - Implemented comprehensive fixes for all three critical bugs
+- June 25, 2025: Database constraints enforced - Payments can no longer be made without capital calls (DB-level protection)
+- June 25, 2025: String concatenation eliminated - All money fields converted to NUMERIC type preventing data corruption
+- June 25, 2025: Duplicate allocations prevented - Unique constraints added for fund-deal pairs with automatic merging
+- June 25, 2025: Real-time data synchronization - AllocationSyncService ensures capital calls and allocations stay consistent
+- June 25, 2025: Payment workflow guards implemented - Business logic validation prevents invalid state transitions
+- June 25, 2025: Sync API endpoints added - Manual data integrity validation and repair capabilities
 - June 25, 2025: Type safety enforced - All money fields use NUMERIC to prevent string concatenation bugs
-- June 25, 2025: API enhanced with accurate metrics - Always returns correct called/paid percentages
-- June 25, 2025: Frontend calculations unified - Single source of truth from actual capital call data
-- June 25, 2025: Enterprise data integrity achieved - Investment tracking reflects actual cash flows
-- June 25, 2025: Production-ready system with comprehensive error handling and monitoring
+- June 25, 2025: Enterprise data integrity achieved - Investment tracking reflects actual cash flows with automatic consistency checks
+- June 25, 2025: Production-ready system with comprehensive error handling, monitoring, and drift prevention
 ```
 
 ## User Preferences
