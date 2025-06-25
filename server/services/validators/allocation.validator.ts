@@ -51,8 +51,8 @@ export class AllocationValidator {
       // Entity existence validation
       await this.validateEntityExistence(request, errors);
 
-      // Fund capacity validation
-      await this.validateFundCapacity(request, errors, warnings);
+      // Fund capacity validation - REMOVED per user request
+      // Fund capacity limits are inappropriate for investment management
 
       return {
         isValid: errors.length === 0,
@@ -89,10 +89,7 @@ export class AllocationValidator {
       if (updates.amount !== undefined) {
         this.validateAmount(updates.amount, errors);
         
-        // Check if amount increase exceeds fund capacity
-        if (updates.amount > current.amount) {
-          await this.validateAmountIncrease(current, updates.amount, errors, warnings);
-        }
+        // Amount increase validation - removed fund capacity check
       }
 
       // Security type validation
@@ -239,37 +236,8 @@ export class AllocationValidator {
     }
   }
 
-  private async validateFundCapacity(
-    request: AllocationCreationRequest,
-    errors: string[],
-    warnings: string[]
-  ): Promise<void> {
-    // Get current fund allocations
-    const allocations = await db
-      .select()
-      .from(fundAllocations)
-      .where(eq(fundAllocations.fundId, request.fundId));
-
-    const currentTotal = allocations.reduce((sum, allocation) => sum + allocation.amount, 0);
-    const newTotal = currentTotal + request.amount;
-
-    // Get fund details for capacity check
-    const [fund] = await db
-      .select()
-      .from(funds)
-      .where(eq(funds.id, request.fundId))
-      .limit(1);
-
-    if (fund && fund.aum > 0) {
-      const utilizationPercentage = (newTotal / fund.aum) * 100;
-      
-      if (utilizationPercentage > this.businessRules.maxFundUtilization) {
-        errors.push(`Allocation would exceed fund capacity. Current utilization: ${utilizationPercentage.toFixed(1)}%`);
-      } else if (utilizationPercentage > 80) {
-        warnings?.push(`High fund utilization: ${utilizationPercentage.toFixed(1)}%`);
-      }
-    }
-  }
+  // REMOVED: Fund capacity validation - inappropriate for investment management
+  // Funds should not have artificial capacity limits
 
   private validateStatusTransition(currentStatus: string, newStatus: string, errors: string[]): void {
     const validTransitions: Record<string, string[]> = {
@@ -286,34 +254,7 @@ export class AllocationValidator {
     }
   }
 
-  private async validateAmountIncrease(
-    current: FundAllocation,
-    newAmount: number,
-    errors: string[],
-    warnings: string[]
-  ): Promise<void> {
-    const increase = newAmount - current.amount;
-    const increasePercentage = (increase / current.amount) * 100;
-
-    // Large increase warning
-    if (increasePercentage > 50) {
-      warnings?.push(`Large amount increase: ${increasePercentage.toFixed(1)}% ($${increase.toLocaleString()})`);
-    }
-
-    // Check fund capacity for the increase
-    await this.validateFundCapacity(
-      {
-        fundId: current.fundId,
-        dealId: current.dealId,
-        amount: increase,
-        securityType: current.securityType,
-        status: current.status,
-        allocationDate: new Date().toISOString()
-      },
-      errors,
-      warnings
-    );
-  }
+  // REMOVED: Amount increase validation - no capacity limits needed
 
   /**
    * Update business rules (for configuration management)
