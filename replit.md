@@ -106,6 +106,8 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
+- June 25, 2025: Enhanced duplicate allocation error messages with detailed conflict information and amount display
+- June 25, 2025: Cleaned up duplicate allocation data to resolve creation conflicts
 - June 25, 2025: Fixed total row alignment in fund allocation table with proper column structure
 - June 25, 2025: Enhanced portfolio weight display with consistent decimal formatting (1 decimal place)
 - June 25, 2025: Enhanced portfolio weight calculation system with modular and scalable design
