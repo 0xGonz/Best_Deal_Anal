@@ -1047,10 +1047,7 @@ export default function FundDetail() {
                               </TableCell>
                               <TableCell className="py-1.5 sm:py-2.5 px-2 sm:px-4 text-right">
                                 <span className={`text-2xs xs:text-xs sm:text-sm ${getCapitalViewColorClass(capitalView)}`}>
-                                  {(() => {
-                                    // Only display authentic data
-                                    return allocation.weight ? `${allocation.weight}%` : 'N/A';
-                                  })()}
+                                  {allocation.portfolioWeight ? `${allocation.portfolioWeight.toFixed(1)}%` : '0.0%'}
                                 </span>
                               </TableCell>
                               <TableCell className="py-1.5 sm:py-2.5 px-2 sm:px-4 text-right">
@@ -1206,10 +1203,11 @@ export default function FundDetail() {
                           return (
                             <TableRow className="bg-gray-50 border-t-2 border-gray-200 font-semibold">
                               <TableCell className="py-3 px-2 sm:px-4 font-bold text-gray-800">TOTAL</TableCell>
-                              <TableCell></TableCell>
-                              <TableCell></TableCell>
+                              <TableCell className="py-3 px-2 sm:px-4"></TableCell>
+                              <TableCell className="py-3 px-2 sm:px-4"></TableCell>
+                              <TableCell className="py-3 px-2 sm:px-4"></TableCell>
                               <TableCell className="py-3 px-2 sm:px-4 text-right font-bold text-gray-800">
-                                {totalWeight.toFixed(2)}%
+                                {totalWeight.toFixed(1)}%
                               </TableCell>
                               <TableCell className="py-3 px-2 sm:px-4 text-right font-bold">
                                 <span className={getCapitalViewColorClass(capitalView)}>
@@ -1228,7 +1226,7 @@ export default function FundDetail() {
                               <TableCell className="py-3 px-2 sm:px-4 text-right font-bold text-gray-800">
                                 {weightedAvgIrr.toFixed(2)}%
                               </TableCell>
-                              <TableCell></TableCell>
+                              <TableCell className="py-3 px-2 sm:px-4"></TableCell>
                             </TableRow>
                           );
                         })()}

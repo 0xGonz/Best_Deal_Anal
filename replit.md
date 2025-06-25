@@ -106,12 +106,13 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
+- June 25, 2025: Fixed total row alignment in fund allocation table with proper column structure
+- June 25, 2025: Enhanced portfolio weight display with consistent decimal formatting (1 decimal place)
 - June 25, 2025: Enhanced portfolio weight calculation system with modular and scalable design
 - June 25, 2025: Fixed duplicate allocation error handling with proper 409 status codes and user feedback
 - June 25, 2025: Improved allocation service with detailed logging and precision weight calculations
 - June 25, 2025: Fixed critical allocation creation error by implementing missing AuditService.logAllocationCreation method
 - June 25, 2025: Added proper error handling for audit logging to prevent workflow failures
-- June 25, 2025: Completed extreme depth analysis of allocation, funds, and capital calls modules
 - June 25, 2025: Initial setup
 ```
 
