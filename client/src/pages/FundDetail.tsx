@@ -267,7 +267,7 @@ export default function FundDetail() {
       setEditingAllocation(null);
       
       // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: [`/api/allocations/fund/${fundId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/production/allocations/fund/${fundId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/funds/${fundId}`] });
     },
     onError: (error) => {

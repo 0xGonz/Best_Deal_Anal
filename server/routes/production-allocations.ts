@@ -111,7 +111,71 @@ router.post('/', requireAuth, requirePermission('create', 'allocation'), async (
 });
 
 /**
- * PATCH /api/allocations/:id - Update allocation
+ * PUT /api/allocations/:id - Update allocation (full update)
+ */
+router.put('/:id', requireAuth, requirePermission('edit', 'allocation'), async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const allocationId = parseInt(req.params.id);
+    if (isNaN(allocationId)) {
+      return res.status(400).json({ error: 'Invalid allocation ID' });
+    }
+
+    // Validate request body
+    const validationResult = updateAllocationSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: validationResult.error.errors
+      });
+    }
+
+    const updates = validationResult.data;
+
+    // Update allocation
+    const result = await productionAllocationService.updateAllocation(allocationId, updates, userId);
+
+    if (!result.success) {
+      if (result.validationErrors) {
+        return res.status(400).json({
+          error: 'Validation failed',
+          details: result.validationErrors
+        });
+      }
+
+      if (result.error?.includes('not found')) {
+        return res.status(404).json({
+          error: 'Allocation not found'
+        });
+      }
+
+      return res.status(500).json({
+        error: 'Failed to update allocation',
+        message: result.error
+      });
+    }
+
+    res.json({
+      success: true,
+      data: result.allocation,
+      auditId: result.auditId
+    });
+
+  } catch (error) {
+    console.error('Error in allocation update:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
+ * PATCH /api/allocations/:id - Update allocation (partial update)
  */
 router.patch('/:id', requireAuth, requirePermission('edit', 'allocation'), async (req: Request, res: Response) => {
   try {

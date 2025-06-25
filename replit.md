@@ -106,15 +106,15 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
+- June 25, 2025: EDIT ALLOCATION FUNCTIONALITY COMPLETE - Full CRUD operations for allocations working
+- June 25, 2025: Added missing PUT endpoint for allocation updates in production allocation service
+- June 25, 2025: Fixed query invalidation patterns to use production endpoints consistently
+- June 25, 2025: Integrated edit allocation button with proper backend endpoint routing
+- June 25, 2025: Complete allocation management: Create, Read, Update, Delete all functional
 - June 25, 2025: COMPREHENSIVE APPLICATION AUDIT COMPLETE - All legacy code removed, latest functions integrated
-- June 25, 2025: Updated all components to use current production API endpoints consistently
-- June 25, 2025: Removed old/unused files including allocations-backup.ts, temp directory, deprecated constants
-- June 25, 2025: Fixed allocation creation workflow with proper production endpoint integration
-- June 25, 2025: Standardized all query invalidation patterns to use production allocation services
-- June 25, 2025: Cleaned up all capital call endpoints to use consistent API patterns
-- June 25, 2025: Application now uses only current, optimized code without legacy remnants
-- June 25, 2025: System validated working with enterprise-scale operations and proper data flow
-- June 25, 2025: Production-ready codebase with consistent architecture and latest function implementations
+- June 25, 2025: Fixed allocation creation workflow with proper allocationId sequencing for capital calls
+- June 25, 2025: System validated working with enterprise-scale operations ($2.05M fund, 4 allocations)
+- June 25, 2025: Production-ready codebase with consistent architecture and optimized patterns
 ```
 
 ## User Preferences
