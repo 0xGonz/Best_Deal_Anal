@@ -1,0 +1,98 @@
+Below is a copy-and-paste prompt you can drop straight into the Replit AI “Fix my code” box (or into a /fix task) so the agent knows exactly what’s broken, why, and the concrete steps to patch it systematically and scalably.
+
+pgsql
+Copy
+Edit
+# 🛠️ Replit AI Fix Brief – DealFlowLifecycle (v28)
+
+## 0. Goal
+Stop the “Committed / Part-Paid / Funded” drift in fund-allocation math, and make the pipeline rock-solid at scale (one deal or 10 000 deals).
+
+## 1. Current Bugs to Eliminate
+1. **Ad-hoc payments before a capital call**  
+   • `payment.controller.ts → recordPayment` lets payloads without `capitalCallId` create a payment directly on an allocation, bypassing `capital_calls`.  
+2. **String–number mixing in funded math**  
+   • `allocation.service.ts → applyPaymentToAllocation` concatenates when `fundedAmount` (string) is added to a numeric `paymentAmount`, causing `"400000600000"` → `NaN`.  
+3. **Double allocations from the invested-deal webhook**  
+   • `services/onDealInvested.ts` bulk-inserts an allocation even if one already exists for the same `(fund_id, deal_id)`, leading to duplicate rows and inflated roll-ups.
+
+## 2. Architectural Fixes Required
+
+### 2.1 Strict Money Types
+* Convert every monetary column (`committed_amount`, `called_amount`, `funded_amount`, `amount` in payments & calls) to `NUMERIC(18,2)` in Postgres.  
+* Update Drizzle models to map these as `bigintMode: 'number'` **or** a Decimal wrapper; no strings allowed.
+
+### 2.2 Relational Guard-Rails
+* **FK** `payments.capital_call_id REFERENCES capital_calls(id) NOT NULL ON DELETE RESTRICT`.  
+* **UNIQUE(fund_id, deal_id)** on `fund_allocations`.  
+* **CHECK** constraints inside `fund_allocations`:  
+  ```sql
+  funded_amount <= called_amount
+  AND called_amount <= committed_amount
+Generate called_amount & funded_amount as stored generated columns that SUM child tables, so the app never writes them manually.
+
+2.3 State Machine Enforcement
+Introduce AllocationFSM (already scaffolded) and block PAYMENT_RECEIVED events when state < partially_called.
+
+Remove the “ad-hoc payment” branch; instead require callers to first create a zero-amount “catch-up” capital call if they truly need one.
+
+2.4 Webhook Idempotency
+In onDealInvested, check for an existing allocation:
+If present → update committed_amount;
+If absent → insert.
+
+Respect the UNIQUE key above so retries don’t 500.
+
+3. Required Deliverables
+Two SQL migrations
+
+001_money_numeric.sql – change column types & add CHECK + UNIQUE constraints.
+
+002_generated_totals.sql – add generated columns & drop old mutable ones.
+
+Code patches
+
+payment.controller.ts – remove ad-hoc logic, require capitalCallId.
+
+allocation.service.ts – ensure numeric arithmetic (Number() or Decimal), no string concat.
+
+onDealInvested.ts – make allocation idempotent.
+
+allocationFSM.ts – guard payment event.
+
+Tests (Vitest/Jest)
+
+New integration spec: commit → (no call) → payment → expect 409 Conflict.
+
+Happy-path spec: commit 1 M → call 400 k → pay 400 k → call 600 k → pay 600 k → expect funded = committed = called = 1 M.
+
+Cypress E2E script mirroring the integration test, verifying UI values.
+
+4. Acceptance Criteria
+API returns 409 if a payment is posted without an open capital call.
+
+Dashboard always shows committed ≥ called ≥ funded with correct percentages.
+
+Duplicate webhook calls don’t create extra rows.
+
+All migrations run in < 30 s on 10k allocations (use ALTER … NOT VALID pattern).
+
+5. Non-Goals (for now)
+Multi-currency support, table partitioning, or event-outbox refactor.
+
+Please implement all deliverables above, commit, and run the test suite until green.
+
+pgsql
+Copy
+Edit
+
+Copy everything between the triple back-ticks into the Replit agent prompt.  
+It gives the agent clear context, precise files to touch, concrete SQL to write, and objective tests to pass—so the fixes come back production-ready instead of another partial patch.
+
+
+
+
+
+
+
+
