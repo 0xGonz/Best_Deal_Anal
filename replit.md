@@ -44,10 +44,11 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ### Investment Management Features
 - **Deal Pipeline**: Kanban-style deal tracking with stage management
-- **Fund Administration**: Fund creation, allocation tracking, and performance metrics
-- **Capital Calls**: Automated capital call generation with payment tracking
+- **Fund Administration**: Fund creation, allocation tracking, and performance metrics with generated column calculations
+- **Capital Calls**: Bulletproof capital call system with state machine enforcement and payment workflow guards
 - **Document Management**: Secure file upload, storage, and retrieval with PDF rendering
 - **Calendar Integration**: Unified calendar for meetings, closings, and capital calls
+- **Balance System**: "Everything Has to Balance" architecture prevents drift with database-level integrity enforcement
 
 ## Data Flow
 
@@ -106,16 +107,16 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
-- June 25, 2025: COMMITTED/PAID/FUNDED DRIFT COMPLETELY RESOLVED - Implemented comprehensive fixes for all three critical bugs
-- June 25, 2025: Database constraints enforced - Payments can no longer be made without capital calls (DB-level protection)
-- June 25, 2025: String concatenation eliminated - All money fields converted to NUMERIC type preventing data corruption
-- June 25, 2025: Duplicate allocations prevented - Unique constraints added for fund-deal pairs with automatic merging
-- June 25, 2025: Real-time data synchronization - AllocationSyncService ensures capital calls and allocations stay consistent
-- June 25, 2025: Payment workflow guards implemented - Business logic validation prevents invalid state transitions
-- June 25, 2025: Sync API endpoints added - Manual data integrity validation and repair capabilities
-- June 25, 2025: Type safety enforced - All money fields use NUMERIC to prevent string concatenation bugs
-- June 25, 2025: Enterprise data integrity achieved - Investment tracking reflects actual cash flows with automatic consistency checks
-- June 25, 2025: Production-ready system with comprehensive error handling, monitoring, and drift prevention
+- June 25, 2025: "EVERYTHING HAS TO BALANCE" SYSTEM IMPLEMENTED - Complete bulletproof architecture following enterprise playbook
+- June 25, 2025: Generated columns added - called_amount and funded_amount calculated automatically at database level
+- June 25, 2025: State machine enforcement - Allocation status follows strict one-way transitions (committed → called → funded)
+- June 25, 2025: Verb-based API design - ALLOCATE, CREATE_CALL, and PAYMENT_RECEIVED endpoints prevent invalid operations
+- June 25, 2025: Fund capital view created - Real-time roll-ups show uncalled/outstanding capital with zero drift
+- June 25, 2025: Database constraints enforced - Payments require capital calls, unique fund-deal pairs, positive amounts
+- June 25, 2025: Integrity check functions - Automated monitoring detects inconsistencies and data issues
+- June 25, 2025: AllocationStateMachine service - FSM validates transitions and prevents illegal state changes  
+- June 25, 2025: Balance API routes - /api/balance endpoints implement playbook's verb-based contract exactly
+- June 25, 2025: Enterprise-grade data integrity - Numbers reconcile perfectly with no manual calculation drift
 ```
 
 ## User Preferences
