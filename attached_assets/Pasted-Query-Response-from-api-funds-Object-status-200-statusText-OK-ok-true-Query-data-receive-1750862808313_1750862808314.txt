@@ -1,0 +1,63 @@
+Query Response from /api/funds: 
+Object {status: 200, statusText: "OK", ok: true}
+Query data received from /api/funds: 
+(2) [{…}, {…}]
+Using /me endpoint data for avatar 
+Object {id: 4, username: "Gonz", fullName: "Brett Gonzalez", initials: "BG", email: "bgonzalez@doliveradvisors.com", …}
+Using /me endpoint data for avatar 
+Object {id: 4, username: "Gonz", fullName: "Brett Gonzalez", initials: "BG", email: "bgonzalez@doliveradvisors.com", …}
+Query fetch request: /api/system/health 
+Object {queryKey: Array(1), unauthorizedBehavior: "returnNull"}
+Query Response from /api/system/health: 
+Object {status: 200, statusText: "OK", ok: true}
+Query data received from /api/system/health: 
+Object {status: "ok", timestamp: "2025-06-25T14:46:27.117Z", storage: "pg", databaseConnected: true, environment: "development", …}
+Using /me endpoint data for avatar 
+Object {id: 4, username: "Gonz", fullName: "Brett Gonzalez", initials: "BG", email: "bgonzalez@doliveradvisors.com", …}
+API Request: POST /api/production/allocations 
+Object {data: {…}}
+Sending fetch request to /api/production/allocations with options: 
+Object {method: "POST", credentials: "include", headers: {…}, body: "BODY_DATA"}
+Query fetch request: /api/auth/me 
+Object {queryKey: Array(1), unauthorizedBehavior: "returnNull"}
+Query Response from /api/auth/me: 
+Object {status: 200, statusText: "OK", ok: true}
+Query data received from /api/auth/me: 
+Object {id: 4, username: "Gonz", fullName: "Brett Gonzalez", initials: "BG", email: "bgonzalez@doliveradvisors.com", …}
+ProtectedRoute for /pipeline: isLoading=false, user=Gonz
+ProtectedRoute /pipeline: Rendering component for user Gonz
+API Response from /api/production/allocations: 
+Object {status: 201, statusText: "Created", ok: true}
+API Request: POST /api/capital-calls 
+Object {data: {…}}
+Sending fetch request to /api/capital-calls with options: 
+Object {method: "POST", credentials: "include", headers: {…}, body: "BODY_DATA"}
+API Response from /api/capital-calls: 
+Object {status: 400, statusText: "Bad Request", ok: false}
+Error response from /api/capital-calls: 
+Object {status: 400, data: {…}}
+
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Error creating immediate payment: 
+Error {}
+
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Allocation creation error: 
+Error {}
+
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+ProtectedRoute for /pipeline: isLoading=false, user=Gonz
+ProtectedRoute /pipeline: Rendering component for user Gonz
+Using /me endpoint data for avatar 
+Object {id: 4, username: "Gonz", fullName: "Brett Gonzalez", initials: "BG", email: "bgonzalez@doliveradvisors.com", …}
+ProtectedRoute for /pipeline: isLoading=false, user=Gonz
+ProtectedRoute /pipeline: Rendering component for user Gonz

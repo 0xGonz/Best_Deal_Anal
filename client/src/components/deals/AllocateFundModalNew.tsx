@@ -68,6 +68,7 @@ export default function AllocateFundModal({ isOpen, onClose, dealId, dealName }:
           : data.immediatePaymentAmount;
         
         const capitalCallPayload = {
+          allocationId: allocationId,
           callAmount: paymentAmount,
           amountType: 'dollar',
           callDate: formatDateForAPI(data.allocationDate),
@@ -76,7 +77,7 @@ export default function AllocateFundModal({ isOpen, onClose, dealId, dealName }:
           notes: `Immediate payment at commitment - ${data.paymentOption === 'pay_immediately' ? 'Full funding' : 'Partial funding'}`
         };
         
-        const response = await apiRequest('POST', '/api/production/allocations/' + allocationId + '/capital-calls', capitalCallPayload);
+        const response = await apiRequest('POST', '/api/capital-calls', capitalCallPayload);
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.error || `Failed to create immediate payment: ${response.statusText}`);
@@ -115,7 +116,7 @@ export default function AllocateFundModal({ isOpen, onClose, dealId, dealName }:
       }
       
       const result = await response.json();
-      const allocation = result.allocation || result;
+      const allocation = result.data || result.allocation || result;
       
       // Create immediate payment if needed
       if (allocation && allocation.id) {
