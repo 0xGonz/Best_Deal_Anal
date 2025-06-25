@@ -255,11 +255,12 @@ export class AutoAllocationSyncService {
   }
 
   /**
-   * Background sync job - runs automatically
+   * Background sync job - DISABLED due to status corruption
    */
   async startBackgroundSync(intervalMinutes: number = 30): Promise<void> {
-    console.log(`Starting automated allocation sync every ${intervalMinutes} minutes`);
-    
+    console.log(`Background sync DISABLED - caused status overwrites`);
+    // Commenting out the auto-sync that was overwriting funded status
+    /*
     const runSync = async () => {
       try {
         const result = await this.performFullSync();
@@ -276,6 +277,7 @@ export class AutoAllocationSyncService {
     
     // Schedule recurring syncs
     setInterval(runSync, intervalMinutes * 60 * 1000);
+    */
   }
 }
 

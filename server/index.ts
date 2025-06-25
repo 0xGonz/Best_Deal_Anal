@@ -200,14 +200,9 @@ async function initialize() {
     console.log('Continuing without background processing');
   }
   
-  // Auto-allocation sync system
-  try {
-    const { allocationEventSystem } = await import('./services/allocation-event-system.service');
-    allocationEventSystem.startEventProcessing();
-    console.log('Automated allocation sync system initialized');
-  } catch (error) {
-    console.error('Failed to initialize allocation sync system:', error);
-  }
+  // Auto-allocation sync system disabled due to data corruption issues
+  // TODO: Fix status logic before re-enabling
+  console.log('Auto-allocation sync system disabled for data safety');
   
   const server = await registerRoutes(app);
 

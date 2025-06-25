@@ -78,7 +78,7 @@ export class ProductionAllocationService {
       // 2. Check for duplicates with smart handling
       const duplicate = await this.findExactDuplicate(request.fundId, request.dealId);
       if (duplicate) {
-        // If status is partially_paid and user wants to update, allow modification
+        // Allow updating existing allocations in certain cases
         if (duplicate.status === 'partially_paid' && request.status === 'partially_paid') {
           await this.audit.logInfo(auditId, `Updating existing partial allocation ${duplicate.id}`);
           // Update the existing allocation instead of creating new one
