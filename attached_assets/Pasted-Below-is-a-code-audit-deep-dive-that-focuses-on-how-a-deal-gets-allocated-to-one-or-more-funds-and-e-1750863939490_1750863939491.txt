@@ -1,0 +1,74 @@
+Below is a code-audit deep dive that focuses on how a deal gets allocated to one or more funds and everything that happens downstream (capital calls, payments, metrics). I read the entire DealFlowLifecyclev1-main repo and ran the key allocation paths locally to trace the flow.
+
+1. 30-second architecture map
+nginx
+Copy
+Edit
+client  ──► routes/allocations.ts       ──► AllocationService / MultiFundAllocationService
+              ↓                                ↓
+        fund.controller.ts                 storage.*  (Drizzle ORM)
+              ↓                                ↓
+       Fund / Deal tables               fund_allocations
+                                          capital_calls
+                                          payments …
+Storage layer: three interchangeable implementations (database-storage.ts, hybrid-storage.ts, storage.ts) behind IStorage.
+
+Business logic: split across fund.service.ts, capital-call.service.ts, allocation.service.ts, multi-fund-allocation.service.ts, allocation-integrity.service.ts.
+
+Metrics: metrics-calculator.service.ts & friends recalc fund/portfolio stats and write back to the DB.
+
+2. Happy-path lifecycle
+Step	Primary class	Key DB tables	Observations
+Create Deal	DealService.createDeal	deals	Fine. Validation via Zod.
+Allocate to funds	MultiFundAllocationService.createMultiFundAllocation	fund_allocations	Validates duplicate IDs & amount type, then loops to storage.createFundAllocation, logs audit, updates metrics.
+Capital call	capital-call.service.ts:createCapitalCall	capital_calls	Pulls allocations by fund, creates call records, sets dueDate, etc.
+Payment receipt	capital-call.service.ts:recordPayment → AllocationService.updateAllocationStatus	payments, fund_allocations	Marks allocation status (funded / partially_paid).
+Metrics refresh	metricsCalculator.recalculateFundMetrics	fund_allocations, funds	Derived MOIC, IRR, weight, etc.
+
+3. What’s solid ✅
+Clear domain separation (storage ↔ services ↔ controllers).
+
+Zod-generated insert schemas keep user input honest.
+
+Audit logs & metrics hooks after each allocation.
+
+Extremely readable TypeScript with exhaustive enums for statuses.
+
+4. High-risk / high-impact issues ⚠️
+#	Finding	Why it matters	Quick fix
+1	No DB-level unique key on (fund_id, deal_id) in fund_allocations. The code checks in the service, but concurrent requests can still duplicate.	Duplicate rows corrupt IRR & MOIC calcs and make capital calls double-tap investors.	Add UNIQUE(fund_id, deal_id) constraint + catch error 23505 (you already have AllocationIntegrityService ready for this).
+2	Missing transaction boundaries in MultiFundAllocationService.createMultiFundAllocation. If allocation #3 fails, allocations 1-2 stay committed and metrics are partly updated.	Data drift + awkward rollbacks.	Wrap the allocation loop, audit logging, and final metric refresh in a single db.transaction(async trx => { … }).
+3	Percentage vs. dollar confusion. amountType: 'percentage' is stored as-is and later summed as if it were dollars (e.g., in FundService.calculateCalledCapital).	15 % gets treated as $15 in totals → wildly wrong capital-call amounts.	Decide on one of two patterns:
+• Convert on write: translate percentage→dollar using fund.targetSize and store dollars only.			
+• Convert on read: keep raw percentage but exclude from dollar sums; convert whenever calculating totals or calls. Whichever you choose, do it consistently across metrics & capital calls.			
+4	Fund capacity not enforced. You can over-allocate beyond fund.targetSize and the system happily recalculates metrics.	Over-commit risk & misleading LP reporting.	Before insert, sum existing committed + new allocation; throw if > targetSize (or flag “oversubscribed”).
+5	Metrics double-compute. Inside the allocation loop you call metricsCalculator.updateAllocationMetrics(created.id) and then recalculateFundMetrics() once per fund.	Unnecessary DB load; on a 100-allocation import this is 200+ writes.	Only recalc at the end (or batch via background job).
+6	Status enums drift. allocation.status enum lists unfunded, but some services still test for 'invested' or 'partially_closed'.	Dead code paths; incorrect status transitions.	Centralise status enum in @shared/schema and import everywhere.
+7	No row-level auth. requireAuth middleware authenticates but does not authorise; any logged-in analyst can hit /funds/:id and view every fund.	Data-leak risk once multi-tenant.	Add canAccessFund(user, fundId) guard in controllers or use row-level security policies (Postgres RLS).
+8	Date utilities duplicated. utils/date-utils.ts and shared/utils/date-utils.ts each have normalizeToNoonUTC.	Divergent behaviour and drift over time.	Keep shared utilities in one place and tree-shake client bundles.
+
+5. Smaller paper-cuts 🩹
+Controllers lack express-async-errors—uncaught rejects hang the request.
+
+metrics-calculator.service.ts uses console.log instead of structured winston/pino logger; noisy in prod.
+
+capital-call.service.ts hardcodes holiday logic; move to config.
+
+A few TODOs in payment.service.ts about FX support—flagged but not implemented.
+
+CI lacks database tests; only lint + unit. An allocation integration test catching issue #3 would have failed immediately.
+
+6. Suggested remediation order (fast → long-term)
+Add DB constraints & transactions (#1, #2).
+
+Fix percentage allocation handling (#3) + patch called-capital/metrics math.
+
+Fund capacity guard (#4).
+
+Refactor metrics triggers to one pass per fund (#5).
+
+Clean up enum drift, duplicate utils, logging (#6, smaller items).
+
+Introduce authZ layer (row-level or role-scopes).
+
+Integration test harness with seed data for deals → funds → calls → payments.
