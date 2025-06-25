@@ -12,35 +12,11 @@ export interface CapitalMetrics {
  */
 export function calculateAllocationCapitalMetrics(allocation: FundAllocation): CapitalMetrics {
   const committedAmount = allocation.amount;
-  let calledAmount = 0;
-  let uncalledAmount = allocation.amount;
   
-  // Calculate based on allocation status
-  // In a real system, this would query actual capital call records
-  switch (allocation.status) {
-    case 'funded':
-      // Fully funded allocations have called = committed
-      calledAmount = allocation.amount;
-      uncalledAmount = 0;
-      break;
-      
-    case 'partially_paid':
-      // Use actual capital call data instead of stale allocation data
-      // This reflects real capital call payments made
-      const actualCalledAmount = Number(allocation.calledAmount) || Number(allocation.paidAmount) || 0;
-      const actualPaidAmount = Number(allocation.paidAmount) || 0;
-      calledAmount = actualCalledAmount;
-      uncalledAmount = allocation.amount - calledAmount;
-      break;
-      
-    case 'committed':
-    case 'unfunded':
-    default:
-      // No capital has been called yet
-      calledAmount = 0;
-      uncalledAmount = allocation.amount;
-      break;
-  }
+  // Use actual capital call data from the API instead of status-based calculations
+  // This ensures we always reflect real capital call transactions
+  const calledAmount = Number(allocation.calledAmount) || 0;
+  const uncalledAmount = committedAmount - calledAmount;
   
   return {
     committedAmount,

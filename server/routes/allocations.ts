@@ -17,6 +17,7 @@ import { z } from 'zod';
 import { requireAuth } from '../utils/auth';
 import { requirePermission } from '../utils/permissions';
 import { requireFundAccess } from '../middleware/fund-authorization.middleware';
+import { capitalCallMetricsService } from '../services/capital-call-metrics.service';
 
 const router = Router();
 const storage = StorageFactory.getStorage();

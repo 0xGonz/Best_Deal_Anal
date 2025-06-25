@@ -534,21 +534,30 @@ export class DatabaseStorage implements IStorage {
         irr: fundAllocations.irr,
         dealName: deals.name,
         dealSector: deals.sector,
-        // Add calculated fields from actual capital calls
-        calledAmount: sql<number>`COALESCE(SUM(${capitalCalls.callAmount}), 0)`,
+        // Add calculated fields from actual capital calls data
+        calledAmount: sql<number>`COALESCE(capital_call_totals.total_called, 0)`,
         calledPercentage: sql<number>`
           CASE 
             WHEN ${fundAllocations.amount} > 0 
-            THEN ROUND((COALESCE(SUM(${capitalCalls.callAmount}), 0) / ${fundAllocations.amount}) * 100, 1)
+            THEN ROUND((COALESCE(capital_call_totals.total_called, 0) / ${fundAllocations.amount}) * 100, 1)
             ELSE 0 
           END
         `
       })
       .from(fundAllocations)
       .leftJoin(deals, eq(fundAllocations.dealId, deals.id))
-      .leftJoin(capitalCalls, eq(capitalCalls.allocationId, fundAllocations.id))
-      .where(eq(fundAllocations.fundId, fundId))
-      .groupBy(fundAllocations.id, deals.id);
+      .leftJoin(
+        sql`(
+          SELECT 
+            allocation_id,
+            SUM(call_amount) as total_called,
+            SUM(paid_amount) as total_paid
+          FROM capital_calls 
+          GROUP BY allocation_id
+        ) as capital_call_totals`,
+        sql`capital_call_totals.allocation_id = ${fundAllocations.id}`
+      )
+      .where(eq(fundAllocations.fundId, fundId));
     
     // Transform results to include deal information, preserving all allocations
     return results.map(result => ({
