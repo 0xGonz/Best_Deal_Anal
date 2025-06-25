@@ -398,11 +398,18 @@ router.post('/', requireAuth, requirePermission('create', 'allocation'), async (
     const newAllocation = await storage.createFundAllocation(allocationData);
     
     // Log allocation creation for audit trail
-    await AuditService.logAllocationCreation(
+    const auditService = new AuditService();
+    await auditService.logAllocationCreation(
       newAllocation.id,
-      allocationData,
+      allocationData.dealId,
+      allocationData.fundId,
+      allocationData.amount,
       (req as any).user.id,
-      req
+      { 
+        securityType: allocationData.securityType, 
+        notes: allocationData.notes,
+        status: allocationData.status 
+      }
     );
     
     console.log(`Allocation created successfully: ID ${newAllocation.id}, Amount: $${allocationData.amount.toLocaleString()}, Deal: ${deal.name}, Fund: ${fund.name}`);

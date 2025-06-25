@@ -115,6 +115,88 @@ export class AuditService {
     await this.createAuditRecord(auditEvent);
   }
 
+  async logAllocationCreation(
+    allocationId: number,
+    dealId: number,
+    fundId: number,
+    amount: number,
+    userId: number,
+    metadata?: Record<string, any>
+  ): Promise<void> {
+    try {
+      const auditEvent: AuditEvent = {
+        eventType: 'allocation_created',
+        userId,
+        entityType: 'allocation',
+        entityId: allocationId,
+        action: 'create',
+        details: {
+          dealId,
+          fundId,
+          amount,
+          metadata: metadata || {},
+          timestamp: new Date().toISOString()
+        },
+        timestamp: new Date()
+      };
+
+      await this.createAuditRecord(auditEvent);
+      
+      this.logger.info(`Allocation created: ID ${allocationId}`, {
+        userId,
+        dealId,
+        fundId,
+        amount
+      });
+    } catch (error) {
+      // Log error but don't throw - audit logging should not break allocation creation
+      this.logger.error('Failed to log allocation creation', { 
+        error, 
+        allocationId, 
+        dealId, 
+        fundId, 
+        userId 
+      });
+    }
+  }
+
+  async logAllocationUpdate(
+    allocationId: number,
+    changes: Record<string, any>,
+    userId: number,
+    metadata?: Record<string, any>
+  ): Promise<void> {
+    try {
+      const auditEvent: AuditEvent = {
+        eventType: 'allocation_updated',
+        userId,
+        entityType: 'allocation',
+        entityId: allocationId,
+        action: 'update',
+        details: {
+          changes,
+          changeCount: Object.keys(changes).length,
+          metadata: metadata || {},
+          timestamp: new Date().toISOString()
+        },
+        timestamp: new Date()
+      };
+
+      await this.createAuditRecord(auditEvent);
+      
+      this.logger.info(`Allocation updated: ID ${allocationId}`, {
+        userId,
+        changes: Object.keys(changes)
+      });
+    } catch (error) {
+      this.logger.error('Failed to log allocation update', { 
+        error, 
+        allocationId, 
+        userId 
+      });
+    }
+  }
+
   async getAuditTrail(
     entityType: string,
     entityId: number,

@@ -95,11 +95,14 @@ export class MultiFundAllocationService {
         createdAllocations.push(created);
 
         // Log the allocation creation for audit
-        await AuditService.logAllocationCreation(
+        const auditService = new AuditService();
+        await auditService.logAllocationCreation(
           created.id,
-          allocationData,
+          allocationRequest.dealId,
+          allocation.fundId,
+          allocation.amount,
           userId,
-          request
+          { securityType: allocation.securityType, notes: allocation.notes }
         );
 
         // Calculate initial metrics for this allocation

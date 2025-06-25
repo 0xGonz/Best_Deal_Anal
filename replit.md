@@ -106,6 +106,8 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
+- June 25, 2025: Fixed critical allocation creation error by implementing missing AuditService.logAllocationCreation method
+- June 25, 2025: Added proper error handling for audit logging to prevent workflow failures
 - June 25, 2025: Completed extreme depth analysis of allocation, funds, and capital calls modules
 - June 25, 2025: Initial setup
 ```
