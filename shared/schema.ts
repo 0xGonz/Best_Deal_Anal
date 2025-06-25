@@ -195,8 +195,10 @@ export const fundAllocations = pgTable("fund_allocations", {
   id: serial("id").primaryKey(),
   fundId: integer("fund_id").notNull(),
   dealId: integer("deal_id").notNull(),
-  amount: real("amount").notNull(), // Committed amount
-  paidAmount: real("paid_amount").default(0), // Actually paid amount
+  amount: numeric("amount", { precision: 18, scale: 2 }).notNull(), // Committed amount
+  paidAmount: numeric("paid_amount", { precision: 18, scale: 2 }).default('0'), // Actually paid amount
+  calledAmount: numeric("called_amount", { precision: 18, scale: 2 }).default('0'), // Generated from capital calls
+  fundedAmount: numeric("funded_amount", { precision: 18, scale: 2 }).default('0'), // Generated from payments
   amountType: text("amount_type", { enum: ["percentage", "dollar"] }).default("dollar"),
   securityType: text("security_type").notNull(),
   allocationDate: timestamp("allocation_date").notNull().defaultNow(),
@@ -215,14 +217,20 @@ export const fundAllocations = pgTable("fund_allocations", {
 export const insertFundAllocationSchema = createInsertSchema(fundAllocations)
   .omit({
     id: true,
+    calledAmount: true, // Generated column
+    fundedAmount: true, // Generated column
   })
   .extend({
     // Convert ISO string dates to Date objects for Zod validation
     allocationDate: z.string().transform(val => new Date(val)),
     // Handle firstCallDate if it exists in any capital call data
     firstCallDate: z.string().optional().transform(val => val ? new Date(val) : undefined),
-    // Override the amount validation to allow much larger numbers
-    amount: z.number().positive().max(1000000000), // Allow up to 1 billion
+    // Override the amount validation to allow much larger numbers - use string for NUMERIC
+    amount: z.string().or(z.number().transform(n => n.toString())).refine(val => {
+      const num = parseFloat(val.toString());
+      return num > 0 && num <= 1000000000;
+    }, "Amount must be positive and not exceed 1 billion"),
+    paidAmount: z.string().or(z.number().transform(n => n.toString())).optional(),
   });
 
 // User assignments to deals
@@ -284,19 +292,18 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
 export const capitalCalls = pgTable("capital_calls", {
   id: serial("id").primaryKey(),
   allocationId: integer("allocation_id").notNull().references(() => fundAllocations.id, { onDelete: "cascade" }),
-  callAmount: real("call_amount").notNull(), // Amount of the capital call
+  callAmount: numeric("call_amount", { precision: 18, scale: 2 }).notNull(), // Amount of the capital call
   amountType: text("amount_type", { enum: ["percentage", "dollar"] }).default("percentage"),
   callDate: timestamp("call_date").notNull().defaultNow(),
   dueDate: timestamp("due_date").notNull(),
-  paidAmount: real("paid_amount").default(0), // Amount currently paid
+  paidAmount: numeric("paid_amount", { precision: 18, scale: 2 }).default('0'), // Amount currently paid
   paidDate: timestamp("paid_date"), // Date of the last payment
-  outstanding_amount: numeric("outstanding_amount", { precision: 14, scale: 2 }).notNull(), // Remaining amount to be paid
+  outstanding_amount: numeric("outstanding_amount", { precision: 18, scale: 2 }).notNull(), // Remaining amount to be paid
   status: text("status", { enum: ["scheduled", "called", "partially_paid", "paid", "defaulted", "overdue"] }).notNull().default("scheduled"),
   notes: text("notes"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-  // This column will be added in the migration, along with the CHECK constraint
-  callPct: real("call_pct"),
+  callPct: numeric("call_pct", { precision: 5, scale: 2 }), // Percentage with 2 decimal places
 });
 
 export const insertCapitalCallSchema = createInsertSchema(capitalCalls).omit({
