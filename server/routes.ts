@@ -12,6 +12,7 @@ import activityRoutes from './routes/activity';
 import notificationsRoutes from './routes/notifications';
 import documentsRoutes from './routes/documents-persistent';
 import allocationsRoutes from './routes/allocations';
+import productionAllocationsRouter from './routes/production-allocations';
 import capitalCallsRoutes from './routes/capital-calls';
 import closingSchedulesRoutes from './routes/closing-schedules';
 import meetingsRoutes from './routes/meetings';
@@ -84,7 +85,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/users', usersRoutes);
   app.use('/api/auth', authRoutes);
   // Production allocation routes (new architecture)
-  import productionAllocationsRouter from './routes/production-allocations';
   app.use('/api/allocations', productionAllocationsRouter);
   app.use('/api/fund-allocations', allocationsRoutes); // Add this alias for client compatibility
   app.use('/api/capital-calls', capitalCallsRoutes);

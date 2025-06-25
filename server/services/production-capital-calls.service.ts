@@ -167,7 +167,7 @@ export class ProductionCapitalCallsService {
       let finalUpdates = { ...updates };
       if (updates.callAmount !== undefined || updates.paidAmount !== undefined) {
         const newCallAmount = updates.callAmount ?? current.callAmount;
-        const newPaidAmount = updates.paidAmount ?? current.paidAmount || 0;
+        const newPaidAmount = updates.paidAmount ?? (current.paidAmount || 0);
         const outstanding = this.calculateOutstanding(newCallAmount, newPaidAmount);
         finalUpdates.outstanding_amount = outstanding.outstanding.toString();
       }
