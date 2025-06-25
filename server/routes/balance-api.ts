@@ -11,7 +11,7 @@ import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { StorageFactory } from '../storage-factory';
 import { AllocationStateMachine } from '../services/allocation-state-machine.service';
-import { requireAuth } from '../middleware/authentication';
+import { requireAuth } from '../utils/auth';
 
 const router = Router();
 const storage = StorageFactory.getStorage();
