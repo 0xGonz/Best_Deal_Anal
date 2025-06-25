@@ -92,7 +92,7 @@ export default function Funds() {
   
   // Fetch all allocations
   const { data: allAllocations = [], isLoading: isAllocationsLoading } = useQuery({
-    queryKey: ['/api/allocations'],
+    queryKey: ['/api/production/allocations'],
   });
   
   // Process allocations to get the most recent ones

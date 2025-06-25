@@ -125,7 +125,7 @@ const CapitalCallsByAllocation = () => {
   
   // Fetch allocation details
   const { data: allocation, isLoading: isLoadingAllocation } = useQuery<Allocation>({
-    queryKey: ['/api/allocations', allocationId],
+    queryKey: [`/api/production/allocations/${allocationId}`],
     enabled: !!allocationId,
   });
 

@@ -131,7 +131,7 @@ export default function AllocateFundModal({ isOpen, onClose, dealId, dealName }:
         irr: ALLOCATION_DEFAULTS.INITIAL_IRR
       };
 
-      const response = await apiRequest('POST', '/api/allocations', allocationPayload);
+      const response = await apiRequest('POST', '/api/production/allocations', allocationPayload);
       if (!response.ok) {
         throw new Error(`Failed to create allocation: ${response.statusText}`);
       }
@@ -167,8 +167,8 @@ export default function AllocateFundModal({ isOpen, onClose, dealId, dealName }:
       onClose();
       
       // Invalidate relevant queries
-      queryClient.invalidateQueries({ queryKey: ['/api/allocations'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/funds'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/production/allocations/fund/${allocationData.fundId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/funds/${allocationData.fundId}`] });
     },
     onError: (error: any) => {
       console.error('Allocation creation error:', error);
