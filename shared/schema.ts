@@ -308,6 +308,7 @@ export const insertCapitalCallSchema = createInsertSchema(capitalCalls).omit({
   outstanding_amount: z.union([z.string(), z.number()]).transform(val => String(val)),
   callAmount: z.number().positive("Call amount must be greater than 0"),
   paidAmount: z.number().optional().default(0),
+  allocationId: z.number().positive("Allocation ID is required"),
 });
 
 // Capital Call Payments - Track individual payments against capital calls
