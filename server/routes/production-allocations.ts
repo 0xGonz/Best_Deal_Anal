@@ -230,7 +230,7 @@ router.delete('/:id', requireAuth, requirePermission('delete', 'allocation'), as
 /**
  * GET /api/production/allocations/fund/:fundId - Get fund allocations with deal information
  */
-router.get('/fund/:fundId', requireAuth, async (req: Request, res: Response) => {
+router.get('/fund/:fundId', requireAuth, requirePermission('view', 'allocation'), async (req: Request, res: Response) => {
   try {
     const fundId = parseInt(req.params.fundId);
     if (isNaN(fundId)) {
