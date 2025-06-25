@@ -1210,7 +1210,7 @@ export default function FundDetail() {
                                 {totalWeight.toFixed(1)}%
                               </TableCell>
                               <TableCell className="py-3 px-2 sm:px-4 text-right font-bold">
-                                <span className={getCapitalViewColorClass(capitalView)}>
+                                <span className="text-[#000000] font-bold">
                                   {formatCurrency(displayTotalAmount)}
                                 </span>
                               </TableCell>
