@@ -106,20 +106,28 @@ export class PortfolioCalculator {
 
   /**
    * Calculate fund metrics for multiple funds (batch operation)
+   * Optimized for scale - handles 1 to 1000+ funds efficiently
    */
   async calculateMultipleFundMetrics(fundIds: number[]): Promise<Map<number, FundMetrics>> {
     const results = new Map<number, FundMetrics>();
 
-    // Process in parallel for better performance
-    const metricsPromises = fundIds.map(async (fundId) => {
-      const metrics = await this.calculateFundMetrics(fundId);
-      return [fundId, metrics] as const;
-    });
-
-    const metricsResults = await Promise.all(metricsPromises);
+    // Process in chunks for memory efficiency at scale
+    const CHUNK_SIZE = 50; // Process 50 funds at a time
     
-    for (const [fundId, metrics] of metricsResults) {
-      results.set(fundId, metrics);
+    for (let i = 0; i < fundIds.length; i += CHUNK_SIZE) {
+      const chunk = fundIds.slice(i, i + CHUNK_SIZE);
+      
+      // Process chunk in parallel
+      const chunkPromises = chunk.map(async (fundId) => {
+        const metrics = await this.calculateFundMetrics(fundId);
+        return [fundId, metrics] as const;
+      });
+
+      const chunkResults = await Promise.all(chunkPromises);
+      
+      for (const [fundId, metrics] of chunkResults) {
+        results.set(fundId, metrics);
+      }
     }
 
     return results;

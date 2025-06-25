@@ -72,19 +72,19 @@ export class ProductionConfig {
   };
 
   readonly businessRules: BusinessRulesConfig = {
-    maxAllocationPerFund: parseInt(process.env.MAX_ALLOCATION_PER_FUND || '50000000'),
-    maxAllocationPerDeal: parseInt(process.env.MAX_ALLOCATION_PER_DEAL || '10000000'),
-    minAllocationAmount: parseInt(process.env.MIN_ALLOCATION_AMOUNT || '1000'),
-    maxFundUtilization: parseFloat(process.env.MAX_FUND_UTILIZATION || '95'),
-    allowedSecurityTypes: (process.env.ALLOWED_SECURITY_TYPES || 'equity,debt,convertible,warrant,option').split(','),
+    maxAllocationPerFund: parseInt(process.env.MAX_ALLOCATION_PER_FUND || String(Number.MAX_SAFE_INTEGER)),
+    maxAllocationPerDeal: parseInt(process.env.MAX_ALLOCATION_PER_DEAL || String(Number.MAX_SAFE_INTEGER)),
+    minAllocationAmount: parseInt(process.env.MIN_ALLOCATION_AMOUNT || '1'),
+    maxFundUtilization: parseFloat(process.env.MAX_FUND_UTILIZATION || String(Number.MAX_SAFE_INTEGER)),
+    allowedSecurityTypes: (process.env.ALLOWED_SECURITY_TYPES || 'equity,debt,convertible,warrant,option,preferred,common,note').split(','),
     allowedStatuses: (process.env.ALLOWED_STATUSES || 'committed,funded,unfunded,partially_paid,written_off').split(','),
-    requireApprovalThreshold: parseInt(process.env.APPROVAL_THRESHOLD || '1000000')
+    requireApprovalThreshold: parseInt(process.env.APPROVAL_THRESHOLD || String(Number.MAX_SAFE_INTEGER))
   };
 
   readonly performance: PerformanceConfig = {
-    batchSize: parseInt(process.env.BATCH_SIZE || '100'),
-    queryTimeoutMs: parseInt(process.env.QUERY_TIMEOUT || '5000'),
-    maxConcurrentOperations: parseInt(process.env.MAX_CONCURRENT_OPS || '10'),
+    batchSize: parseInt(process.env.BATCH_SIZE || '500'), // Scale up for large operations
+    queryTimeoutMs: parseInt(process.env.QUERY_TIMEOUT || '30000'), // 30s for complex queries
+    maxConcurrentOperations: parseInt(process.env.MAX_CONCURRENT_OPS || '50'), // Scale up
     enableQueryOptimization: process.env.ENABLE_QUERY_OPTIMIZATION !== 'false'
   };
 

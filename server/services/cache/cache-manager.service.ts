@@ -28,7 +28,7 @@ export class CacheManager {
   };
 
   private readonly defaultTTL = 300; // 5 minutes
-  private readonly maxSize = 10000;
+  private readonly maxSize = 100000; // Scale to 100k cache entries for large funds
   private cleanupInterval: NodeJS.Timeout;
 
   constructor() {

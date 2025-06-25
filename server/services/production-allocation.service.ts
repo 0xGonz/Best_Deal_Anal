@@ -284,7 +284,7 @@ export class ProductionAllocationService {
   }
 
   /**
-   * Batch operation for multiple allocations
+   * Batch operation for multiple allocations - scales to hundreds of allocations
    */
   async batchCreateAllocations(
     requests: AllocationCreationRequest[],
@@ -292,10 +292,19 @@ export class ProductionAllocationService {
   ): Promise<Array<AllocationOperationResult>> {
     const results: AllocationOperationResult[] = [];
 
-    // Process in chunks to avoid overwhelming the database
-    const CHUNK_SIZE = 10;
+    // Dynamic chunk sizing based on request volume for optimal performance
+    const CHUNK_SIZE = requests.length > 100 ? 25 : requests.length > 50 ? 15 : 10;
+    
+    console.log(`Processing ${requests.length} allocations in chunks of ${CHUNK_SIZE}`);
+
     for (let i = 0; i < requests.length; i += CHUNK_SIZE) {
       const chunk = requests.slice(i, i + CHUNK_SIZE);
+      
+      // Process chunk with progress logging for large batches
+      if (requests.length > 20) {
+        console.log(`Processing chunk ${Math.floor(i / CHUNK_SIZE) + 1}/${Math.ceil(requests.length / CHUNK_SIZE)}`);
+      }
+      
       const chunkResults = await Promise.all(
         chunk.map(request => this.createAllocation(request, userId))
       );

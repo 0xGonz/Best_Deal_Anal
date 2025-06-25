@@ -356,7 +356,7 @@ export class ProductionCapitalCallsService {
   }
 
   /**
-   * Calculate capital call metrics for fund
+   * Calculate capital call metrics for fund - optimized for scale (1 to 1000+ allocations)
    */
   async calculateFundCapitalCallMetrics(fundId: number): Promise<{
     totalCalls: number;
@@ -366,54 +366,36 @@ export class ProductionCapitalCallsService {
     overdueAmount: number;
     collectionRate: number;
   }> {
-    // Get all allocations for fund
-    const allocations = await db
-      .select({ id: fundAllocations.id })
-      .from(fundAllocations)
-      .where(eq(fundAllocations.fundId, fundId));
+    // Single optimized query for all fund capital calls
+    const metrics = await db.execute(`
+      SELECT 
+        COUNT(cc.id)::integer as total_calls,
+        COALESCE(SUM(cc.call_amount), 0)::numeric as total_call_amount,
+        COALESCE(SUM(cc.paid_amount), 0)::numeric as total_paid_amount,
+        COALESCE(SUM(cc.outstanding_amount::numeric), 0)::numeric as total_outstanding,
+        COALESCE(SUM(
+          CASE 
+            WHEN cc.due_date < CURRENT_DATE AND cc.status = 'called' 
+            THEN cc.call_amount - COALESCE(cc.paid_amount, 0)
+            ELSE 0 
+          END
+        ), 0)::numeric as overdue_amount
+      FROM capital_calls cc
+      JOIN fund_allocations fa ON cc.allocation_id = fa.id
+      WHERE fa.fund_id = $1
+    `, [fundId]);
 
-    const allocationIds = allocations.map(a => a.id);
-
-    if (allocationIds.length === 0) {
-      return {
-        totalCalls: 0,
-        totalCallAmount: 0,
-        totalPaidAmount: 0,
-        totalOutstanding: 0,
-        overdueAmount: 0,
-        collectionRate: 0
-      };
-    }
-
-    // Get all capital calls for these allocations
-    const calls = await db
-      .select()
-      .from(capitalCalls)
-      .where(eq(capitalCalls.allocationId, allocationIds[0])); // This needs to be fixed for multiple IDs
-
-    let totalCallAmount = 0;
-    let totalPaidAmount = 0;
-    let overdueAmount = 0;
-    const today = new Date();
-
-    for (const call of calls) {
-      totalCallAmount += call.callAmount;
-      totalPaidAmount += call.paidAmount || 0;
-      
-      if (call.dueDate < today && call.status === 'called') {
-        overdueAmount += call.callAmount - (call.paidAmount || 0);
-      }
-    }
-
-    const totalOutstanding = totalCallAmount - totalPaidAmount;
+    const result = metrics.rows[0];
+    const totalCallAmount = parseFloat(result.total_call_amount || '0');
+    const totalPaidAmount = parseFloat(result.total_paid_amount || '0');
     const collectionRate = totalCallAmount > 0 ? (totalPaidAmount / totalCallAmount) * 100 : 0;
 
     return {
-      totalCalls: calls.length,
+      totalCalls: parseInt(result.total_calls || '0'),
       totalCallAmount,
       totalPaidAmount,
-      totalOutstanding,
-      overdueAmount,
+      totalOutstanding: parseFloat(result.total_outstanding || '0'),
+      overdueAmount: parseFloat(result.overdue_amount || '0'),
       collectionRate: parseFloat(collectionRate.toFixed(2))
     };
   }
