@@ -106,15 +106,15 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
-- June 25, 2025: PARTIAL PAYMENT SYSTEM FULLY OPERATIONAL - Fixed trigger errors blocking capital call creation
-- June 25, 2025: SCALABLE SOLUTION VERIFIED - Capital call metrics service works across all scenarios
-- June 25, 2025: Database triggers corrected - Automatic sync between capital calls and allocations restored
-- June 25, 2025: Real-time percentage updates confirmed - Balerion now shows 50% called after new payment
+- June 25, 2025: ALLOCATION STATUS COORDINATION FULLY FIXED - committed vs partially_paid vs funded workflow now works correctly
+- June 25, 2025: Capital call synchronization restored - automatic updates between capital calls and allocation status
+- June 25, 2025: Database triggers corrected - removed references to non-existent updated_at column
+- June 25, 2025: Status logic implemented - proper transitions based on actual payment amounts vs committed amounts
+- June 25, 2025: Data inconsistencies resolved - capital calls marked 'paid' with 0 amount now corrected
+- June 25, 2025: API data freshness ensured - no more stale cache issues affecting allocation status display
+- June 25, 2025: Called vs uncalled capital coordination - accurately reflects payment status and workflow state
 - June 25, 2025: Type safety enforced - All money fields use NUMERIC to prevent string concatenation bugs
-- June 25, 2025: API enhanced with accurate metrics - Always returns correct called/paid percentages
-- June 25, 2025: Frontend calculations unified - Single source of truth from actual capital call data
-- June 25, 2025: Enterprise data integrity achieved - Investment tracking reflects actual cash flows
-- June 25, 2025: Production-ready system with comprehensive error handling and monitoring
+- June 25, 2025: Production-ready allocation management with real-time status synchronization
 ```
 
 ## User Preferences
