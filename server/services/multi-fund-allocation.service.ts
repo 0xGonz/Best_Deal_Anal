@@ -51,72 +51,32 @@ export class MultiFundAllocationService {
     userId: number,
     request: any
   ): Promise<any[]> {
+    // Use transaction-safe service for atomic operations
+    const { transactionSafeAllocationService } = await import('./transaction-safe-allocation.service');
+    
     try {
-      // Validate the deal exists
-      const deal = await this.storage.getDeal(allocationRequest.dealId);
-      if (!deal) {
-        throw new ValidationError('Deal not found', 'dealId');
-      }
-
-      // Validate all funds exist
-      const fundIds = allocationRequest.allocations.map(a => a.fundId);
-      const existingFunds = await Promise.all(
-        fundIds.map(id => this.storage.getFund(id))
+      const result = await transactionSafeAllocationService.createMultipleAllocationsSafely(
+        allocationRequest.dealId,
+        allocationRequest.allocations.map(a => ({
+          fundId: a.fundId,
+          amount: a.amount,
+          amountType: a.amountType,
+          securityType: a.securityType,
+          allocationDate: a.allocationDate,
+          notes: a.notes,
+          status: 'committed'
+        })),
+        userId
       );
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to create allocations');
+      }
+
+      const createdAllocations = Array.isArray(result.allocation) ? result.allocation : [result.allocation];
       
-      const missingFunds = fundIds.filter((id, index) => !existingFunds[index]);
-      if (missingFunds.length > 0) {
-        throw new ValidationError(`Funds not found: ${missingFunds.join(', ')}`, 'fundIds');
-      }
-
-      // Check for duplicate allocations (same deal-fund combination)
-      await this.validateNoDuplicateAllocations(allocationRequest.dealId, fundIds);
-
-      // Validate allocation amounts
-      this.validateAllocationAmounts(allocationRequest.allocations);
-
-      // Create all allocations
-      const createdAllocations = [];
+      console.log(`✅ Created ${createdAllocations.length} allocations with transaction safety for deal ${allocationRequest.dealId}`);
       
-      for (const allocation of allocationRequest.allocations) {
-        const allocationData = {
-          dealId: allocationRequest.dealId,
-          fundId: allocation.fundId,
-          amount: allocation.amount,
-          amountType: allocation.amountType,
-          securityType: allocation.securityType,
-          allocationDate: allocation.allocationDate,
-          notes: allocation.notes,
-          status: 'committed' as const
-        };
-
-        // Create the allocation
-        const created = await this.storage.createFundAllocation(allocationData);
-        createdAllocations.push(created);
-
-        // Log the allocation creation for audit
-        const auditService = new AuditService();
-        await auditService.logAllocationCreation(
-          created.id,
-          allocationRequest.dealId,
-          allocation.fundId,
-          allocation.amount,
-          userId,
-          { securityType: allocation.securityType, notes: allocation.notes }
-        );
-
-        // Calculate initial metrics for this allocation
-        await metricsCalculator.updateAllocationMetrics(created.id);
-
-        console.log(`✅ Created allocation ${created.id} for deal ${allocationRequest.dealId} in fund ${allocation.fundId}`);
-      }
-
-      // Recalculate portfolio weights for all affected funds
-      const uniqueFundIds = [...new Set(fundIds)];
-      for (const fundId of uniqueFundIds) {
-        await this.recalculateFundMetrics(fundId);
-      }
-
       return createdAllocations;
     } catch (error) {
       console.error('Error creating multi-fund allocation:', error);

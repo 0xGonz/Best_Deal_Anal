@@ -16,6 +16,7 @@ import { AllocationSyncService } from '../services/allocation-sync.service';
 import { z } from 'zod';
 import { requireAuth } from '../utils/auth';
 import { requirePermission } from '../utils/permissions';
+import { requireFundAccess } from '../middleware/fund-authorization.middleware';
 
 const router = Router();
 const storage = StorageFactory.getStorage();
@@ -124,61 +125,29 @@ router.post('/', requireAuth, requirePermission('create', 'allocation'), async (
     }
     
     try {
-      // Use the new core service for rock-solid allocation creation
-      const newAllocation = await allocationCoreService.createAllocation({
+      // Use transaction-safe allocation service for atomic operations
+      const { transactionSafeAllocationService } = await import('../services/transaction-safe-allocation.service');
+      
+      const result = await transactionSafeAllocationService.createAllocationSafely({
         fundId: allocationData.fundId,
         dealId: allocationData.dealId,
         amount: allocationData.amount,
         amountType: allocationData.amountType,
         securityType: allocationData.securityType,
-        allocationDate: allocationData.allocationDate || new Date().toISOString(),
+        allocationDate: allocationData.allocationDate || new Date(),
         notes: allocationData.notes,
-        status: allocationData.status || 'committed',
-        interestPaid: allocationData.interestPaid,
-        distributionPaid: allocationData.distributionPaid,
-        marketValue: allocationData.marketValue,
-        moic: allocationData.moic,
-        irr: allocationData.irr
-      });
+        status: allocationData.status || 'committed'
+      }, userId);
 
-      // Log allocation creation for audit trail
-      const auditService = new AuditService();
-      try {
-        await auditService.logAllocationCreation(
-          newAllocation.id,
-          allocationData.dealId,
-          allocationData.fundId,
-          allocationData.amount,
-          userId,
-          { 
-            securityType: allocationData.securityType, 
-            notes: allocationData.notes,
-            status: allocationData.status 
-          }
-        );
-      } catch (auditError) {
-        console.warn('Audit logging failed (non-critical):', auditError);
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to create allocation');
       }
 
-      // Update deal stage to "invested"
-      const deal = await storage.getDeal(allocationData.dealId);
-      const fund = await storage.getFund(allocationData.fundId);
-      
-      if (deal && deal.stage !== 'invested') {
-        await storage.updateDeal(deal.id, { 
-          stage: 'invested',
-          createdBy: userId
-        });
-        
-        // Create timeline event
-        await storage.createTimelineEvent({
-          dealId: deal.id,
-          eventType: 'closing_scheduled',
-          content: `Deal was allocated to fund: ${fund?.name}`,
-          createdBy: userId,
-          metadata: {} as any
-        });
-      }
+      const newAllocation = result.allocation;
+
+      // Audit logging is now handled in the transaction service
+
+      // Deal stage update and timeline events are now handled in the transaction service
       
       console.log(`Allocation created successfully with rock-solid architecture: ID ${newAllocation.id}`);
       
@@ -221,7 +190,7 @@ router.post('/', requireAuth, requirePermission('create', 'allocation'), async (
 });
 
 // GET /api/allocations/fund/:fundId - Get all allocations for a specific fund (ROCK SOLID)
-router.get('/fund/:fundId', requireAuth, async (req: Request, res: Response) => {
+router.get('/fund/:fundId', requireAuth, requireFundAccess(), async (req: Request, res: Response) => {
   try {
     const fundId = Number(req.params.fundId);
     
