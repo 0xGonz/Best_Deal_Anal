@@ -90,9 +90,9 @@ export default function Funds() {
     queryKey: ['/api/funds'],
   });
   
-  // Fetch all allocations
+  // Fetch all allocations via legacy endpoint for now
   const { data: allAllocations = [], isLoading: isAllocationsLoading } = useQuery({
-    queryKey: ['/api/production/allocations'],
+    queryKey: ['/api/allocations'],
   });
   
   // Process allocations to get the most recent ones

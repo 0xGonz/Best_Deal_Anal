@@ -102,7 +102,7 @@ const CapitalCallForm: React.FC<CapitalCallFormProps> = ({ isOpen, onClose, sele
     },
     onSuccess: () => {
       // Invalidate the capital calls query to refresh the data
-      queryClient.invalidateQueries({ queryKey: ['/api/capital-calls'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/production/capital-calls'] });
       
       toast({
         title: 'Success',

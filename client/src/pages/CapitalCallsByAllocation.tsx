@@ -181,7 +181,8 @@ const CapitalCallsByAllocation = () => {
       });
       setIsNewCallDialogOpen(false);
       form.reset();
-      queryClient.invalidateQueries({ queryKey: ['/api/capital-calls/allocation', allocationId] });
+      queryClient.invalidateQueries({ queryKey: [`/api/production/allocations/${allocationId}/capital-calls`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/production/allocations/${allocationId}`] });
     },
     onError: (error: Error) => {
       toast({
@@ -213,7 +214,8 @@ const CapitalCallsByAllocation = () => {
         title: "Success",
         description: "Capital call status updated successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/capital-calls/allocation', allocationId] });
+      queryClient.invalidateQueries({ queryKey: [`/api/production/allocations/${allocationId}/capital-calls`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/production/allocations/${allocationId}`] });
     },
     onError: (error: Error) => {
       toast({
