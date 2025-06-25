@@ -4,6 +4,7 @@ import { StorageFactory } from '../storage-factory';
 import { synchronizeAllocationDates } from '../utils/date-integration';
 import { capitalCallService } from '../services/capital-call.service';
 import { allocationService } from '../services/allocation.service';
+import { allocationCoreService } from '../services/allocation-core.service';
 import { AuditService } from '../services/audit.service';
 import { ValidationService } from '../services/validation.service';
 import { metricsCalculator } from '../services/metrics-calculator.service';
@@ -19,14 +20,14 @@ import { requirePermission } from '../utils/permissions';
 const router = Router();
 const storage = StorageFactory.getStorage();
 
-// Export the helper function from allocation service for backward compatibility
+// Rock-solid helper functions using the new core architecture
 async function updateAllocationStatusBasedOnCapitalCalls(allocationId: number): Promise<void> {
   await allocationService.updateAllocationStatus(allocationId);
 }
 
-// Export the helper function from allocation service for backward compatibility
+// Use the new core service for portfolio weight calculations
 async function recalculatePortfolioWeights(fundId: number): Promise<void> {
-  await allocationService.recalculatePortfolioWeights(fundId);
+  await allocationCoreService.updatePortfolioWeights(fundId);
 }
 
 // Multi-fund allocation endpoints
@@ -308,164 +309,84 @@ router.get('/', requireAuth, async (req: Request, res: Response) => {
   }
 });
 
-// Fund allocations
+// POST /api/allocations - Create a new fund allocation (ROCK SOLID ARCHITECTURE)
 router.post('/', requireAuth, requirePermission('create', 'allocation'), async (req: Request, res: Response) => {
   try {
+    const userId = (req as any).user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+
+    console.log('Creating allocation with rock-solid architecture:', req.body);
     
-    // Log the incoming data for debugging
-    console.log('Allocation request body:', req.body);
-    
-    // Parse and validate the allocation data - remove amountType since allocations are always in dollars
+    // Parse and validate the request body using Zod
     const { amountType, ...cleanRequestBody } = req.body;
     const allocationData = insertFundAllocationSchema.parse({
       ...cleanRequestBody,
-      amountType: 'dollar' // Force all allocations to be in dollars
+      amountType: 'dollar'
     });
     
-    // For single payment schedules, automatically mark as 'funded' instead of 'committed'
+    // For single payment schedules, automatically mark as 'funded'
     if (req.body.capitalCallSchedule === 'single') {
       allocationData.status = 'funded';
     }
     
-    // Log the validated data
-    console.log('Parsed allocation data:', allocationData);
-    
-    // Make sure fund and deal exist
-    const fund = await storage.getFund(allocationData.fundId);
-    const deal = await storage.getDeal(allocationData.dealId);
-    
-    if (!fund) {
-      return res.status(404).json({ message: 'Fund not found' });
-    }
-    
-    if (!deal) {
-      return res.status(404).json({ message: 'Deal not found' });
-    }
-
-    // Get existing allocations for validation context
-    const existingAllocations = await storage.getAllocationsByFund(fund.id);
-    const totalExistingAmount = existingAllocations.reduce((sum, alloc) => sum + alloc.amount, 0);
-
-    // Comprehensive validation with business context
-    const validationContext = {
-      fundId: fund.id,
-      dealId: deal.id,
-      amount: allocationData.amount,
-      fundName: fund.name,
-      dealName: deal.name,
-      existingAllocations: totalExistingAmount,
-      fundTotalSize: fund.aum
-    };
-
-    const validationResult = await ValidationService.validateAllocation(allocationData, validationContext);
-    
-    // Log validation results
-    ValidationService.logValidationResult(validationResult, validationContext, (req as any).user.id);
-    
-    if (!validationResult.isValid) {
-      console.error('Allocation validation failed:', validationResult.errors);
-      return res.status(400).json({ 
-        message: 'Allocation validation failed', 
-        errors: validationResult.errors,
-        warnings: validationResult.warnings
-      });
-    }
-
-    // Log warnings but continue processing
-    if (validationResult.warnings.length > 0) {
-      console.warn('Allocation validation warnings:', validationResult.warnings);
-    }
-
-    // Validate capital call parameters if provided
-    if (req.body.capitalCallSchedule && req.body.capitalCallSchedule !== 'none') {
-      const capitalCallValidation = ValidationService.validateCapitalCallParams({
-        callAmountType: req.body.callAmountType || 'percentage',
-        callPercentage: req.body.callPercentage,
-        callDollarAmount: req.body.callDollarAmount,
-        allocationAmount: allocationData.amount,
-        callCount: req.body.callCount || 1
-      });
-
-      if (!capitalCallValidation.isValid) {
-        console.error('Capital call validation failed:', capitalCallValidation.errors);
-        return res.status(400).json({ 
-          message: 'Capital call validation failed', 
-          errors: capitalCallValidation.errors 
-        });
-      }
-    }
-    
-    // Check for existing allocation with same deal and fund before creating
-    const existingDealAllocations = await storage.getAllocationsByDeal(allocationData.dealId);
-    const duplicateAllocation = existingDealAllocations.find(a => a.fundId === allocationData.fundId);
-    
-    if (duplicateAllocation) {
-      return res.status(409).json({ 
-        message: 'Fund allocation already exists',
-        error: `An allocation for deal "${deal.name}" from fund "${fund.name}" already exists (ID: ${duplicateAllocation.id}).`,
-        existingAllocation: {
-          id: duplicateAllocation.id,
-          amount: duplicateAllocation.amount,
-          status: duplicateAllocation.status,
-          allocationDate: duplicateAllocation.allocationDate
-        }
-      });
-    }
-
-    let newAllocation;
     try {
-      newAllocation = await storage.createFundAllocation(allocationData);
-    } catch (error: any) {
-      // Handle database constraint violations gracefully
-      if (error.code === '23505' || error.message?.includes('unique_deal_fund_allocation')) {
-        return res.status(409).json({ 
-          message: 'Fund allocation already exists',
-          error: `An allocation for deal "${deal.name}" from fund "${fund.name}" already exists. Only one allocation per deal-fund combination is allowed.`
+      // Use the new core service for rock-solid allocation creation
+      const newAllocation = await allocationCoreService.createAllocation({
+        fundId: allocationData.fundId,
+        dealId: allocationData.dealId,
+        amount: allocationData.amount,
+        amountType: allocationData.amountType,
+        securityType: allocationData.securityType,
+        allocationDate: allocationData.allocationDate || new Date().toISOString(),
+        notes: allocationData.notes,
+        status: allocationData.status || 'committed',
+        interestPaid: allocationData.interestPaid,
+        distributionPaid: allocationData.distributionPaid,
+        marketValue: allocationData.marketValue,
+        moic: allocationData.moic,
+        irr: allocationData.irr
+      });
+
+      // Log allocation creation for audit trail
+      const auditService = new AuditService();
+      try {
+        await auditService.logAllocationCreation(
+          newAllocation.id,
+          allocationData.dealId,
+          allocationData.fundId,
+          allocationData.amount,
+          userId,
+          { 
+            securityType: allocationData.securityType, 
+            notes: allocationData.notes,
+            status: allocationData.status 
+          }
+        );
+      } catch (auditError) {
+        console.warn('Audit logging failed (non-critical):', auditError);
+      }
+
+      // Update deal stage to "invested"
+      const deal = await storage.getDeal(allocationData.dealId);
+      const fund = await storage.getFund(allocationData.fundId);
+      
+      if (deal && deal.stage !== 'invested') {
+        await storage.updateDeal(deal.id, { 
+          stage: 'invested',
+          createdBy: userId
+        });
+        
+        // Create timeline event
+        await storage.createTimelineEvent({
+          dealId: deal.id,
+          eventType: 'closing_scheduled',
+          content: `Deal was allocated to fund: ${fund?.name}`,
+          createdBy: userId,
+          metadata: {} as any
         });
       }
-      
-      // Handle other database errors
-      console.error('Database error creating allocation:', error);
-      return res.status(500).json({
-        message: 'Failed to create fund allocation',
-        error: error.message || 'Database error occurred'
-      });
-    }
-    
-    // Log allocation creation for audit trail
-    const auditService = new AuditService();
-    await auditService.logAllocationCreation(
-      newAllocation.id,
-      allocationData.dealId,
-      allocationData.fundId,
-      allocationData.amount,
-      (req as any).user.id,
-      { 
-        securityType: allocationData.securityType, 
-        notes: allocationData.notes,
-        status: allocationData.status 
-      }
-    );
-    
-    console.log(`Allocation created successfully: ID ${newAllocation.id}, Amount: $${allocationData.amount.toLocaleString()}, Deal: ${deal.name}, Fund: ${fund.name}`);
-    
-    // Update deal stage to "invested" regardless of how many funds it's allocated to
-    // This ensures the deal stays in the invested pipeline stage
-    if (deal.stage !== 'invested') {
-      await storage.updateDeal(deal.id, { 
-        stage: 'invested',
-        createdBy: (req as any).user.id
-      });
-      
-      // Create a timeline event for this allocation
-      await storage.createTimelineEvent({
-        dealId: deal.id,
-        eventType: 'closing_scheduled',
-        content: `Deal was allocated to fund: ${fund.name}`,
-        createdBy: (req as any).user.id,
-        metadata: {} as any
-      });
-    }
     
     // Create appropriate capital calls based on the allocation schedule
     // Use our enhanced capital call service for better date handling and validation
