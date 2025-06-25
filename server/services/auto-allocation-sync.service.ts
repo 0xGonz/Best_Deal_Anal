@@ -247,18 +247,20 @@ export class AutoAllocationSyncService {
 
   /**
    * Calculate correct allocation status automatically
+   * DISABLED - Use database trigger logic instead to prevent status corruption
    */
   private calculateCorrectStatus(amount: number, paidAmount: number): string {
-    if (paidAmount === 0) return 'committed';
-    if (paidAmount >= amount) return 'funded';
-    return 'partially_paid';
+    // Status should be calculated by database triggers based on capital calls
+    // This service was causing incorrect status overwrites
+    console.log('WARNING: calculateCorrectStatus called - should use database triggers instead');
+    return 'committed'; // Default safe value
   }
 
   /**
    * Background sync job - DISABLED due to status corruption
    */
   async startBackgroundSync(intervalMinutes: number = 30): Promise<void> {
-    console.log(`Background sync DISABLED - caused status overwrites`);
+    console.log(`Background sync DISABLED - was overriding correct allocation workflow status`);
     // Commenting out the auto-sync that was overwriting funded status
     /*
     const runSync = async () => {
