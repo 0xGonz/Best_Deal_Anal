@@ -237,15 +237,20 @@ export class ProductionAllocationService {
         };
       }
 
-      // Check for dependent capital calls - temporarily disable to allow deletion
-      const dependentCalls: any[] = [];
-      // TODO: Fix capital calls foreign key relationship
-      /*
+      // Check for dependent capital calls and handle cascade deletion
       const dependentCalls = await db
         .select()
         .from(capitalCalls)
         .where(eq(capitalCalls.allocationId, allocationId));
-      */
+
+      // Delete dependent capital calls first
+      if (dependentCalls.length > 0) {
+        await this.transaction.execute(async (tx) => {
+          await tx
+            .delete(capitalCalls)
+            .where(eq(capitalCalls.allocationId, allocationId));
+        });
+      }
 
       if (dependentCalls.length > 0) {
         return {
