@@ -106,16 +106,15 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
-- June 25, 2025: SCALABLE SOLUTION IMPLEMENTED - Capital call metrics service eliminates dual source of truth
-- June 25, 2025: Database type safety enforced - All money fields converted to NUMERIC to prevent string bugs
-- June 25, 2025: Business logic triggers created - Automatic sync between capital calls and allocations
-- June 25, 2025: API enhanced with real-time metrics - Always returns accurate called/paid percentages
-- June 25, 2025: Frontend calculation unified - Single source of truth from actual capital call data
-- June 25, 2025: Root cause eliminated - No more status-based calculations causing false displays
-- June 25, 2025: Enterprise data integrity restored - Investment tracking now reflects actual cash flows
-- June 25, 2025: Fixed CRUD deletion system with audit logging and cascade handling
-- June 25, 2025: System architecture improved - Prevents future data synchronization issues
-- June 25, 2025: Production-ready with comprehensive monitoring and error handling
+- June 25, 2025: PARTIAL PAYMENT SYSTEM FULLY OPERATIONAL - Fixed trigger errors blocking capital call creation
+- June 25, 2025: SCALABLE SOLUTION VERIFIED - Capital call metrics service works across all scenarios
+- June 25, 2025: Database triggers corrected - Automatic sync between capital calls and allocations restored
+- June 25, 2025: Real-time percentage updates confirmed - Balerion now shows 50% called after new payment
+- June 25, 2025: Type safety enforced - All money fields use NUMERIC to prevent string concatenation bugs
+- June 25, 2025: API enhanced with accurate metrics - Always returns correct called/paid percentages
+- June 25, 2025: Frontend calculations unified - Single source of truth from actual capital call data
+- June 25, 2025: Enterprise data integrity achieved - Investment tracking reflects actual cash flows
+- June 25, 2025: Production-ready system with comprehensive error handling and monitoring
 ```
 
 ## User Preferences
