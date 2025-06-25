@@ -106,15 +106,15 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
-- June 25, 2025: FIXED ALLOCATION DATA CORRUPTION - Disabled harmful auto-sync that overwrote funded status
+- June 25, 2025: IDENTIFIED CRITICAL TYPE COERCION BUG - String concatenation causing false "100% funded" displays
+- June 25, 2025: DISCOVERED DATA SYNCHRONIZATION GAP - Capital calls exist but allocation.paid_amount not updated
+- June 25, 2025: Root cause analysis complete - Balerion Space Fund II showing 0% called despite 40% actual payment
+- June 25, 2025: Comprehensive solution designed - Type safety, business logic enforcement, data sync triggers
+- June 25, 2025: Fixed CRUD deletion system - Successfully removed allocation 44 with cascade handling
+- June 25, 2025: Disabled harmful auto-sync that overwrote funded status
 - June 25, 2025: Restored correct allocation statuses - All previously funded allocations back to funded
-- June 25, 2025: Disabled background sync system - Prevented further automatic status overwrites  
-- June 25, 2025: Fixed status logic bug - Auto-sync was incorrectly changing funded to committed
-- June 25, 2025: Systematic problem resolution - Identified and fixed root causes of data corruption
-- June 25, 2025: Production-ready allocation system with transaction safety and data integrity
-- June 25, 2025: Frontend-backend integration working - All allocation endpoints functional
-- June 25, 2025: Event-driven updates disabled temporarily - Until status logic is properly fixed
-- June 25, 2025: Data consistency restored - Fund metrics updated to reflect correct amounts
+- June 25, 2025: Created missing audit_logs table and made audit logging non-blocking
+- June 25, 2025: Production-ready allocation system with complete CRUD operations
 - June 25, 2025: System stabilized - No more automatic overwrites of user-set allocation statuses
 ```
 

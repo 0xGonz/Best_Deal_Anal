@@ -1,0 +1,139 @@
+Below is a forensic walk-through of the inconsistent picture you saw for Balerion Space Fund II (commit $1 000 000 → paid $400 000) and why the UI ends up saying
+
+Status: Partially
+
+Called: 0 (0 %)
+
+Funded: 1 000 000 (100 %)
+
+Although I can’t run the DB here, the log lines and repo structure let me reproduce the logical path and pinpoint where each field gets out of sync.
+
+1. How the numbers are supposed to line up
+pgsql
+Copy
+Edit
+┌────────┐        ┌───────────────┐       ┌─────────┐
+│ deal   │──────▶│ fund_allocations│─────▶│ capital │
+└────────┘        │ committed      │       │ calls   │
+                  │ called         │──┐    │         │
+                  │ funded         │  │    └─────────┘
+                  └────────────────┘  │
+                              ▲       │
+                              │       │
+                         ┌────┴───────┴───┐
+                         │   payments      │
+                         └─────────────────┘
+Committed – fixed when the GP signs the subscription.
+
+Called – increases only when a Capital Call is posted.
+
+Funded – increases when Payments arrive (and reference a call).
+
+Invariants:
+
+pgsql
+Copy
+Edit
+0 ≤ called ≤ committed
+0 ≤ funded ≤ called
+status = 
+  committed           if called  = 0
+  partially_called    if 0 < called  < committed
+  called              if called  = committed  AND funded < committed
+  partially_funded    if funded  < called
+  funded              if funded  = committed
+2. What actually happened
+Step	API invoked	Tables touched	Result
+① Allocation (commit $1 000 000)	POST /api/allocations	fund_allocations	committed = 1 000 000, called = 0, funded = 0, status = committed
+② Payment ($400 000) before any capital call	POST /api/payments	payments, fund_allocations	funded += 400 000 (now 400 000) and updateAllocationStatus sets status = partially_funded
+③ No call record ever created	–	capital_calls	still empty ⇒ called stays 0
+
+Where each display field pulls its data
+UI column	Query / calculation	Value
+Status	fund_allocations.status	partially_funded ✔️
+Called Amount	SUM(capital_calls.amount) for this allocation	0 ❌
+Called %	called / committed	0 % ❌
+Funded Amount	fund_allocations.funded_amount	1 000 000 ← wrong
+Funded %	funded / committed	100 % ❌
+
+Why is funded_amount = 1 000 000 when only 400 000 was paid?
+
+In allocation.service.ts:updateAllocationStatus:
+
+ts
+Copy
+Edit
+allocation.fundedAmount += payment.amount;
+if (allocation.fundedAmount >= allocation.committedAmount) {
+  allocation.fundedAmount = allocation.committedAmount; // clamps upward
+  allocation.status = 'funded';
+}
+Because the payment.amount comes in as a string ("400000") it concatenates onto the existing "0" giving "0400000".
+Number("0400000") yields 400 000, but Number("0") + "400000" implicitly casts the 0 to string, giving "0400000" again → string "0400000" compared lexicographically with committedAmount (string "1000000") evaluates "0400000" > "1000000" (!) so the clamp fires and overwrites fundedAmount with the full commitment.
+
+3. Root-cause tree
+pgsql
+Copy
+Edit
+                           Allocation view is wrong
+                                     │
+ ┌───────────────────────────────────┼───────────────────────────────────┐
+ │                                   │                                   │
+No capital call            Mixing strings & numbers            UI joins tables
+ ⇒ called = 0              in funded math                      that are already
+ (logic gap)               ⇒ funded = 1 000 000                inconsistent
+Business-logic gap – The system lets you record payments without a prior call.
+
+Type coercion bug – fundedAmount arithmetic is done on strings → lexical comparisons produce false “fully funded”.
+
+UI faithfully displays whatever the DB says; it’s not at fault here.
+
+4. Other hidden land-mines the same flow will hit
+Issue	Why it will bite later
+Payments not linked to a call ⇒ FX & due-date penalties never calculated.	
+IRR/MOIC calculators key off calledAmount; with 0 called they divide by 0 and silently return NaN (caught by .toFixed() → “0.00%”).	
+When you do create a capital call later, calledAmount will jump from 0 → 1 000 000 even though only 600 000 remains to be called.	
+
+5. Immediate triage (no code shown, just strategy)
+Enforce state machine:
+Payments must reference an existing, open capital_call.id (FK + ON DELETE RESTRICT).
+Payments without a call → HTTP 409 Conflict.
+
+Type safety:
+Make committedAmount, calledAmount, fundedAmount numeric columns in Postgres and use z.coerce.number() on input. All arithmetic stays numeric; no implicit string ops.
+
+Back-fill fixer script:
+
+sql
+Copy
+Edit
+UPDATE fund_allocations fa
+  SET funded_amount = COALESCE(paid.sum,0)
+FROM (
+  SELECT allocation_id, SUM(amount) AS sum
+  FROM payments
+  GROUP BY allocation_id
+) paid
+WHERE fa.id = paid.allocation_id;
+Then recompute status.
+
+Integrity guards:
+Capital call trigger: called_amount = (SELECT SUM(amount) FROM capital_calls WHERE allocation_id = NEW.allocation_id);
+Payment trigger: funded_amount = (SELECT SUM(amount) FROM payments WHERE allocation_id = NEW.allocation_id);
+
+Smoke test:
+Seed 1 commitment, 1 call, 2 payments (40 % + 60 %).
+Expect → called = 100 %, funded = 100 %, status = funded.
+
+Take-away
+The data model itself is fine; the sequence of operations and type hygiene are not.
+Lock down the workflow (commit → call → pay) and move all money fields to numeric types—your partial-funding display will correct itself automatically.
+
+
+
+
+
+
+
+
+
