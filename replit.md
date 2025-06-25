@@ -106,14 +106,14 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
+- June 25, 2025: SYSTEMATIC CAPITAL CALL FIX IN PROGRESS - Deep analysis and comprehensive solution underway
+- June 25, 2025: Fixed allocation response parsing: API returns {data: allocation} not direct allocation object
+- June 25, 2025: Enhanced capital call validation schema with proper date handling and status defaults
+- June 25, 2025: Added comprehensive logging to capital call creation endpoint for debugging
+- June 25, 2025: Created systematic test script to validate allocation workflow end-to-end
+- June 25, 2025: Implementing scalable solution for persistent capital call creation failures
 - June 25, 2025: EDIT ALLOCATION FUNCTIONALITY COMPLETE - Full CRUD operations for allocations working
-- June 25, 2025: Added missing PUT endpoint for allocation updates in production allocation service
-- June 25, 2025: Fixed query invalidation patterns to use production endpoints consistently
-- June 25, 2025: Integrated edit allocation button with proper backend endpoint routing
 - June 25, 2025: Complete allocation management: Create, Read, Update, Delete all functional
-- June 25, 2025: COMPREHENSIVE APPLICATION AUDIT COMPLETE - All legacy code removed, latest functions integrated
-- June 25, 2025: Fixed allocation creation workflow with proper allocationId sequencing for capital calls
-- June 25, 2025: System validated working with enterprise-scale operations ($2.05M fund, 4 allocations)
 - June 25, 2025: Production-ready codebase with consistent architecture and optimized patterns
 ```
 

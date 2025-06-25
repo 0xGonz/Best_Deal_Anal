@@ -81,26 +81,52 @@ export default function AllocateFundModal({ isOpen, onClose, dealId, dealName }:
   const createImmediatePayment = async (allocationId: number, data: AllocationFormData) => {
     try {
       if (data.paymentOption === 'pay_immediately' || data.paymentOption === 'partial_payment') {
+        // Validate input data
+        if (!allocationId || isNaN(allocationId)) {
+          throw new Error(`Invalid allocation ID: ${allocationId}`);
+        }
+
         const totalAmount = parseFloat(data.amount) || 0;
+        if (totalAmount <= 0) {
+          throw new Error(`Invalid total amount: ${totalAmount}`);
+        }
+
         const paymentAmount = data.paymentOption === 'pay_immediately' 
           ? totalAmount 
           : calculatePaymentAmount(totalAmount, data.immediatePaymentAmount, data.immediatePaymentType);
+
+        if (paymentAmount <= 0) {
+          throw new Error(`Invalid payment amount: ${paymentAmount}`);
+        }
         
         const capitalCallPayload = {
           allocationId: allocationId,
           callAmount: paymentAmount,
-          amountType: 'dollar',
+          amountType: 'dollar' as const,
           callDate: formatDateForAPI(data.fundingDate),
           dueDate: formatDateForAPI(data.fundingDate),
-          status: 'paid',
+          status: 'paid' as const,
+          paidAmount: paymentAmount,
+          paidDate: formatDateForAPI(data.fundingDate),
           outstanding_amount: "0", // Payment is complete, so outstanding amount is 0
           notes: `Immediate payment at commitment - ${data.paymentOption === 'pay_immediately' ? 'Full funding' : 'Partial funding'}`
         };
+
+        console.log('Creating capital call with payload:', capitalCallPayload);
         
         const response = await apiRequest('POST', '/api/capital-calls', capitalCallPayload);
         if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+          console.error('Capital call creation failed:', {
+            status: response.status,
+            statusText: response.statusText,
+            errorData
+          });
           throw new Error(`Failed to create immediate payment: ${response.statusText}`);
         }
+
+        const result = await response.json();
+        console.log('Capital call created successfully:', result);
       }
     } catch (error) {
       console.error('Error creating immediate payment:', error);
@@ -136,7 +162,14 @@ export default function AllocateFundModal({ isOpen, onClose, dealId, dealName }:
         throw new Error(`Failed to create allocation: ${response.statusText}`);
       }
       
-      const allocation = await response.json();
+      const result = await response.json();
+      
+      // Extract allocation from response (API returns {success: true, data: allocation, auditId: ...})
+      const allocation = result.data;
+      
+      if (!allocation || !allocation.id) {
+        throw new Error('Invalid allocation response from server');
+      }
       
       // Create immediate payment if needed
       await createImmediatePayment(allocation.id, data);

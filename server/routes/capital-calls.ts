@@ -85,9 +85,13 @@ router.get('/', requireAuth, async (req, res) => {
 const createCapitalCallSchema = insertCapitalCallSchema.extend({
   allocationId: z.number().positive("Allocation ID is required"),
   callAmount: z.number().positive("Call amount must be greater than 0"),
-  amountType: z.enum(["percentage", "dollar"]).optional(),
+  amountType: z.enum(["percentage", "dollar"]).optional().default("dollar"),
   callDate: z.string().or(z.date()),
-  dueDate: z.string().or(z.date())
+  dueDate: z.string().or(z.date()),
+  status: z.enum(["scheduled", "called", "paid", "overdue", "cancelled"]).optional().default("scheduled"),
+  paidAmount: z.number().optional().default(0),
+  paidDate: z.string().or(z.date()).optional().nullable(),
+  outstanding_amount: z.union([z.string(), z.number()]).optional()
 });
 
 // Get all capital calls for a deal
@@ -181,21 +185,33 @@ router.get('/allocation/:allocationId', requireAuth, async (req, res) => {
 // Create a new capital call
 router.post('/', requireAuth, requirePermission('create', 'capital-call'), async (req, res) => {
   try {
+    console.log('Incoming capital call request:', JSON.stringify(req.body, null, 2));
+    
     // Validate the request body
     const validatedData = createCapitalCallSchema.parse(req.body);
+    console.log('Validated capital call data:', JSON.stringify(validatedData, null, 2));
 
     // Get the allocation to validate it exists
     const allocation = await storage.getFundAllocation(validatedData.allocationId);
     if (!allocation) {
+      console.error(`Allocation not found for ID: ${validatedData.allocationId}`);
       return res.status(404).json({ message: 'Fund allocation not found' });
     }
 
-    // Create the capital call
-    const capitalCall = await storage.createCapitalCall({
+    console.log('Found allocation:', allocation);
+
+    // Prepare capital call data with proper date handling
+    const capitalCallData = {
       ...validatedData,
       callDate: new Date(validatedData.callDate),
-      dueDate: new Date(validatedData.dueDate)
-    });
+      dueDate: new Date(validatedData.dueDate),
+      paidDate: validatedData.paidDate ? new Date(validatedData.paidDate) : null
+    };
+
+    console.log('Creating capital call with data:', capitalCallData);
+
+    // Create the capital call
+    const capitalCall = await storage.createCapitalCall(capitalCallData);
 
     // Get fund name for the timeline event
     const fund = await storage.getFund(allocation.fundId);
@@ -216,13 +232,22 @@ router.post('/', requireAuth, requirePermission('create', 'capital-call'), async
       } as any
     });
 
+    console.log('Capital call created successfully:', capitalCall);
     return res.status(201).json(capitalCall);
   } catch (error: any) {
     console.error('Error creating capital call:', error);
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ message: 'Validation error', errors: error.errors });
+      console.error('Validation errors:', error.errors);
+      return res.status(400).json({ 
+        message: 'Validation error', 
+        errors: error.errors 
+      });
     }
-    return res.status(500).json({ message: error.message || 'Internal server error' });
+    console.error('Unexpected error:', error.stack);
+    return res.status(500).json({ 
+      message: error.message || 'Internal server error',
+      details: error.stack 
+    });
   }
 });
 
