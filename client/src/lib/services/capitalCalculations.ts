@@ -25,10 +25,11 @@ export function calculateAllocationCapitalMetrics(allocation: FundAllocation): C
       break;
       
     case 'partially_paid':
-      // Use actual paidAmount from allocation record
+      // Use actual capital call data instead of stale allocation data
       // This reflects real capital call payments made
-      const paidAmount = Number(allocation.paidAmount) || 0;
-      calledAmount = Math.min(paidAmount, allocation.amount); // Cannot exceed committed amount
+      const actualCalledAmount = Number(allocation.calledAmount) || Number(allocation.paidAmount) || 0;
+      const actualPaidAmount = Number(allocation.paidAmount) || 0;
+      calledAmount = actualCalledAmount;
       uncalledAmount = allocation.amount - calledAmount;
       break;
       

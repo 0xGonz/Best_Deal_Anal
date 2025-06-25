@@ -393,6 +393,8 @@ export type FundAllocation = FundAllocationBase & {
   dealSector?: string;
   weight?: number;
   distributions?: typeof distributions.$inferSelect[];
+  calledAmount?: number;
+  calledPercentage?: number;
 };
 export type InsertFundAllocation = z.infer<typeof insertFundAllocationSchema>;
 

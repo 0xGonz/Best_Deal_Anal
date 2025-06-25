@@ -533,11 +533,22 @@ export class DatabaseStorage implements IStorage {
         moic: fundAllocations.moic,
         irr: fundAllocations.irr,
         dealName: deals.name,
-        dealSector: deals.sector
+        dealSector: deals.sector,
+        // Add calculated fields from actual capital calls
+        calledAmount: sql<number>`COALESCE(SUM(${capitalCalls.callAmount}), 0)`,
+        calledPercentage: sql<number>`
+          CASE 
+            WHEN ${fundAllocations.amount} > 0 
+            THEN ROUND((COALESCE(SUM(${capitalCalls.callAmount}), 0) / ${fundAllocations.amount}) * 100, 1)
+            ELSE 0 
+          END
+        `
       })
       .from(fundAllocations)
       .leftJoin(deals, eq(fundAllocations.dealId, deals.id))
-      .where(eq(fundAllocations.fundId, fundId));
+      .leftJoin(capitalCalls, eq(capitalCalls.allocationId, fundAllocations.id))
+      .where(eq(fundAllocations.fundId, fundId))
+      .groupBy(fundAllocations.id, deals.id);
     
     // Transform results to include deal information, preserving all allocations
     return results.map(result => ({
