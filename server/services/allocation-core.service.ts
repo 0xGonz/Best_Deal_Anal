@@ -10,7 +10,7 @@
  */
 
 import { eq, and, sum } from 'drizzle-orm';
-import { db } from '../database/connection';
+import { db } from '../database-storage';
 import { fundAllocations, funds, deals } from '@shared/schema';
 import type { FundAllocation, Fund, Deal } from '@shared/schema';
 
