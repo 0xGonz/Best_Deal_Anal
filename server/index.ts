@@ -200,6 +200,15 @@ async function initialize() {
     console.log('Continuing without background processing');
   }
   
+  // Auto-allocation sync system
+  try {
+    const { allocationEventSystem } = await import('./services/allocation-event-system.service');
+    allocationEventSystem.startEventProcessing();
+    console.log('Automated allocation sync system initialized');
+  } catch (error) {
+    console.error('Failed to initialize allocation sync system:', error);
+  }
+  
   const server = await registerRoutes(app);
 
   // Error handling is centralized in routes.ts

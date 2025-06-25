@@ -73,6 +73,21 @@ router.post('/', requireAuth, requirePermission('create', 'allocation'), async (
 
     // Create allocation
     const result = await productionAllocationService.createAllocation(request, userId);
+    
+    // Auto-trigger system updates
+    if (result.success && result.allocation) {
+      const { allocationEventSystem } = await import('../services/allocation-event-system.service');
+      await allocationEventSystem.emitAllocationEvent({
+        type: 'allocation_created',
+        allocationId: result.allocation.id,
+        fundId: result.allocation.fundId,
+        dealId: result.allocation.dealId,
+        amount: result.allocation.amount,
+        paidAmount: result.allocation.paidAmount || 0,
+        timestamp: new Date(),
+        userId
+      });
+    }
 
     if (!result.success) {
       if (result.validationErrors) {
