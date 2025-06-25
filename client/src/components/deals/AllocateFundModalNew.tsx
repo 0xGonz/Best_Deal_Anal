@@ -112,6 +112,12 @@ export default function AllocateFundModal({ isOpen, onClose, dealId, dealName }:
       const response = await apiRequest('POST', '/api/production/allocations', allocationPayload);
       if (!response.ok) {
         const errorData = await response.json();
+        
+        // Handle conflict error for existing allocations
+        if (response.status === 409 && errorData.error?.includes('already exists')) {
+          throw new Error(`This deal is already allocated to the selected fund. Please check the fund's portfolio or modify the existing allocation instead.`);
+        }
+        
         throw new Error(errorData.error || `Failed to create allocation: ${response.statusText}`);
       }
       
