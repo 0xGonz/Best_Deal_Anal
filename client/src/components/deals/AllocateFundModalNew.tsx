@@ -68,7 +68,6 @@ export default function AllocateFundModal({ isOpen, onClose, dealId, dealName }:
           : data.immediatePaymentAmount;
         
         const capitalCallPayload = {
-          allocationId: allocationId,
           callAmount: paymentAmount,
           amountType: 'dollar',
           callDate: formatDateForAPI(data.allocationDate),
@@ -77,9 +76,10 @@ export default function AllocateFundModal({ isOpen, onClose, dealId, dealName }:
           notes: `Immediate payment at commitment - ${data.paymentOption === 'pay_immediately' ? 'Full funding' : 'Partial funding'}`
         };
         
-        const response = await apiRequest('POST', '/api/capital-calls', capitalCallPayload);
+        const response = await apiRequest('POST', '/api/production/allocations/' + allocationId + '/capital-calls', capitalCallPayload);
         if (!response.ok) {
-          throw new Error(`Failed to create immediate payment: ${response.statusText}`);
+          const errorData = await response.json();
+          throw new Error(errorData.error || `Failed to create immediate payment: ${response.statusText}`);
         }
       }
     } catch (error) {
@@ -108,15 +108,19 @@ export default function AllocateFundModal({ isOpen, onClose, dealId, dealName }:
         irr: 0
       };
 
-      const response = await apiRequest('POST', '/api/allocations', allocationPayload);
+      const response = await apiRequest('POST', '/api/production/allocations', allocationPayload);
       if (!response.ok) {
-        throw new Error(`Failed to create allocation: ${response.statusText}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Failed to create allocation: ${response.statusText}`);
       }
       
-      const allocation = await response.json();
+      const result = await response.json();
+      const allocation = result.allocation || result;
       
       // Create immediate payment if needed
-      await createImmediatePayment(allocation.id, data);
+      if (allocation && allocation.id) {
+        await createImmediatePayment(allocation.id, data);
+      }
       
       return allocation;
     },
@@ -141,8 +145,9 @@ export default function AllocateFundModal({ isOpen, onClose, dealId, dealName }:
       onClose();
       
       // Invalidate relevant queries
-      queryClient.invalidateQueries({ queryKey: ['/api/allocations'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/funds'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/production/allocations/fund/${allocationData.fundId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/funds/${allocationData.fundId}`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/deals'] });
     },
     onError: (error: any) => {
       console.error('Allocation creation error:', error);
