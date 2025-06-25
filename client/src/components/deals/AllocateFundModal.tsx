@@ -171,9 +171,24 @@ export default function AllocateFundModal({ isOpen, onClose, dealId, dealName }:
       queryClient.invalidateQueries({ queryKey: ['/api/funds'] });
     },
     onError: (error: any) => {
+      console.error('Allocation creation error:', error);
+      
+      let errorMessage = "Failed to create allocation.";
+      let errorTitle = "Error";
+      
+      // Handle specific error types
+      if (error.status === 409) {
+        errorTitle = "Allocation Already Exists";
+        errorMessage = error.data?.error || "An allocation for this deal and fund combination already exists.";
+      } else if (error.data?.error) {
+        errorMessage = error.data.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
-        title: "Error",
-        description: error.message || "Failed to create allocation.",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       });
     },

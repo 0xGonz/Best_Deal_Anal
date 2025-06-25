@@ -395,7 +395,42 @@ router.post('/', requireAuth, requirePermission('create', 'allocation'), async (
       }
     }
     
-    const newAllocation = await storage.createFundAllocation(allocationData);
+    // Check for existing allocation with same deal and fund before creating
+    const existingDealAllocations = await storage.getAllocationsByDeal(allocationData.dealId);
+    const duplicateAllocation = existingDealAllocations.find(a => a.fundId === allocationData.fundId);
+    
+    if (duplicateAllocation) {
+      return res.status(409).json({ 
+        message: 'Fund allocation already exists',
+        error: `An allocation for deal "${deal.name}" from fund "${fund.name}" already exists (ID: ${duplicateAllocation.id}).`,
+        existingAllocation: {
+          id: duplicateAllocation.id,
+          amount: duplicateAllocation.amount,
+          status: duplicateAllocation.status,
+          allocationDate: duplicateAllocation.allocationDate
+        }
+      });
+    }
+
+    let newAllocation;
+    try {
+      newAllocation = await storage.createFundAllocation(allocationData);
+    } catch (error: any) {
+      // Handle database constraint violations gracefully
+      if (error.code === '23505' || error.message?.includes('unique_deal_fund_allocation')) {
+        return res.status(409).json({ 
+          message: 'Fund allocation already exists',
+          error: `An allocation for deal "${deal.name}" from fund "${fund.name}" already exists. Only one allocation per deal-fund combination is allowed.`
+        });
+      }
+      
+      // Handle other database errors
+      console.error('Database error creating allocation:', error);
+      return res.status(500).json({
+        message: 'Failed to create fund allocation',
+        error: error.message || 'Database error occurred'
+      });
+    }
     
     // Log allocation creation for audit trail
     const auditService = new AuditService();
