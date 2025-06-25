@@ -9,6 +9,9 @@ import { productionCapitalCallsService } from '../services/production-capital-ca
 import { requireAuth } from '../utils/auth';
 import { requirePermission } from '../utils/permissions';
 import { z } from 'zod';
+import { db } from '../db';
+import { fundAllocations, deals } from '../../shared/schema';
+import { eq } from 'drizzle-orm';
 
 const router = Router();
 
@@ -225,7 +228,7 @@ router.delete('/:id', requireAuth, requirePermission('delete', 'allocation'), as
 });
 
 /**
- * GET /api/allocations/fund/:fundId - Get fund allocations with metrics
+ * GET /api/production/allocations/fund/:fundId - Get fund allocations with deal information
  */
 router.get('/fund/:fundId', requireAuth, async (req: Request, res: Response) => {
   try {
@@ -234,13 +237,35 @@ router.get('/fund/:fundId', requireAuth, async (req: Request, res: Response) => 
       return res.status(400).json({ error: 'Invalid fund ID' });
     }
 
-    // Get fund metrics (includes allocations and portfolio weights)
-    const metrics = await productionAllocationService.getFundMetrics(fundId);
+    // Get detailed fund allocations with deal information
+    const allocations = await db
+      .select({
+        id: fundAllocations.id,
+        fundId: fundAllocations.fundId,
+        dealId: fundAllocations.dealId,
+        amount: fundAllocations.amount,
+        paidAmount: fundAllocations.paidAmount,
+        amountType: fundAllocations.amountType,
+        securityType: fundAllocations.securityType,
+        allocationDate: fundAllocations.allocationDate,
+        notes: fundAllocations.notes,
+        status: fundAllocations.status,
+        portfolioWeight: fundAllocations.portfolioWeight,
+        interestPaid: fundAllocations.interestPaid,
+        distributionPaid: fundAllocations.distributionPaid,
+        totalReturned: fundAllocations.totalReturned,
+        marketValue: fundAllocations.marketValue,
+        moic: fundAllocations.moic,
+        irr: fundAllocations.irr,
+        dealName: deals.name,
+        dealSector: deals.sector
+      })
+      .from(fundAllocations)
+      .leftJoin(deals, eq(fundAllocations.dealId, deals.id))
+      .where(eq(fundAllocations.fundId, fundId))
+      .orderBy(fundAllocations.allocationDate);
 
-    res.json({
-      success: true,
-      data: metrics
-    });
+    res.json(allocations);
 
   } catch (error) {
     console.error('Error getting fund allocations:', error);

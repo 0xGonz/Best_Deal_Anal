@@ -149,19 +149,23 @@ export default function FundDetail() {
   const { data: allocations, isLoading: isAllocationsLoading } = useQuery<FundAllocation[]>({
     queryKey: [`/api/production/allocations/fund/${fundId}`],
     enabled: !!fundId,
-    // Transform the data to ensure proper type compatibility while preserving deal information
-    select: (data) => (data || []).map(allocation => ({
-      ...allocation,
-      // Ensure all potential undefined values are converted to null
-      notes: allocation.notes || null,
-      status: allocation.status || "committed", // Default status if not provided
-      portfolioWeight: allocation.portfolioWeight || 0,
-      // Make sure the right property names are used
-      totalReturned: allocation.totalReturned || 0,
-      // Preserve deal information from API response
-      dealName: allocation.dealName || undefined,
-      dealSector: allocation.dealSector || undefined
-    }))
+    // Transform the data to ensure proper type compatibility
+    select: (data: any) => {
+      console.log('Allocations API response:', data);
+      // The production API now returns allocations directly as an array
+      if (Array.isArray(data)) {
+        return data.map((allocation: any) => ({
+          ...allocation,
+          notes: allocation.notes || null,
+          status: allocation.status || "committed",
+          portfolioWeight: allocation.portfolioWeight || 0,
+          totalReturned: allocation.totalReturned || 0,
+          dealName: allocation.dealName || undefined,
+          dealSector: allocation.dealSector || undefined
+        }));
+      }
+      return [];
+    }
   });
 
   // Remove invalid allocations query - not needed with production service
