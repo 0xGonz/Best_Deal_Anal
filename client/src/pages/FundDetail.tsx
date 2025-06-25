@@ -147,12 +147,12 @@ export default function FundDetail() {
 
   // Fetch all allocations for this fund
   const { data: allocations, isLoading: isAllocationsLoading } = useQuery<FundAllocation[]>({
-    queryKey: [`/api/production/allocations/fund/${fundId}`],
+    queryKey: [`/api/allocations/fund/${fundId}`],
     enabled: !!fundId,
     // Transform the data to ensure proper type compatibility
     select: (data: any) => {
       console.log('Allocations API response:', data);
-      // The production API now returns allocations directly as an array
+      // The API now returns allocations directly as an array
       if (Array.isArray(data)) {
         return data.map((allocation: any) => ({
           ...allocation,

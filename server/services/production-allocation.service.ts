@@ -75,14 +75,27 @@ export class ProductionAllocationService {
         };
       }
 
-      // 2. Check for duplicates with precise logic
+      // 2. Check for duplicates with smart handling
       const duplicate = await this.findExactDuplicate(request.fundId, request.dealId);
       if (duplicate) {
+        // If status is partially_paid and user wants to update, allow modification
+        if (duplicate.status === 'partially_paid' && request.status === 'partially_paid') {
+          await this.audit.logInfo(auditId, `Updating existing partial allocation ${duplicate.id}`);
+          // Update the existing allocation instead of creating new one
+          return await this.updateAllocation(duplicate.id, {
+            amount: request.amount,
+            paidAmount: request.paidAmount || 0,
+            status: request.status,
+            notes: request.notes
+          }, userId);
+        }
+        
         const error = `Allocation already exists: Fund ${request.fundId} → Deal ${request.dealId} (ID: ${duplicate.id})`;
         await this.audit.logError(auditId, error);
         return {
           success: false,
-          error
+          error,
+          existingAllocation: duplicate
         };
       }
 
