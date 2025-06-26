@@ -1,8 +1,9 @@
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
-import { DocumentBlobStorage } from '../services/document-blob-storage.js';
+import { StorageFactory } from '../storage-factory';
 import { requireAuth } from '../utils/auth';
+import * as fs from 'fs/promises';
 
 const router = express.Router();
 
@@ -49,35 +50,45 @@ router.post('/upload', requireAuth, upload.single('file'), async (req, res) => {
     const fileType = req.file.mimetype;
     const tempFilePath = req.file.path;
 
-    console.log(`Processing document upload: ${fileName} for deal ${dealId}`);
+    console.log(`📤 Processing document upload: ${fileName} for deal ${dealId}`);
 
-    // Store document in database
-    const result = await DocumentBlobStorage.storeDocument(
-      parseInt(dealId),
+    // Read the file data
+    const fileData = await fs.readFile(tempFilePath);
+    const fileSize = fileData.length;
+
+    // Get storage instance and create document
+    const storage = StorageFactory.getStorage();
+    const document = await storage.createDocument({
+      dealId: parseInt(dealId),
       fileName,
       fileType,
-      tempFilePath,
-      userId,
+      fileSize,
+      filePath: tempFilePath,
       documentType,
-      description
-    );
+      description: description || '',
+      uploadedBy: userId,
+      uploadedAt: new Date()
+    });
 
-    if (!result.success) {
-      return res.status(500).json({ error: result.error || 'Failed to store document' });
+    // Clean up temporary file
+    try {
+      await fs.unlink(tempFilePath);
+    } catch (cleanupError) {
+      console.warn('Failed to cleanup temp file:', cleanupError);
     }
 
-    console.log(`✓ Document uploaded successfully: ID ${result.id}`);
+    console.log(`✅ Document uploaded successfully: ID ${document.id}`);
     res.json({
-      id: result.id,
+      id: document.id,
       fileName,
       fileType,
       documentType,
       description,
-      message: 'Document uploaded and stored in database successfully'
+      message: 'Document uploaded and stored successfully'
     });
 
   } catch (error) {
-    console.error('Error uploading document:', error);
+    console.error('❌ Error uploading document:', error);
     res.status(500).json({ error: 'Internal server error during upload' });
   }
 });
