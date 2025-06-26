@@ -116,6 +116,8 @@ This repository contains a full-stack investment lifecycle management platform b
 - June 26, 2025: Enhanced database connection health checks to prevent session store issues
 - June 26, 2025: Upload system now handles large files reliably without timeouts or memory issues
 - June 26, 2025: Document management fully operational - Upload, retrieval, and PDF viewing working correctly
+- June 26, 2025: PDF download endpoint fixed - Now properly serves actual file content instead of metadata JSON
+- June 26, 2025: PDF viewer loading errors resolved - Documents now load correctly in browser with 26MB+ file support
 - June 25, 2025: ALLOCATION STATUS LOGIC CORRECTED - 100% called capital now properly shows as "funded" status
 - June 25, 2025: Business workflow implemented - funded = 100% called, partially_paid = some called, committed = uncalled
 - June 25, 2025: Auto-sync service disabled - was causing incorrect status overwrites with flawed payment-only logic

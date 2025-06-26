@@ -109,9 +109,11 @@ router.get('/deal/:dealId', requireAuth, async (req, res) => {
 // Download document
 router.get('/:id/download', requireAuth, async (req, res) => {
   try {
+    console.log(`🔽 Download request for document ${req.params.id}`);
     const documentId = parseInt(req.params.id);
 
     if (isNaN(documentId)) {
+      console.log(`❌ Invalid document ID: ${req.params.id}`);
       return res.status(400).json({ error: 'Invalid document ID' });
     }
 
@@ -119,21 +121,49 @@ router.get('/:id/download', requireAuth, async (req, res) => {
     const document = await storage.getDocument(documentId);
 
     if (!document) {
+      console.log(`❌ Document ${documentId} not found`);
       return res.status(404).json({ error: 'Document not found' });
     }
 
-    // Set appropriate headers for file download
-    res.setHeader('Content-Type', document.fileType);
-    res.setHeader('Content-Disposition', `attachment; filename="${document.fileName}"`);
-    
-    // For now, return document metadata - actual file serving would need file path
-    res.json({
+    console.log(`📄 Found document:`, {
       id: document.id,
       fileName: document.fileName,
-      fileType: document.fileType,
-      fileSize: document.fileSize,
-      message: 'Document download endpoint - file serving not implemented'
+      filePath: document.filePath,
+      fileDataExists: !!document.fileData
     });
+
+    // Set appropriate headers for file serving
+    res.setHeader('Content-Type', document.fileType);
+    res.setHeader('Content-Disposition', `inline; filename="${document.fileName}"`);
+    
+    // Try to serve the actual file if file path exists
+    if (document.filePath) {
+      try {
+        console.log(`📄 Attempting to serve file from ${document.filePath}`);
+        // Check if file exists first
+        await fs.access(document.filePath);
+        console.log(`✅ File exists at ${document.filePath}`);
+        const fileBuffer = await fs.readFile(document.filePath);
+        console.log(`📄 Read file successfully, size: ${fileBuffer.length} bytes`);
+        
+        // Set content length header for proper serving
+        res.setHeader('Content-Length', fileBuffer.length);
+        res.send(fileBuffer);
+        return;
+      } catch (fileError) {
+        console.error(`❌ Could not read file at ${document.filePath}:`, fileError.message);
+      }
+    }
+    
+    // Fallback to base64 data if available
+    if (document.fileData) {
+      const buffer = Buffer.from(document.fileData, 'base64');
+      res.send(buffer);
+      return;
+    }
+    
+    // If no file data available, return error
+    res.status(404).json({ error: 'File content not available' });
 
   } catch (error) {
     console.error('Error downloading document:', error);
