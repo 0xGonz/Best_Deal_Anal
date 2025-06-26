@@ -11,7 +11,7 @@ const router = express.Router();
 const upload = multer({
   dest: 'temp/',
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
+    fileSize: 50 * 1024 * 1024, // 50MB limit
   },
   fileFilter: (req, file, cb) => {
     console.log(`📁 File upload attempt: ${file.originalname}, MIME type: ${file.mimetype}`);
@@ -43,9 +43,9 @@ router.post('/upload', requireAuth, upload.single('file'), async (req, res) => {
 
     console.log(`📤 Processing document upload: ${fileName} for deal ${dealId}`);
 
-    // Read the file data
-    const fileData = await fs.readFile(tempFilePath);
-    const fileSize = fileData.length;
+    // Get file size without reading entire file into memory
+    const stats = await fs.stat(tempFilePath);
+    const fileSize = stats.size;
 
     // Get storage instance and create document
     const storage = StorageFactory.getStorage();

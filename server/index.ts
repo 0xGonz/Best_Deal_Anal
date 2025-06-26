@@ -23,8 +23,14 @@ import { LoggingService } from "./services";
 // Main async function to allow using await
 async function initialize() {
   const app = express();
-  app.use(express.json({ limit: "1mb" }));
-  app.use(express.urlencoded({ extended: false, limit: "1mb" }));
+  app.use(express.json({ limit: "50mb" }));
+  app.use(express.urlencoded({ extended: false, limit: "50mb" }));
+
+  // Create temp directory for file uploads if it doesn't exist
+  if (!fs.existsSync('temp')) {
+    fs.mkdirSync('temp');
+    console.log('📁 Created temp directory for uploads');
+  }
 
   // ─── SESSION CONFIGURATION - SINGLE POINT OF TRUTH ─────────────────────────
   // Initialize the StorageFactory to use the hybrid storage implementation

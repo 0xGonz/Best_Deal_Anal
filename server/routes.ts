@@ -11,7 +11,6 @@ import leaderboardRoutes from './routes/leaderboard';
 import activityRoutes from './routes/activity';
 import notificationsRoutes from './routes/notifications';
 import documentsRoutes from './routes/documents';
-import simpleUploadRoutes from './routes/simple-upload';
 import allocationsRoutes from './routes/allocations';
 import productionAllocationsRouter from './routes/production-allocations';
 import capitalCallsRoutes from './routes/capital-calls';
@@ -97,7 +96,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/activity', activityRoutes);
   app.use('/api/notifications', notificationsRoutes);
   app.use('/api/documents', documentsRoutes);
-  app.use('/api/upload', simpleUploadRoutes);
   app.use('/api/system', systemRouter);
   app.use('/api/v1', v1Router); // V1 API routes including AI analysis
   app.use('/api/ai-analysis', aiAnalysisRoutes); // Direct access to AI analysis

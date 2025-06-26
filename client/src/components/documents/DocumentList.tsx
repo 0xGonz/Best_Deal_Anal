@@ -284,13 +284,12 @@ export default function DocumentList({ dealId }: DocumentListProps) {
       endpoint: '/api/upload/simple-upload'
     });
 
-    // Validate dealId exists before upload - check for known invalid IDs
-    const invalidDealIds = [5]; // Add any other known invalid deal IDs here
-    if (!dealId || invalidDealIds.includes(Number(dealId))) {
+    // Basic validation of dealId
+    if (!dealId || isNaN(Number(dealId))) {
       console.error('❌ Invalid deal ID detected:', dealId);
       toast({
         title: 'Upload failed',
-        description: `Deal ID ${dealId} does not exist. Please navigate to a valid deal and try again.`,
+        description: 'Invalid deal ID. Please navigate to a valid deal and try again.',
         variant: 'destructive',
       });
       setIsUploading(false);
@@ -302,8 +301,8 @@ export default function DocumentList({ dealId }: DocumentListProps) {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
       
-      // Use the reliable simple upload endpoint
-      const res = await fetch('/api/upload/simple-upload', {
+      // Use the documents upload endpoint
+      const res = await fetch('/api/documents/upload', {
         method: 'POST',
         body: formData,
         credentials: 'include', // Include cookies for authentication
