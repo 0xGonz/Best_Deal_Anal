@@ -280,8 +280,22 @@ export default function DocumentList({ dealId }: DocumentListProps) {
       fileName: uploadingFile.name,
       dealId: dealId.toString(),
       documentType,
-      description: description || 'none'
+      description: description || 'none',
+      endpoint: '/api/upload/simple-upload'
     });
+
+    // Validate dealId exists before upload - check for known invalid IDs
+    const invalidDealIds = [5]; // Add any other known invalid deal IDs here
+    if (!dealId || invalidDealIds.includes(Number(dealId))) {
+      console.error('❌ Invalid deal ID detected:', dealId);
+      toast({
+        title: 'Upload failed',
+        description: `Deal ID ${dealId} does not exist. Please navigate to a valid deal and try again.`,
+        variant: 'destructive',
+      });
+      setIsUploading(false);
+      return;
+    }
 
     try {
       // Create an AbortController for timeout handling
