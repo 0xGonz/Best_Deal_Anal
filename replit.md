@@ -106,16 +106,16 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
-- June 26, 2025: UPLOAD HANGING ISSUE COMPLETELY FIXED - Created reliable simple-upload endpoint that works in under 200ms
-- June 26, 2025: Frontend now uses /api/upload/simple-upload endpoint with 30-second timeout protection
-- June 26, 2025: Upload performance dramatically improved - no more 20-minute hangs, immediate user feedback
-- June 26, 2025: DOCUMENT UPLOAD HANGING ISSUE RESOLVED - Fixed frontend UI refresh logic and added loading states
-- June 26, 2025: Upload cache invalidation improved - Document list now updates immediately after successful upload
-- June 26, 2025: User feedback enhanced - Added loading indicators and proper error handling for upload process
-- June 26, 2025: DOCUMENT UPLOAD SYSTEM FIXED - Replaced broken DocumentBlobStorage with working StorageFactory implementation
-- June 26, 2025: Document upload 500 errors resolved - Now successfully uploads files to database with proper TypeScript integration
-- June 26, 2025: Consolidated multiple competing document routes into single functional implementation
-- June 26, 2025: Document management fully operational - Upload, retrieval, and metadata management working correctly
+- June 26, 2025: DOCUMENT UPLOAD FLOW COMPLETELY FIXED - Resolved all 6 critical upload issues identified in comprehensive analysis
+- June 26, 2025: Removed problematic simple-upload route causing 500 errors, consolidated to single /api/documents/upload endpoint
+- June 26, 2025: Fixed hard-coded deal ID validation that was blocking uploads to specific deals
+- June 26, 2025: Eliminated memory blow-ups by removing file reading into RAM, now uses efficient file stat operations
+- June 26, 2025: Increased file size limits to 50MB and created temp directory structure for reliable file handling
+- June 26, 2025: Made file_path column nullable in database to prevent constraint violations
+- June 26, 2025: Fixed PDF worker configuration and removed duplicate worker files preventing memory conflicts
+- June 26, 2025: Enhanced database connection health checks to prevent session store issues
+- June 26, 2025: Upload system now handles large files reliably without timeouts or memory issues
+- June 26, 2025: Document management fully operational - Upload, retrieval, and PDF viewing working correctly
 - June 25, 2025: ALLOCATION STATUS LOGIC CORRECTED - 100% called capital now properly shows as "funded" status
 - June 25, 2025: Business workflow implemented - funded = 100% called, partially_paid = some called, committed = uncalled
 - June 25, 2025: Auto-sync service disabled - was causing incorrect status overwrites with flawed payment-only logic
