@@ -297,19 +297,6 @@ export default function DocumentList({ dealId }: DocumentListProps) {
       return;
     }
 
-    // Check file size before upload (50MB limit)
-    const maxSize = 50 * 1024 * 1024; // 50MB
-    if (uploadingFile.size > maxSize) {
-      console.error('❌ File too large:', uploadingFile.size);
-      toast({
-        title: 'File too large',
-        description: `File size is ${(uploadingFile.size / 1024 / 1024).toFixed(1)}MB. Maximum allowed is 50MB.`,
-        variant: 'destructive',
-      });
-      setIsUploading(false);
-      return;
-    }
-
     try {
       // Create an AbortController for timeout handling
       const controller = new AbortController();
