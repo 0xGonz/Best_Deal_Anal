@@ -60,12 +60,9 @@ router.post('/upload', requireAuth, upload.single('file'), async (req, res) => {
       uploadedBy: userId
     });
 
-    // Clean up temporary file
-    try {
-      await fs.unlink(tempFilePath);
-    } catch (cleanupError) {
-      console.warn('Failed to cleanup temp file:', cleanupError);
-    }
+    // Keep temporary file for now since we're storing the path
+    // In production, you'd want to move this to permanent storage
+    // and then clean up the temp file
 
     console.log(`✅ Document uploaded successfully: ID ${document.id}`);
     res.json({

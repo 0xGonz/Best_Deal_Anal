@@ -281,7 +281,7 @@ export default function DocumentList({ dealId }: DocumentListProps) {
       dealId: dealId.toString(),
       documentType,
       description: description || 'none',
-      endpoint: '/api/upload/simple-upload'
+      endpoint: '/api/documents/upload'
     });
 
     // Basic validation of dealId

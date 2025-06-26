@@ -7,8 +7,11 @@ import { pdfjs } from 'react-pdf';
  * ensuring version consistency and eliminating CORS issues.
  */
 
-// Configure PDF.js to use a local worker file served by the application
-pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+// Configure PDF.js to use the bundled worker file from assets
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.js',
+  import.meta.url
+).toString();
 
 console.log('✅ PDF.js worker configured correctly:', pdfjs.GlobalWorkerOptions.workerSrc);
 

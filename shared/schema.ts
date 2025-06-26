@@ -63,7 +63,7 @@ export const documents = pgTable("documents", {
   fileName: text("file_name").notNull(),
   fileType: text("file_type").notNull(),
   fileSize: integer("file_size").notNull(),
-  filePath: text("file_path").notNull(),
+  filePath: text("file_path"),
   fileData: text("file_data"), // Store actual file content as base64 encoded binary data
   uploadedBy: integer("uploaded_by").notNull().references(() => users.id, { onDelete: "restrict" }),
   uploadedAt: timestamp("uploaded_at").defaultNow().notNull(),
