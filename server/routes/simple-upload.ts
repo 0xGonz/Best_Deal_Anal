@@ -30,6 +30,13 @@ router.post('/simple-upload', requireAuth, upload.single('file'), async (req, re
       return res.status(400).json({ error: 'Deal ID is required' });
     }
 
+    // Validate that the deal exists before attempting upload
+    const dealExists = await storage.getDeal(parseInt(dealId));
+    if (!dealExists) {
+      console.log(`❌ Deal ${dealId} does not exist`);
+      return res.status(400).json({ error: `Deal with ID ${dealId} not found. Please select a valid deal.` });
+    }
+
     const userId = req.session.userId!;
     const fileName = req.file.originalname;
     const fileType = req.file.mimetype;
