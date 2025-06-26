@@ -284,12 +284,19 @@ export default function DocumentList({ dealId }: DocumentListProps) {
     });
 
     try {
-      // Use a direct fetch call instead of apiRequest for FormData upload
-      const res = await fetch('/api/documents/upload', {
+      // Create an AbortController for timeout handling
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      
+      // Use the reliable simple upload endpoint
+      const res = await fetch('/api/upload/simple-upload', {
         method: 'POST',
         body: formData,
         credentials: 'include', // Include cookies for authentication
+        signal: controller.signal,
       });
+      
+      clearTimeout(timeoutId);
       
       console.log('📡 Upload response status:', res.status);
       
@@ -320,9 +327,18 @@ export default function DocumentList({ dealId }: DocumentListProps) {
       
     } catch (error) {
       console.error('💥 Document upload error:', error);
+      
+      let errorMessage = 'There was an error uploading your document. Please try again.';
+      
+      if (error && typeof error === 'object' && 'name' in error && error.name === 'AbortError') {
+        errorMessage = 'Upload timed out after 30 seconds. Please try a smaller file or check your connection.';
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: 'Upload failed',
-        description: error instanceof Error ? error.message : 'There was an error uploading your document. Please try again.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
