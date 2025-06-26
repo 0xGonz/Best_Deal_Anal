@@ -325,6 +325,8 @@ export default function DocumentList({ dealId }: DocumentListProps) {
         description: error instanceof Error ? error.message : 'There was an error uploading your document. Please try again.',
         variant: 'destructive',
       });
+    } finally {
+      setIsUploading(false);
     }
   };
 

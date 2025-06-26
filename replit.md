@@ -106,6 +106,9 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
+- June 26, 2025: DOCUMENT UPLOAD HANGING ISSUE RESOLVED - Fixed frontend UI refresh logic and added loading states
+- June 26, 2025: Upload cache invalidation improved - Document list now updates immediately after successful upload
+- June 26, 2025: User feedback enhanced - Added loading indicators and proper error handling for upload process
 - June 26, 2025: DOCUMENT UPLOAD SYSTEM FIXED - Replaced broken DocumentBlobStorage with working StorageFactory implementation
 - June 26, 2025: Document upload 500 errors resolved - Now successfully uploads files to database with proper TypeScript integration
 - June 26, 2025: Consolidated multiple competing document routes into single functional implementation
