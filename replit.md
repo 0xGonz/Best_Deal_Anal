@@ -106,6 +106,10 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
+- June 26, 2025: DOCUMENT UPLOAD SYSTEM FIXED - Replaced broken DocumentBlobStorage with working StorageFactory implementation
+- June 26, 2025: Document upload 500 errors resolved - Now successfully uploads files to database with proper TypeScript integration
+- June 26, 2025: Consolidated multiple competing document routes into single functional implementation
+- June 26, 2025: Document management fully operational - Upload, retrieval, and metadata management working correctly
 - June 25, 2025: ALLOCATION STATUS LOGIC CORRECTED - 100% called capital now properly shows as "funded" status
 - June 25, 2025: Business workflow implemented - funded = 100% called, partially_paid = some called, committed = uncalled
 - June 25, 2025: Auto-sync service disabled - was causing incorrect status overwrites with flawed payment-only logic
