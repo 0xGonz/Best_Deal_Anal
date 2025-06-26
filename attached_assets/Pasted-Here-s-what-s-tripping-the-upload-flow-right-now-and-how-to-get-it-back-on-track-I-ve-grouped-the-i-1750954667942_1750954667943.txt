@@ -1,0 +1,50 @@
+Here’s what’s tripping the upload flow right now and how to get it back on track. I’ve grouped the issues by where they surface so you can tackle them in a logical order.
+
+1. Front-end / back-end contract is out of sync
+Symptom	Root cause	Fast fix
+500 or 404 every time you hit Upload	The React component calls POST /api/upload/simple-upload, but the “full-fat” route that writes a valid filePath is /api/documents/upload. The simple-upload handler was only meant for in-memory testing and still inserts an empty string for filePath.	Pick one route and stick with it. Simplest: change the React call to /api/documents/upload and delete the simple-upload code so you can’t hit it by accident.
+“Upload failed – Deal ID … does not exist” even when the deal is valid	DocumentList.tsx hard-codes const invalidDealIds = [5]. Any doc you try to attach to deal 5 dies in the UI before it ever reaches the server.	Kill the sentinel array or replace it with a real existence check (e.g., fetch /api/deals/:id and verify a 200).
+
+2. Multer & filesystem mismatches
+temp/ directory – Multer will crash with ENOENT if the working directory isn’t the repo root. Create the folder at boot:
+
+ts
+Copy
+Edit
+import fs from 'fs';
+if (!fs.existsSync('temp')) fs.mkdirSync('temp');
+10 MB limit – limits.fileSize in documents.ts is 10 MB. Anything bigger throws a 413. Bump the limit or surface a friendly toast in the UI.
+
+3. Memory blow-ups & long-running uploads
+You read the entire file into RAM (await fs.readFile(tempFilePath)) and then Base-64 it before writing to Postgres. Large PDFs = Node heap explosion and a 30 s abort in the React AbortController.
+Fix: stream uploads straight to disk (or S3) and store only the path/URL in Postgres. If you really need the blob in the DB, use Postgres large objects or bytea and stream with pg-COPY instead of loading the whole thing into JS memory.
+
+4. Database constraint traps
+Schema marks file_path NOT NULL. The simple-upload handler inserts '', which passes the TypeScript compiler but still hits the DB as an empty string. If you decide to keep that route, give it the real temp path or make file_path nullable.
+
+5. PDF worker duplication & crashes
+Three copies of pdf.worker.min.js are checked in (/client/public, /client/src/assets, /public). Vite includes whichever it resolves first, but the others still load via <script> tags in the compiled HTML, so you get multiple workers and runaway memory. Delete the dupes and import one worker module via pdfjs.GlobalWorkerOptions.workerSrc.
+
+6. Session / auth pitfalls
+requireAuth gates every upload, yet req.session.userId comes from Express-Session using the PG store. If you spin the dev server without a reachable Postgres instance, sessions silently downgrade to MemoryStore and evaporate on restart – uploads then fail with a 401.
+
+Ensure DATABASE_URL and SESSION_SECRET are set before you start the dev server.
+
+Add a health-check at boot (await pool.query('SELECT 1')) and crash early if it fails.
+
+Quick triage checklist
+Rename or remove /server/routes/simple-upload.ts.
+
+Point the React handleUpload to /api/documents/upload.
+
+Add if (!fs.existsSync('temp')) fs.mkdirSync('temp') at server start.
+
+Raise limits.fileSize (or enforce it in the UI with a file-size checker).
+
+Replace RAM-heavy fs.readFile with a stream → S3 or local storage.
+
+Nuke extra pdf.worker.min.js files.
+
+Verify Postgres is running and reachable before Express starts.
+
+Work through these in order and you’ll go from “nothing uploads” to a stable, scalable document pipeline. Ping me once you’ve knocked these out and we can harden the tests or refactor anything that’s still flaky.
