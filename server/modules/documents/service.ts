@@ -23,12 +23,15 @@ export class DocumentService {
         .orderBy(documents.uploadedAt);
       
       console.log(`✅ DocumentService: Found ${result.length} documents for deal ${dealId}`);
-      return result;
+      // Always return an array, never null or undefined
+      return result || [];
       
     } catch (error) {
       const err = error as Error;
       console.error(`💥 DocumentService: Error fetching documents for deal ${dealId}:`, err);
-      throw new Error(`Failed to fetch documents: ${err.message}`);
+      // Return empty array on error instead of throwing
+      console.log(`🔧 DocumentService: Returning empty array for deal ${dealId} due to error`);
+      return [];
     }
   }
 

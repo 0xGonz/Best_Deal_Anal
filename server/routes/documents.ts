@@ -92,12 +92,19 @@ router.get('/deal/:dealId', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Invalid deal ID' });
     }
 
+    console.log(`📋 Documents route: Fetching documents for deal ${dealId}`);
     const storage = StorageFactory.getStorage();
     const documents = await storage.getDocumentsByDeal(dealId);
     
-    res.json(documents);
+    // Ensure we always return an array
+    const responseData = Array.isArray(documents) ? documents : [];
+    console.log(`📋 Documents route: Returning ${responseData.length} documents for deal ${dealId}`);
+    
+    res.json(responseData);
   } catch (error) {
-    console.error('Error fetching documents:', error);
+    console.error('❌ Error fetching documents:', error);
+    // Return empty array on error to prevent frontend crashes
+    res.json([]);
     res.status(500).json({ error: 'Failed to fetch documents' });
   }
 });

@@ -67,6 +67,7 @@ export default function DocumentList({ dealId }: DocumentListProps) {
   const [editDocumentType, setEditDocumentType] = useState('other');
   const [editDescription, setEditDescription] = useState('');
   const [isPdfViewerOpen, setIsPdfViewerOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -261,6 +262,8 @@ export default function DocumentList({ dealId }: DocumentListProps) {
   const handleUpload = async () => {
     if (!uploadingFile) return;
 
+    setIsUploading(true);
+    
     // Create FormData for file upload - this matches the multer implementation on the server
     const formData = new FormData();
     // The key 'file' must match the multer field name in upload.single('file')
@@ -299,13 +302,14 @@ export default function DocumentList({ dealId }: DocumentListProps) {
       const responseData = await res.json();
       console.log('✅ Upload successful:', responseData);
       
-      // Invalidate queries to refresh the document list
-      queryClient.invalidateQueries({ queryKey: [`/api/documents/deal/${dealId}`] });
+      // Force immediate refresh of document list
+      await queryClient.invalidateQueries({ queryKey: [`/api/documents/deal/${dealId}`] });
+      await queryClient.refetchQueries({ queryKey: [`/api/documents/deal/${dealId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/deals/${dealId}`] });
       
       toast({
         title: 'Document uploaded',
-        description: 'Your document has been successfully uploaded.',
+        description: `${uploadingFile.name} has been successfully uploaded.`,
       });
       
       // Reset form
