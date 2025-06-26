@@ -1,0 +1,55 @@
+index-D1CD-VGa.js:554
+POST https://deal-flow-lifecyclev-1-bgonzalez9.replit.app/api/documents/upload 500 (Internal Server Error)
+index-D1CD-VGa.js:554
+POST https://deal-flow-lifecyclev-1-bgonzalez9.replit.app/api/documents/upload 500 (Internal Server Error)
+index-D1CD-VGa.js:48 Query fetch request: /api/system/health
+{queryKey: Array(1), unauthorizedBehavior: 'returnNull'}
+index-D1CD-VGa.js:48 Query Response from /api/system/health:
+{status: 200, statusText: '', ok: true}
+index-D1CD-VGa.js:48 Query data received from /api/system/health:
+{status: 'ok', timestamp: '2025-06-26T15:06:53.043Z', storage: 'pg', databaseConnected: true, environment: 'production', …}
+index-D1CD-VGa.js:467 Using /me endpoint data for avatar
+{id: 5, username: 'intern', fullName: 'Intern User', initials: 'IU', email: 'intern@doliveradvisors.com', …}
+index-D1CD-VGa.js:48 Query fetch request: /api/auth/me
+{queryKey: Array(1), unauthorizedBehavior: 'returnNull'}
+index-D1CD-VGa.js:48 Query Response from /api/auth/me:
+{status: 200, statusText: '', ok: true}
+index-D1CD-VGa.js:48 Query data received from /api/auth/me:
+{id: 5, username: 'intern', fullName: 'Intern User', initials: 'IU', email: 'intern@doliveradvisors.com', …}
+index-D1CD-VGa.js:467 Using /me endpoint data for avatar
+{id: 5, username: 'intern', fullName: 'Intern User', initials: 'IU', email: 'intern@doliveradvisors.com', …}
+index-D1CD-VGa.js:467 Using /me endpoint data for avatar
+{id: 5, username: 'intern', fullName: 'Intern User', initials: 'IU', email: 'intern@doliveradvisors.com', …}
+index-D1CD-VGa.js:48 Query fetch request: /api/system/health
+{queryKey: Array(1), unauthorizedBehavior: 'returnNull'}
+index-D1CD-VGa.js:48 Query Response from /api/system/health:
+{status: 200, statusText: '', ok: true}
+index-D1CD-VGa.js:48 Query data received from /api/system/health:
+{status: 'ok', timestamp: '2025-06-26T15:07:23.323Z', storage: 'pg', databaseConnected: true, environment: 'production', …}
+index-D1CD-VGa.js:467 Using /me endpoint data for avatar
+{id: 5, username: 'intern', fullName: 'Intern User', initials: 'IU', email: 'intern@doliveradvisors.com', …}
+index-D1CD-VGa.js:48 Query fetch request: /api/auth/me
+{queryKey: Array(1), unauthorizedBehavior: 'returnNull'}
+index-D1CD-VGa.js:48 Query Response from /api/auth/me:
+{status: 200, statusText: '', ok: true}
+index-D1CD-VGa.js:48 Query data received from /api/auth/me:
+{id: 5, username: 'intern', fullName: 'Intern User', initials: 'IU', email: 'intern@doliveradvisors.com', …}
+index-D1CD-VGa.js:467 Using /me endpoint data for avatar
+{id: 5, username: 'intern', fullName: 'Intern User', initials: 'IU', email: 'intern@doliveradvisors.com', …}
+index-D1CD-VGa.js:467 Using /me endpoint data for avatar
+{id: 5, username: 'intern', fullName: 'Intern User', initials: 'IU', email: 'intern@doliveradvisors.com', …}
+index-D1CD-VGa.js:48 Query fetch request: /api/system/health
+{queryKey: Array(1), unauthorizedBehavior: 'returnNull'}
+index-D1CD-VGa.js:48 Query Response from /api/system/health:
+{status: 200, statusText: '', ok: true}
+index-D1CD-VGa.js:48 Query data received from /api/system/health:
+{status: 'ok', timestamp: '2025-06-26T15:07:53.591Z', storage: 'pg', databaseConnected: true, environment: 'production', …}
+index-D1CD-VGa.js:467 Using /me endpoint data for avatar
+{id: 5, username: 'intern', fullName: 'Intern User', initials: 'IU', email: 'intern@doliveradvisors.com', …}
+index-D1CD-VGa.js:48 Query fetch request: /api/auth/me
+{queryKey: Array(1), unauthorizedBehavior: 'returnNull'}
+index-D1CD-VGa.js:48 Query Response from /api/auth/me:
+{status: 200, statusText: '', ok: true}
+index-D1CD-VGa.js:48 Query data received from /api/auth/me:
+{id: 5, username: 'intern', fullName: 'Intern User', initials: 'IU', email: 'intern@doliveradvisors.com', …}
+﻿
