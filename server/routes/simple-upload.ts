@@ -5,11 +5,11 @@ import { requireAuth } from '../utils/auth';
 
 const router = express.Router();
 
-// Simple in-memory upload with smaller limits for testing
+// Simple in-memory upload with larger limits for PDFs
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 50 * 1024 * 1024, // 50MB limit for PDFs
   }
 });
 
