@@ -6,6 +6,7 @@
 import { Router, Request, Response } from 'express';
 import { productionAllocationService } from '../services/production-allocation.service';
 import { productionCapitalCallsService } from '../services/production-capital-calls.service';
+import { AllocationDeletionService } from '../services/allocation-deletion.service.js';
 import { requireAuth } from '../utils/auth';
 import { requirePermission } from '../utils/permissions';
 import { z } from 'zod';
@@ -14,6 +15,9 @@ import { fundAllocations, deals } from '../../shared/schema';
 import { eq } from 'drizzle-orm';
 
 const router = Router();
+
+// Initialize services
+const allocationDeletionService = new AllocationDeletionService();
 
 // Validation schemas
 const createAllocationSchema = z.object({
@@ -256,33 +260,19 @@ router.delete('/:id', requireAuth, requirePermission('delete', 'allocation'), as
       return res.status(400).json({ error: 'Invalid allocation ID' });
     }
 
-    // Delete allocation
-    const result = await productionAllocationService.deleteAllocation(allocationId, userId);
+    // Use systematic deletion service that handles all blockers automatically
+    const result = await allocationDeletionService.safeDelete(allocationId, userId);
 
     if (!result.success) {
-      if (result.error?.includes('not found')) {
-        return res.status(404).json({
-          error: 'Allocation not found'
-        });
-      }
-
-      if (result.error?.includes('capital calls')) {
-        return res.status(409).json({
-          error: 'Cannot delete allocation with related capital calls',
-          message: result.error
-        });
-      }
-
-      return res.status(500).json({
-        error: 'Failed to delete allocation',
-        message: result.error
+      return res.status(409).json({
+        error: 'Cannot delete allocation',
+        message: result.message
       });
     }
 
     res.json({
       success: true,
-      message: 'Allocation deleted successfully',
-      auditId: result.auditId
+      message: result.message
     });
 
   } catch (error) {
