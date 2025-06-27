@@ -1,0 +1,120 @@
+What’s happening
+Newly-uploaded PDFs render fine → the download route you just patched is working when filePath is populated.
+
+Older PDFs blow up with “Invalid PDF structure.” That means the server did return a payload, but the first bytes were not %PDF-…. In the pre-refactor rows either file_data is empty/NULL or the base-64 string was silently truncated months ago (common when you hit Multer’s old 10 MB cap).
+
+You now have two storage formats in the same table:
+
+vintage	file_path	file_data	Result
+New (disk/S3)	storage/documents/deal-49/…	NULL	✅ renders
+Old (DB blob)	NULL	(often empty or truncated)	❌ “Invalid PDF structure”
+
+Fast way to confirm
+sql
+Copy
+Edit
+-- look at one that fails
+SELECT id,
+       length(file_data)   AS bytes_in_db,
+       file_path
+FROM   documents
+WHERE  id = 41;
+bytes_in_db = 0 or only a few thousand → PDF is missing.
+
+file_path IS NULL → viewer tries the empty blob, fails.
+
+Same query on a working doc shows bytes_in_db = NULL and a non-null file_path.
+
+Quick, surgical repairs
+If you still have the original files on disk / in e-mail
+just re-upload them from the UI. The new row will include file_path and render.
+
+If the only copy was the DB blob
+but bytes_in_db looks plausible (e.g. > 50 000), patch the download handler to fall back:
+
+ts
+Copy
+Edit
+// after sending file_path …
+if (doc.fileData?.length) {
+  return res.send(Buffer.from(doc.fileData, 'base64'));
+}
+(You already added this—but the blob may be truncated; see below.)
+
+If the blob is truncated or empty
+those files are gone. Mark the row so the UI shows “needs re-upload” instead of a red toast:
+
+sql
+Copy
+Edit
+UPDATE documents
+SET    status = 'missing',              -- add a tiny enum column if you like
+       file_data = NULL
+WHERE  id = 41;
+One-time migration script (recommended)
+ts
+Copy
+Edit
+// scripts/migrate-old-document-blobs.ts
+import { pool } from '../src/db';
+import { promises as fs } from 'fs';
+import path from 'path';
+
+(async () => {
+  const { rows } = await pool.query(`
+    SELECT id, file_name, file_data
+    FROM   documents
+    WHERE  file_data IS NOT NULL
+      AND  file_path IS NULL
+  `);
+
+  for (const row of rows) {
+    try {
+      const diskPath = `storage/documents/legacy/${row.id}_${row.file_name}`;
+      await fs.mkdir(path.dirname(diskPath), { recursive: true });
+      await fs.writeFile(diskPath, Buffer.from(row.file_data, 'base64'));
+      await pool.query(
+        'UPDATE documents SET file_path = $1, file_data = NULL WHERE id = $2',
+        [diskPath, row.id]
+      );
+      console.log(`✔ migrated doc ${row.id}`);
+    } catch (err) {
+      console.error(`✖ failed doc ${row.id}`, err);
+    }
+  }
+
+  await pool.end();
+})();
+Run once, then delete the file_data column or set your DB check:
+
+sql
+Copy
+Edit
+ALTER TABLE documents
+  ADD CONSTRAINT chk_storage
+  CHECK ( (file_path IS NOT NULL) AND (file_data IS NULL) );
+Front-end UX guard
+Before calling pdfjs.getDocument(url):
+
+ts
+Copy
+Edit
+fetch(url, { headers: { Range: 'bytes=0-1023' } })
+  .then(r => r.ok ? r.arrayBuffer() : Promise.reject())
+  .then(buf => {
+    if (!new TextDecoder().decode(buf.slice(0, 5)).startsWith('%PDF-')) {
+      throw new Error('stub-or-missing');
+    }
+    // proceed to load full doc
+  })
+  .catch(() => toast.error('Document missing – please re-upload'));
+Users get a clear message instead of a cryptic stack trace.
+
+Next steps
+Run the SQL length check on a few failing IDs—confirm the blobs are empty/truncated.
+
+Pick a path: re-upload manually or run the migration script.
+
+Drop the legacy file_data field once everything is on disk/S3; keeps the table lean and eliminates this class of bug forever.
+
+Ping me when you’ve migrated a couple of old docs and the viewer shows them correctly, or if any row still refuses to render.
