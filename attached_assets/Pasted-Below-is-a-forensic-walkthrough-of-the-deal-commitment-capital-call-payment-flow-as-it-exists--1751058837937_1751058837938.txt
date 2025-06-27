@@ -1,0 +1,101 @@
+Below is a forensic walkthrough of the deal → commitment → capital-call → payment flow as it exists in DealFlowLifecycle v1, the failure modes I uncovered, and a blueprint for hardening the workflow so “committed / partially-paid / funded” stays correct no matter how a deal drips capital.
+
+1 | Where the design is solid
+Data model – fund_allocations vs capital_calls is the right split: one row for the promise (commitment) and many rows for draws.
+
+Enums – you already condensed allocation status to committed | partially_paid | funded and capital-call status to scheduled | called | paid | overdue | defaulted, which is exactly the minimal state machine you need.
+
+Pure calculator – AllocationCalculator.calculate() gives a clean, side-effect-free way to derive totals – keep that.
+
+Everything else that follows is about wiring these good pieces together.
+
+2 | Critical break-points
+Missing status synchronisation
+
+AllocationStatusService.updateAllocationStatus() is an empty stub.
+
+CapitalCallService.updateCapitalCall() assumes “lifecycle events” will propagate changes … but no event emitter/listener exists, so the allocation row is never refreshed when a call is paid.
+
+Result: fund_allocations.paidAmount and status freeze at their first value; the UI shows “committed” forever even if payments land.
+
+Payment validation stubbed out
+
+PaymentWorkflowService calls AllocationStatusService.validatePayment(), but that method was never written.
+
+A real payment post therefore throws a TypeError: AllocationStatusService.validatePayment is not a function and the whole request rolls back.
+
+Capital calls never auto-create
+
+CapitalCallService.createCapitalCallsForAllocation() is never invoked by the allocation layer. Commitments therefore have zero capital-call rows unless someone manually hits the POST endpoint. The front-end treats “no calls” as “nothing due”, so paid/unpaid math can never balance.
+
+No constraint guaranteeing internal consistency
+
+There is no CHECK on fund_allocations to enforce paidAmount ≤ amount. One fat-fingered payment can silently push an allocation beyond 100 % and the status calculator will misbehave.
+
+Service sprawl
+
+Nine different allocation-related services (allocation-core, domain, integrity, production-allocation, transaction-safe-allocation, …). Several are half-implemented; a few import the others recursively. This is the source of the “it worked yesterday, broke today” drift you’ve been fighting.
+
+3 | Blueprint for a bullet-proof allocation lifecycle
+Step	What to build	Why it fixes the bug
+A	Single AllocationLifecycleService that owns every state change (createCommitment, scheduleCapitalCalls, recordPayment). Retire the eight legacy services.	Removes race conditions and duplicated logic.
+B	Finish AllocationStatusService:
+• implement validatePayment(allocation, amount) → rejects negatives/over-funding.
+• implement updateAllocationStatus(allocationId) → (i) sum capital_calls.paidAmount; (ii) write fund_allocations.paidAmount; (iii) derive status via calculateStatus(). Call this from every payment or call update.	Guarantees the allocation row is ground truth.
+C	In createAllocation immediately call scheduleCapitalCalls with user-provided cadence (single, quarterly, etc.). Emit a domain-event CapitalCallsCreated.	Ensures capital-call rows always exist, so UI and calculations have data.
+D	Add a database CHECK on fund_allocations:
+CHECK (paid_amount <= amount)	Stops over-payment corruption at the storage layer.
+E	Introduce a Postgres view v_allocation_progress that exposes:
+allocation_id, committed, called, paid, outstanding, uncalled, and an index on allocation_id. Point the dashboard directly at the view instead of re-hydrating in JavaScript.	All sums are computed once, in-db, with ACID guarantees—front-end just reads.
+F	Put an integration-test harness (vitest or jest) that seeds a memory DB with one allocation, three capital calls (0 %, 50 %, 50 %), then posts two payments. Assert lifecycle outputs (status flips to partially_paid then funded, outstanding hits 0).	Locks the contract in place—future refactors can’t break the flow.
+
+4 | Quick wins you can ship today
+Wire up the stub – copy the validatePayment snippet below and drop it into AllocationStatusService.
+
+ts
+Copy
+Edit
+static validatePayment(a: FundAllocation, amt: number) {
+  if (amt <= 0) return { isValid: false, error: 'Payment must be positive' };
+  if ((a.paidAmount || 0) + amt > a.amount)
+    return { isValid: false, error: 'Payment exceeds commitment' };
+  return { isValid: true };
+}
+Trigger status refresh – at the end of PaymentWorkflowService.processPayment() call AllocationStatusService.updateAllocationStatus(allocationId).
+
+UI clarity – expose uncalled = amount - SUM(called) and outstanding = SUM(called) - paidAmount right in the allocation card; color-code red if outstanding > 0 and the due date on the earliest unpaid capital call is passed.
+
+5 | Long-term refactor sequence
+Service consolidation (1–2 days) – fold overlapping services into AllocationLifecycleService.
+
+Database constraints & views (½ day).
+
+Event bus / domain events (1 day) – use p-event or a light wrapper around Node’s EventEmitter; fire CapitalCallPaid, AllocationStatusChanged.
+
+Front-end hooks (1 day) – swap every status-derived calculation for a simple fetch of v_allocation_progress.
+
+Test harness (1 day) – seed data, assert lifecycle.
+
+Cleanup & docs (½ day).
+
+Total: roughly one sprint to get from brittle to production-ready and white-label-safe.
+
+6 | What this gives you when it’s done
+A single source of truth for every dollar (committed, called, paid).
+
+Automatic status flips—no manual patching in the DB console.
+
+Real-time visibility for LPs: they can always see what’s still owed.
+
+Confidence to white-label the platform—because the core accounting logic is now airtight and covered by tests.
+
+Let me know if you’d like code snippets for the event bus or the test suite scaffolding; I can paste those next.
+
+
+
+
+
+
+
+
+
