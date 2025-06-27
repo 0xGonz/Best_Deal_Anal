@@ -21,8 +21,8 @@ async function applyCriticalFixes() {
       CREATE INDEX IF NOT EXISTS idx_timeline_events_deal_created 
         ON timeline_events(deal_id, created_at DESC);
       
-      CREATE INDEX IF NOT EXISTS idx_documents_deal_created 
-        ON documents(deal_id, created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_documents_deal_uploaded 
+        ON documents(deal_id, uploaded_at DESC);
     `);
     console.log('✅ Performance indexes added');
 
