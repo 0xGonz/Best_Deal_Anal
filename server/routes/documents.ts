@@ -2,6 +2,8 @@ import express from 'express';
 import multer from 'multer';
 import { databaseDocumentStorage } from '../services/database-document-storage.js';
 import { requireAuth } from '../utils/auth.js';
+import { apiRateLimiter } from '../middleware/rateLimit.js';
+import DOMPurify from 'isomorphic-dompurify';
 
 const router = express.Router();
 
@@ -25,13 +27,13 @@ const upload = multer({
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type. Only PDF, DOCX, XLSX, XLS, CSV, and images are allowed.'), false);
+      cb(new Error('Invalid file type. Only PDF, DOCX, XLSX, XLS, CSV, and images are allowed.'));
     }
   }
 });
 
-// Upload document with database storage
-router.post('/upload', requireAuth, upload.single('file'), async (req, res) => {
+// Upload document with database storage (with rate limiting for security)
+router.post('/upload', apiRateLimiter, requireAuth, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -59,12 +61,15 @@ router.post('/upload', requireAuth, upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: validation.reason });
     }
 
-    console.log(`Processing document upload: ${req.file.originalname} for deal ${dealId}`);
+    // Sanitize filename for security (prevent XSS)
+    const sanitizedFileName = DOMPurify.sanitize(req.file.originalname);
+    
+    console.log(`Processing document upload: ${sanitizedFileName} for deal ${dealId}`);
 
     // Store document in database
     const newDocument = await databaseDocumentStorage.createDocument({
       dealId: parseInt(dealId),
-      fileName: req.file.originalname,
+      fileName: sanitizedFileName,
       fileType: req.file.mimetype,
       fileSize: req.file.size,
       fileBuffer: req.file.buffer,
