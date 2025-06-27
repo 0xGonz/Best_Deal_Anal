@@ -1,9 +1,4 @@
-// Add debug print to confirm this is the actual boot file
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-const moduleUrl = import.meta.url;
-const modulePath = fileURLToPath(moduleUrl);
-console.log("🐞  Boot file:", modulePath);
+// Server initialization and configuration
 
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
@@ -29,7 +24,6 @@ async function initialize() {
   // Create temp directory for file uploads if it doesn't exist
   if (!fs.existsSync('temp')) {
     fs.mkdirSync('temp');
-    console.log('📁 Created temp directory for uploads');
   }
 
   // ─── SESSION CONFIGURATION - SINGLE POINT OF TRUTH ─────────────────────────
@@ -83,7 +77,7 @@ async function initialize() {
         });
     });
     
-    console.log("Database connectivity check passed");
+
   } catch (error: any) {
     console.error("Database connectivity check failed:", error.message);
     isDbHealthy = false;
@@ -101,7 +95,7 @@ async function initialize() {
         // Add error handling to be more resilient
         errorLog: (err) => console.error("PgSession error:", err)
       });
-      console.log("▶ Using PgSession for sessions (PostgreSQL)");
+
     } catch (error) {
       console.error("Failed to create PostgreSQL session store:", error);
       if (isProd) {
@@ -109,18 +103,14 @@ async function initialize() {
       } else {
         // Fallback to memory store only in dev mode
         sessionStore = createMemoryStore();
-        console.log("▶ Fallback to MemoryStore for sessions due to PostgreSQL error");
+
       }
     }
   } else {
     // Use memory store due to explicit request or database health issues
     sessionStore = createMemoryStore();
     
-    if (forceUseMemory) {
-      console.log("▶ Using MemoryStore for sessions (explicitly requested)");
-    } else {
-      console.log("▶ Using MemoryStore for sessions (database health check failed)");
-    }
+
   }
 
   // Debug the session store to verify it remains consistent
