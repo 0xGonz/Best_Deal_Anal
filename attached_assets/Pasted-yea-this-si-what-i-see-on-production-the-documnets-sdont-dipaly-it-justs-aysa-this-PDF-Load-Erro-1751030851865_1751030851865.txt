@@ -1,0 +1,65 @@
+yea this si what i see on production the documnets sdont dipaly it justs aysa this --- PDF Load Error
+Failed to load PDF: The API version "4.8.69" does not match the Worker version "3.11.174". 
+
+
+ChatGPT said:
+That error means your front-end bundle (React-PDF + pdf.js v 4.8.69) is talking to an old worker file (pdf.js v 3.11.174) that got baked into your production build. Fixing it is just making both sides use the same file.
+
+Pick one of the two proven fixes
+1. Stop shipping your own worker file — let React-PDF load the right one
+Delete every copy of pdf.worker.min.js in /public (or anywhere else you copied it manually).
+
+In your code that runs before you render any PDFs (e.g., src/lib/setupPdfWorker.ts):
+
+ts
+Copy
+Edit
+import { pdfjs } from 'react-pdf';
+
+// Point to the worker that lives inside node_modules/pdfjs-dist
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.js',
+  import.meta.url
+).toString();
+Commit, deploy, and hard-refresh the browser.
+Because the worker is now served straight from node_modules/pdfjs-dist, its version will always match whatever react-pdf just bundled.
+
+2. If you must keep the worker under /public
+During the build (or via a postinstall script) copy the current worker each time:
+
+bash
+Copy
+Edit
+# package.json
+{
+  "scripts": {
+    "postinstall": "cp node_modules/pdfjs-dist/build/pdf.worker.min.js public/pdf.worker.min.js"
+  }
+}
+Make sure setupPdfWorker.ts still points to /pdf.worker.min.js:
+
+ts
+Copy
+Edit
+import { pdfjs } from 'react-pdf';
+pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+Re-deploy. Any time you bump pdfjs-dist, the copy command pulls the matching worker so versions stay in sync.
+
+Quick production sanity-check
+bash
+Copy
+Edit
+# On your deployed site:
+curl -s https://yourdomain.com/pdf.worker.min.js | grep 'pdfjsVersion'
+# Should show 4.8.69 (or whatever react-pdf just bundled)
+If the numbers match, reload the app → select a document → the PDF canvas should render immediately, no “API version … does not match” message.
+
+Do one of those two fixes, redeploy, and the Documents pane will work in production. Let me know if anything’s still blank after that!
+
+
+
+
+
+
+
+
