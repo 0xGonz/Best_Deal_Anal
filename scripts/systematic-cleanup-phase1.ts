@@ -9,7 +9,7 @@
  * 5. Service consolidation prep
  */
 
-import { DatabaseStorage } from '../server/storage';
+import { StorageFactory } from '../server/storage-factory';
 import fs from 'fs';
 import path from 'path';
 
@@ -22,7 +22,7 @@ interface CleanupIssue {
 }
 
 class SystematicCleanupPhase1 {
-  private storage = new DatabaseStorage();
+  private storage = StorageFactory.getInstance();
   private issues: CleanupIssue[] = [];
 
   async runPhase1Cleanup(): Promise<void> {
