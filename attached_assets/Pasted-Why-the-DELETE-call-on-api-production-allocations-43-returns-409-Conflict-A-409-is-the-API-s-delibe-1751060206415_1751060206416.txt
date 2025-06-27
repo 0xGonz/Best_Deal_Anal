@@ -1,0 +1,49 @@
+Why the DELETE call on /api/production/allocations/43 returns 409 Conflict
+A 409 is the API’s deliberate “business rule violated” signal.
+That endpoint will only hard-delete an allocation when all three of these conditions are simultaneously true — and allocation #43 is failing at least one of them:
+
+Guard-rail	Where it is enforced	What it checks
+(1) No capital-call rows	ProductionAllocationsService.delete() → throws AllocationHasCapitalCallsError → maps to HTTP 409	EXISTS (SELECT 1 FROM capital_calls WHERE allocation_id = :allocationId) must be false.
+(2) No payments recorded	Same service, second check	Same EXISTS test in table payments.
+(3) Allocation status is still “committed” (i.e., $0 paid)	Service layer and a DB CHECK (paid_amount = 0); trigger will veto the delete	Protects the audit trail once even $1 has moved.
+
+Because the log shows multiple 409s in a row and the allocation list refresh still contains id 43, the service is stopping the delete before any SQL DELETE is issued, not because of a permission problem.
+
+How to confirm which guard-rail you hit
+Run one quick set of queries (replace 43 if the ID changes):
+
+sql
+Copy
+Edit
+-- Capital–call dependency?
+SELECT COUNT(*) AS calls
+FROM   capital_calls
+WHERE  allocation_id = 43;
+
+-- Payment dependency?
+SELECT COUNT(*) AS payments
+FROM   payments
+WHERE  allocation_id = 43;
+
+-- Status snapshot
+SELECT status, paid_amount
+FROM   fund_allocations
+WHERE  id = 43;
+calls > 0 → You still have at least one call linked to the allocation.
+
+payments > 0 → Someone has posted money; the allocation is now part of your immutable ledger.
+
+paid_amount > 0 or status ≠ committed → Even if there are no open calls, the allocation is already partially/fully funded and cannot be removed.
+
+Legitimate ways to remove or “undo” an allocation
+Situation	Proper action	Why
+Created by mistake and no capital calls/payments yet	Delete the capital-call drafts first, then retry DELETE /allocations/43.	Satisfies guard-rail #1.
+Capital calls exist but were accidental	Cancel each call via DELETE /api/production/capital-calls/:id (returns 204).	Clears guard-rail #1.
+Payments have already been logged	Cannot hard-delete. Instead, mark allocation as “cancelled” or “void” via the Archive button (soft-delete flag). All history stays intact for audit.	Ledger integrity requirement.
+Allocation is partially or fully funded	Same: archive/void. If funds must be returned, create an “offsetting” journal (negative payment) rather than deleting history.	Ensures your capital-account trail stays GAAP-compliant.
+
+(The UI exposes the Archive toggle by default; if you disabled it, re-enable in AllocationsTable.tsx.)
+
+Take-away
+The 409 you’re seeing is the system correctly protecting your ledger, not a bug.
+Delete succeeds only when the allocation is still a clean, unreconciled stub. Otherwise, archive it or reverse it with proper journal entries—never hard-delete once capital has been called or paid.
