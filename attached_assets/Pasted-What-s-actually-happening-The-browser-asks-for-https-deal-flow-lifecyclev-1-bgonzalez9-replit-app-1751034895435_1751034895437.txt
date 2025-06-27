@@ -1,0 +1,74 @@
+What’s actually happening
+
+The browser asks for
+https://deal-flow-lifecyclev-1-bgonzalez9.replit.app/assets/pdfjs-dist/build/pdf.worker.min.js
+
+Your Express / Vite server can’t find that file, so it falls back to index.html.
+index.html is served with the default header Content-Type: text/html.
+
+The client tries to treat that HTML file as an ES-module worker script, but the MIME type
+is wrong and the load fails, so React-PDF (or plain pdfjs) switches to “fake worker” mode.
+Fake worker also needs to import() the real script, so it dies immediately and you get the
+“Setting up fake worker failed” message.
+
+You therefore have two separate problems:
+
+⚠️ Problem	Why it happens	One-line fix
+Missing file	Vite doesn’t copy pdf.worker.min.js into your /assets bundle because the import path you hard-coded never goes through the bundler.	Let Vite do the import for you (see snippet below) or manually place the worker file in client/public and reference it as /pdf.worker.min.js.
+Wrong MIME type	When the fallback index.html is served, the header is text/html. Browsers refuse to execute that as JavaScript.	Once the path is correct, Vite will serve it with text/javascript automatically—but you must stop the request from falling through to index.html first.
+
+Two solid ways to solve it
+1. Let Vite handle the worker (recommended)
+ts
+Copy
+Edit
+// viewer.tsx or App.tsx (before you render <Document>)
+import { pdfjs } from 'react-pdf';
+// 👇 `?url` forces Vite to copy the file and give you a hashed URL
+import workerSrc from 'pdfjs-dist/build/pdf.worker.min.js?url';
+
+pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
+Vite copies pdf.worker.min.js into /assets/<hash>.js at build time.
+
+You never hard-code the path, so it works in dev and prod.
+
+The server now finds the file, serves it with the proper MIME type, and the error disappears.
+
+2. Host one static copy yourself
+Move node_modules/pdfjs-dist/build/pdf.worker.min.js → client/public/pdf.worker.min.js
+
+Remove every other copy of the worker from the repo.
+
+Point pdfjs at it once:
+
+ts
+Copy
+Edit
+import { pdfjs } from 'react-pdf';
+pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+Make sure Express/Vite’s static-file middleware includes client/public (it already does
+in most Vite templates).
+
+Clean-up checklist (do these whichever approach you choose)
+Delete duplicate workers in /client/src/assets/, /public/, etc.
+Multiple <script> tags race to register workers and chew memory.
+
+Remove the <script src="/assets/pdfjs-dist/build/pdf.worker.min.js"> tag from your
+index.html; you no longer need to manually load it.
+
+If you previously set limits.fileSize very low while debugging, bump it back up (PDFs
+
+10 MB will still 413 otherwise).
+
+After these steps, refresh the page in a private window (to avoid cached 404s) and watch the Network tab—you should see the worker load with status 200 and MIME text/javascript, and your PDFs will render again.
+
+Let me know once this part is stable and we’ll tackle any remaining upload-pipeline quirks.
+
+
+
+
+
+
+
+
+
