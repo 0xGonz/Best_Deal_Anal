@@ -106,6 +106,14 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
+- June 27, 2025: CAPITAL CALL PAYMENT WORKFLOW FORENSIC ANALYSIS FIXES IMPLEMENTED - Resolved critical status synchronization failures identified in comprehensive forensic analysis
+- June 27, 2025: Fixed missing validatePayment() method that was causing TypeError crashes when processing payments
+- June 27, 2025: Implemented updateAllocationStatus() synchronization method to ensure allocation status reflects actual capital call payments
+- June 27, 2025: Added database constraints preventing overpayment corruption (paid_amount <= committed_amount)
+- June 27, 2025: Created v_allocation_progress view providing single source of truth for allocation financial data
+- June 27, 2025: PaymentWorkflowService now properly triggers allocation status updates after payment processing
+- June 27, 2025: Database enforces proper payment workflow through capital calls instead of direct allocation updates
+- June 27, 2025: Status synchronization verified working - allocations now correctly show committed/partially_paid/funded based on actual payments
 - June 27, 2025: HYBRID DOCUMENT STORAGE ISSUE COMPLETELY RESOLVED - Fixed "Invalid PDF structure" errors by migrating all documents to consistent file system storage
 - June 27, 2025: Migrated 32 documents from hybrid blob/file storage to clean file system storage using automated migration script
 - June 27, 2025: Identified and marked 1 corrupted PDF (NNE_GLP_DiscussionSlides.pdf) that was causing viewer failures
