@@ -1,0 +1,41 @@
+Let’s zero-in on the Documents pane and the pieces that drive how it shows up on screen.
+Below is a quick “triage grid”—start with the items that have the biggest visual impact and work down. Most fixes take only a few minutes once you know where to look.
+
+Where it lives	What goes wrong	How to spot it in dev-tools	How to fix it
+client/src/components/documents/DocumentsPane.tsx
+and Sidebar / PdfViewer children	Layout collapses, viewer overflows, or nothing scrolls.	In Elements panel the flex container is only 0 px tall or the viewer has width: 0.	1. Give every parent in the chain className="h-full" and min-h-0.
+2. Add min-w-0 to the <div className="flex-1 …"> that wraps PdfViewer so the PDF can shrink instead of forcing overflow.
+DocumentsTab.tsx	Card isn’t tall enough on short screens (Calc height = 100vh – 120 px).	You see a vertical scrollbar inside the Card header instead of in the document list.	Switch to h-screen on the Card and let Tailwind’s responsive utilities handle small layouts, or make the 120 px constant match your actual header size (headerRef.offsetHeight).
+PDF.js worker
+setupPdfWorker.ts + duplicate files in /public and /src/assets	Blank PDF pane or “Worker terminated” errors.	Console logs 404 on /pdf.worker.min.js or “multiple workers created”.	Keep one copy of pdf.worker.min.js (put it in /public), delete the duplicate under src/assets, and restart Vite so it doesn’t cache the old import graph.
+Sidebar.tsx upload flow	Docs list never refreshes after an upload, so the viewer looks empty.	Network tab shows 201 Created but React Query cache still has zero items.	After the uploadMutation succeeds, call
+queryClient.invalidateQueries({queryKey:[\/api/documents/deal/${dealId}`]})`
+so useDealDocuments refetches.
+useDealDocuments hook	Infinite spinner because the query key never matches.	React Query “Devtools” shows one query stuck in loading forever.	Make sure your key is exactly the one you invalidate:
+['/api/documents/deal', dealId] (or the string-template version—just be consistent).
+Database / API
+server/routes/documents*.ts	Front end calls succeed but viewer 404s when it tries to GET the file.	Network tab: upload ➔ 200, file fetch ➔ 404.	Ensure downloadUrl you send back is publicly reachable (/api/documents/:id/download or an S3 signed URL). Then, in UniversalDocumentViewer, use that exact URL.
+
+Quick smoke-test script
+Hard-refresh the front end (clear service-worker cache if you’ve used Vite PWA).
+
+Upload a PDF ≤ 5 MB and watch the Network panel: you should see
+
+POST /api/documents/upload → 201
+
+GET /api/documents/deal/101 → 200 with the new record
+
+GET /pdf.worker.min.js → 200
+
+GET /api/documents/123/download → 200 (blob)
+
+Select the doc in the sidebar. If the main pane is blank, open the console—most PDF-worker problems shout at you there.
+
+If you still see a blank/garbled layout
+Inspect the DOM: if any parent of the viewer has a computed height of 0 px, add min-h-0 or h-full to that element.
+
+Run npm ls react-pdf pdfjs-dist to verify both packages are on the same major/minor version. Mismatched versions break rendering silently.
+
+Tailwind purge: if you added new class names, restart the dev server so Tailwind JIT can pick them up.
+
+Give these a try and let me know what still isn’t lining up—we can dig deeper once the basics are stable.
