@@ -1,0 +1,97 @@
+🔍 useDealDocuments: Processing data for deal 49: []
+index-Bg4TCSmp.js:567 📝 useDealDocuments: Setting 0 documents in context: []
+index-Bg4TCSmp.js:567 ❌ useDealDocuments: No documents found, clearing selection
+index-Bg4TCSmp.js:567 🔍 useDealDocuments: Processing data for deal 49: []
+index-Bg4TCSmp.js:567 📝 useDealDocuments: Setting 0 documents in context: []
+index-Bg4TCSmp.js:567 ❌ useDealDocuments: No documents found, clearing selection
+index-Bg4TCSmp.js:565 
+            
+            
+            HEAD https://deal-flow-lifecyclev-1-bgonzalez9.replit.app/api/documents/42/download net::ERR_ABORTED 404 (Not Found)
+(anonymous) @ index-Bg4TCSmp.js:565
+(anonymous) @ index-Bg4TCSmp.js:565
+sN @ index-Bg4TCSmp.js:40
+fm @ index-Bg4TCSmp.js:40
+W$ @ index-Bg4TCSmp.js:40
+Cd @ index-Bg4TCSmp.js:38
+ile @ index-Bg4TCSmp.js:40
+Jd @ index-Bg4TCSmp.js:40
+u9 @ index-Bg4TCSmp.js:40
+A @ index-Bg4TCSmp.js:25
+P @ index-Bg4TCSmp.js:25
+index-Bg4TCSmp.js:555 
+            
+            
+            GET https://deal-flow-lifecyclev-1-bgonzalez9.replit.app/api/documents/42/download 404 (Not Found)
+AVe @ index-Bg4TCSmp.js:555
+getFullReader @ index-Bg4TCSmp.js:555
+(anonymous) @ index-Bg4TCSmp.js:555
+(anonymous) @ index-Bg4TCSmp.js:555
+rre @ index-Bg4TCSmp.js:555
+nre @ index-Bg4TCSmp.js:555
+index-Bg4TCSmp.js:467 Using /me endpoint data for avatar {id: 4, username: 'Gonz', fullName: 'Brett Gonzalez', initials: 'BG', email: 'bgonzalez@doliveradvisors.com', …}
+index-Bg4TCSmp.js:467 Direct user fetch for avatar ID 8: {id: 8, username: 'Evankeppel', fullName: 'Emily van Keppel', initials: 'EK', email: 'evankeppel@doliveradvisors.com', …}
+index-Bg4TCSmp.js:467 Direct user fetch for avatar ID 5: {id: 5, username: 'intern', fullName: 'Intern User', initials: 'IU', email: 'intern@doliveradvisors.com', …}
+index-Bg4TCSmp.js:554 
+            
+            
+            POST https://deal-flow-lifecyclev-1-bgonzalez9.replit.app/api/documents/upload 500 (Internal Server Error)
+mutationFn @ index-Bg4TCSmp.js:554
+fn @ index-Bg4TCSmp.js:48
+v @ index-Bg4TCSmp.js:48
+start @ index-Bg4TCSmp.js:48
+execute @ index-Bg4TCSmp.js:48
+await in execute
+mutate @ index-Bg4TCSmp.js:48
+(anonymous) @ index-Bg4TCSmp.js:48
+p @ index-Bg4TCSmp.js:554
+f @ index-Bg4TCSmp.js:554
+Aae @ index-Bg4TCSmp.js:37
+Nae @ index-Bg4TCSmp.js:37
+Cae @ index-Bg4TCSmp.js:37
+m$ @ index-Bg4TCSmp.js:37
+gW @ index-Bg4TCSmp.js:37
+(anonymous) @ index-Bg4TCSmp.js:37
+SM @ index-Bg4TCSmp.js:40
+BH @ index-Bg4TCSmp.js:37
+AE @ index-Bg4TCSmp.js:37
+XD @ index-Bg4TCSmp.js:37
+Vae @ index-Bg4TCSmp.js:37
+index-Bg4TCSmp.js:467 Using /me endpoint data for avatar {id: 4, username: 'Gonz', fullName: 'Brett Gonzalez', initials: 'BG', email: 'bgonzalez@doliveradvisors.com', …}
+index-Bg4TCSmp.js:467 Direct user fetch for avatar ID 8: {id: 8, username: 'Evankeppel', fullName: 'Emily van Keppel', initials: 'EK', email: 'evankeppel@doliveradvisors.com', …}
+index-Bg4TCSmp.js:467 Direct user fetch for avatar ID 5: {id: 5, username: 'intern', fullName: 'Intern User', initials: 'IU', email: 'intern@doliveradvisors.com', …}
+index-Bg4TCSmp.js:554 
+            
+            
+            POST https://deal-flow-lifecyclev-1-bgonzalez9.replit.app/api/documents/upload 500 (Internal Server Error)
+mutationFn @ index-Bg4TCSmp.js:554
+fn @ index-Bg4TCSmp.js:48
+v @ index-Bg4TCSmp.js:48
+(anonymous) @ index-Bg4TCSmp.js:48
+Promise.then
+(anonymous) @ index-Bg4TCSmp.js:48
+Promise.catch
+v @ index-Bg4TCSmp.js:48
+start @ index-Bg4TCSmp.js:48
+execute @ index-Bg4TCSmp.js:48
+await in execute
+mutate @ index-Bg4TCSmp.js:48
+(anonymous) @ index-Bg4TCSmp.js:48
+p @ index-Bg4TCSmp.js:554
+f @ index-Bg4TCSmp.js:554
+Aae @ index-Bg4TCSmp.js:37
+Nae @ index-Bg4TCSmp.js:37
+Cae @ index-Bg4TCSmp.js:37
+m$ @ index-Bg4TCSmp.js:37
+gW @ index-Bg4TCSmp.js:37
+(anonymous) @ index-Bg4TCSmp.js:37
+SM @ index-Bg4TCSmp.js:40
+BH @ index-Bg4TCSmp.js:37
+AE @ index-Bg4TCSmp.js:37
+XD @ index-Bg4TCSmp.js:37
+Vae @ index-Bg4TCSmp.js:37
+index-Bg4TCSmp.js:48 Query fetch request: /api/system/health {queryKey: Array(1), unauthorizedBehavior: 'returnNull'}
+index-Bg4TCSmp.js:48 Query Response from /api/system/health: {status: 200, statusText: '', ok: true}
+index-Bg4TCSmp.js:48 Query data received from /api/system/health: {status: 'ok', timestamp: '2025-06-27T20:57:37.481Z', storage: 'pg', databaseConnected: true, environment: 'production', …}
+index-Bg4TCSmp.js:467 Using /me endpoint data for avatar {id: 4, username: 'Gonz', fullName: 'Brett Gonzalez', initials: 'BG', email: 'bgonzalez@doliveradvisors.com', …}
+index-Bg4TCSmp.js:48 Query fetch request: /api/auth/me {queryKey: Array(1), unauthorizedBehavior: 'returnNull'}

@@ -1,9 +1,14 @@
 import express from 'express';
 import multer from 'multer';
+import { promises as fs } from 'fs';
+import { join, dirname } from 'path';
 import { databaseDocumentStorage } from '../services/database-document-storage.js';
 import { requireAuth } from '../utils/auth.js';
 import { apiRateLimiter } from '../middleware/rateLimit.js';
 import DOMPurify from 'isomorphic-dompurify';
+import { db } from '../db-read-replica.js';
+import { documents } from '../../shared/schema.js';
+import { eq } from 'drizzle-orm';
 
 const router = express.Router();
 
@@ -32,7 +37,7 @@ const upload = multer({
   }
 });
 
-// Upload document with database storage (with rate limiting for security)
+// Upload document with file system storage (with rate limiting for security)
 router.post('/upload', apiRateLimiter, requireAuth, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
@@ -66,19 +71,37 @@ router.post('/upload', apiRateLimiter, requireAuth, upload.single('file'), async
     
     console.log(`Processing document upload: ${sanitizedFileName} for deal ${dealId}`);
 
-    // Store document in database
-    const newDocument = await databaseDocumentStorage.createDocument({
-      dealId: parseInt(dealId),
-      fileName: sanitizedFileName,
-      fileType: req.file.mimetype,
-      fileSize: req.file.size,
-      fileBuffer: req.file.buffer,
-      uploadedBy: userId,
-      description,
-      documentType
-    });
+    // Create storage directory
+    const storageDir = join(process.cwd(), 'storage', 'documents');
+    await fs.mkdir(storageDir, { recursive: true });
 
-    console.log(`✓ Document uploaded successfully: ID ${newDocument.id}`);
+    // Generate unique filename to prevent conflicts
+    const timestamp = Date.now();
+    const fileExtension = sanitizedFileName.substring(sanitizedFileName.lastIndexOf('.'));
+    const uniqueFileName = `${timestamp}_${sanitizedFileName}`;
+    const filePath = join(storageDir, uniqueFileName);
+
+    // Save file to disk
+    await fs.writeFile(filePath, req.file.buffer);
+    
+    // Store metadata in database (file system storage mode)
+    const [newDocument] = await db
+      .insert(documents)
+      .values({
+        dealId: parseInt(dealId),
+        fileName: sanitizedFileName,
+        fileType: req.file.mimetype,
+        fileSize: req.file.size,
+        filePath: filePath,
+        fileData: null, // No database storage
+        uploadedBy: userId,
+        description: description || null,
+        documentType: (documentType as any) || 'other',
+        uploadedAt: new Date()
+      })
+      .returning();
+
+    console.log(`✓ Document uploaded successfully: ID ${newDocument.id}, saved to ${filePath}`);
     res.json({
       id: newDocument.id,
       fileName: newDocument.fileName,
@@ -87,7 +110,7 @@ router.post('/upload', apiRateLimiter, requireAuth, upload.single('file'), async
       documentType: newDocument.documentType,
       description: newDocument.description,
       uploadedAt: newDocument.uploadedAt,
-      message: 'Document uploaded and stored in database successfully'
+      message: 'Document uploaded and stored successfully'
     });
 
   } catch (error) {
