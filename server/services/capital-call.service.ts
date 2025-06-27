@@ -165,7 +165,7 @@ export class CapitalCallService {
       const singleCall = await storage.createCapitalCall({
         allocationId: allocation.id,
         callAmount: callAmount,
-        amountType: callAmountType === 'dollar' ? 'dollar' : allocation.amountType,
+        amountType: 'dollar', // Always store as dollar for consistency
         callDate: normalizedDate, // Use the normalized date
         dueDate: normalizedDate, // Use the normalized date
         status: 'paid',
@@ -251,7 +251,7 @@ export class CapitalCallService {
         dueDate: normalizedDueDate, // Use normalized due date
         status: 'scheduled',
         paidAmount: capitalCallsConfig.getInitialPaidAmount(),
-        outstanding_amount: String(callAmount), // Full amount outstanding - match DB column name
+        outstanding_amount: callAmount, // Full amount outstanding
         notes: `Scheduled payment ${i + 1} of ${callCount}`
       });
       
