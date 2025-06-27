@@ -78,17 +78,7 @@ router.post('/logout', asyncHandler(async (req: Request, res: Response) => {
 
 // Get current user route
 router.get('/me', asyncHandler(async (req: Request, res: Response) => {
-  console.log(`Session debug [GET /api/auth/me]: sessionID=${req.sessionID?.slice(0, 8)}..., hasSession=${!!req.session}, userId=${req.session?.userId || 'none'}, headers="${req.headers.cookie?.slice(0, 20)}"`);
-  
-  // Add extended logging to help debug session issues
-  console.log('Session cookies:', req.headers.cookie);
-  console.log('Session object:', {
-    id: req.sessionID,
-    cookie: req.session?.cookie,
-    userId: req.session?.userId,
-    username: req.session?.username,
-    role: req.session?.role,
-  });
+
   
   const user = await getCurrentUser(req);
   

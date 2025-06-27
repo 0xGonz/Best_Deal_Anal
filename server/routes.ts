@@ -28,28 +28,7 @@ import { pool } from './db';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Debug middleware to log session consistency issues
-  app.use('/api', (req: Request, res: Response, next: NextFunction) => {
-    if (req.path === '/closing-schedules') {
-      console.log(`Session debug before closing-schedules: userId=${req.session?.userId || 'none'}, sessionID=${req.sessionID?.substring(0, 8)}...`);
-      
-      // Print session data for debugging
-      if (req.session) {
-        console.log('Session object:', {
-          id: req.sessionID,
-          cookie: req.session.cookie,
-          userId: req.session.userId,
-          username: req.session.username,
-          role: req.session.role
-        });
-        
-        if (!req.session.userId) {
-          console.log('No userId in session, user is not authenticated');
-        }
-      }
-    }
-    next();
-  });
+
   
   // Middleware to attach user object to request - enhanced with error handling
   app.use('/api', async (req: Request, res: Response, next: NextFunction) => {
