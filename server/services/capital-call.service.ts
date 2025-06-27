@@ -141,12 +141,8 @@ export class CapitalCallService {
       if (callAmountType === 'dollar') {
         callAmount = callDollarAmount;
       } else {
-        // For percentage, calculate based on allocation amount
-        if (allocation.amountType === 'dollar') {
-          callAmount = (allocation.amount * callPercentage) / 100;
-        } else {
-          callAmount = callPercentage;
-        }
+        // For percentage calls, always calculate the dollar amount
+        callAmount = (allocation.amount * callPercentage) / 100;
       }
       
       // Log the incoming date for debugging
@@ -233,22 +229,17 @@ export class CapitalCallService {
       let callAmountTypeForCall: 'percentage' | 'dollar';
       
       if (callAmountType === 'dollar') {
-        // Use dollar amount divided by call count
+        // When calling a specific dollar amount, divide by call count
         callAmount = callDollarAmount / callCount;
         callAmountTypeForCall = 'dollar';
       } else {
-        // For the last call, use remaining percentage to ensure we reach 100%
+        // When calling by percentage
         const isLastCall = i === callCount - 1;
         const thisCallPercentage = isLastCall ? remainingPercentage : callPercentage;
         
-        // Calculate call amount based on percentage and allocation type
-        if (allocation.amountType === 'dollar') {
-          callAmount = (baseAmount * thisCallPercentage) / 100;
-          callAmountTypeForCall = 'dollar';
-        } else {
-          callAmount = thisCallPercentage; // For percentage allocations, use the percentage directly
-          callAmountTypeForCall = 'percentage';
-        }
+        // Always store the actual dollar amount in capital calls for consistency
+        callAmount = (allocation.amount * thisCallPercentage) / 100;
+        callAmountTypeForCall = 'dollar';
       }
       
       // Create capital call
