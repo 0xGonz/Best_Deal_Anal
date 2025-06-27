@@ -208,8 +208,7 @@ async function main(): Promise<void> {
   }
 }
 
-if (require.main === module) {
-  main();
-}
+// Run the migration if this file is executed directly
+main().catch(console.error);
 
 export { migrateBlobsToFileSystem };

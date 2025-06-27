@@ -32,11 +32,36 @@ const EmbeddedPDFViewer = ({ documentId, documentName, fileType }: EmbeddedPDFVi
     standardFontDataUrl: 'https://unpkg.com/pdfjs-dist@4.8.69/standard_fonts/',
   }), []);
 
-  // Check if file exists before attempting to load
+  // Check if file exists and validate PDF structure
   const checkFileExists = useCallback(async (url: string) => {
     try {
+      // First check if the endpoint responds
       const response = await fetch(url, { method: 'HEAD' });
-      return response.ok;
+      if (!response.ok) return false;
+      
+      // For PDFs, validate the first few bytes to ensure it's a valid PDF
+      if (url.includes('.pdf') || response.headers.get('content-type')?.includes('application/pdf')) {
+        try {
+          const sampleResponse = await fetch(url, { 
+            headers: { Range: 'bytes=0-1023' } 
+          });
+          
+          if (sampleResponse.ok) {
+            const buffer = await sampleResponse.arrayBuffer();
+            const header = new TextDecoder().decode(buffer.slice(0, 5));
+            
+            if (!header.startsWith('%PDF-')) {
+              console.warn('Document header validation failed - not a valid PDF structure:', header);
+              return false;
+            }
+          }
+        } catch (headerError) {
+          console.warn('PDF header validation failed:', headerError);
+          // Continue anyway - might be a range request issue with legacy storage
+        }
+      }
+      
+      return true;
     } catch {
       return false;
     }
@@ -70,7 +95,18 @@ const EmbeddedPDFViewer = ({ documentId, documentName, fileType }: EmbeddedPDFVi
 
   const onDocumentLoadError = useCallback((error: Error) => {
     console.error('❌ PDF load error:', error);
-    setError(`Failed to load PDF: ${error.message}`);
+    
+    // Check for specific "Invalid PDF structure" error
+    if (error.message.includes('Invalid PDF structure') || 
+        error.message.includes('PDF header not found') ||
+        error.message.includes('Invalid or corrupted PDF')) {
+      setError('Document appears corrupted or incomplete. Please try re-uploading this document.');
+    } else if (error.message.includes('Loading document') || error.message.includes('fetch')) {
+      setError('Unable to load document. Please check your connection and try again.');
+    } else {
+      setError(`Failed to load PDF: ${error.message}`);
+    }
+    
     setLoading(false);
   }, []);
 
