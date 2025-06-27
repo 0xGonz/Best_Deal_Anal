@@ -84,7 +84,7 @@ export class AllocationStatusService {
    * Calculate the correct status based on amount and paidAmount
    * This ensures data consistency across the system
    */
-  static calculateStatus(data: { amount: number; paidAmount: number | null; status?: string }) {
+  static calculateStatus(data: { amount: number; paidAmount: number | null; status?: string | null }) {
     const amount = Number(data.amount) || 0;
     const paidAmount = Number(data.paidAmount) || 0;
     

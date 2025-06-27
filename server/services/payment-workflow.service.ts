@@ -119,6 +119,10 @@ export class PaymentWorkflowService {
         userId || 0
       );
 
+      // 8. CRITICAL FIX: Update allocation status from capital calls 
+      // This is the synchronization method identified in the forensic analysis
+      await AllocationStatusService.updateAllocationStatus(allocationId);
+
       console.log(`Payment processed: Allocation ${allocationId} - $${amount.toLocaleString()} payment`);
       console.log(`  Previous: $${previousPaidAmount.toLocaleString()} (${previousStatus})`);
       console.log(`  New: $${newPaidAmount.toLocaleString()} (${statusResult.status})`);
