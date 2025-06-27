@@ -1,3 +1,5 @@
+import { StorageFactory } from '../storage-factory.js';
+
 /**
  * AllocationStatusService
  * 
@@ -6,9 +8,76 @@
  */
 export class AllocationStatusService {
   
+  /**
+   * Validate a payment against an allocation
+   * Prevents negative payments and overpayments
+   */
+  static validatePayment(allocation: any, amount: number): { isValid: boolean; error?: string } {
+    if (amount <= 0) {
+      return { isValid: false, error: 'Payment must be positive' };
+    }
+    
+    const currentPaid = allocation.paidAmount || 0;
+    if (currentPaid + amount > allocation.amount) {
+      return { isValid: false, error: 'Payment exceeds commitment' };
+    }
+    
+    return { isValid: true };
+  }
+  
+  /**
+   * Update allocation status based on capital call payments
+   * This is the critical synchronization method identified in the forensic analysis
+   */
   static async updateAllocationStatus(allocationId: number): Promise<void> {
-    // Implementation will be added to update allocation status based on payments
-    // This is a stub for the investment workflow service
+    try {
+      const storage = StorageFactory.getStorage();
+      
+      // 1. Get current allocation
+      const allocation = await storage.getFundAllocation(allocationId);
+      if (!allocation) {
+        console.warn(`Allocation ${allocationId} not found`);
+        return;
+      }
+      
+      // 2. Sum all capital call payments for this allocation
+      const capitalCalls = await storage.getCapitalCallsByAllocation(allocationId);
+      let totalPaidAmount = 0;
+      
+      for (const call of capitalCalls) {
+        if (call.paidAmount && call.paidAmount > 0) {
+          totalPaidAmount += call.paidAmount;
+        }
+      }
+      
+      // 3. Calculate correct status using our calculator
+      const statusResult = this.calculateStatus({
+        amount: allocation.amount,
+        paidAmount: totalPaidAmount,
+        status: allocation.status || 'committed'
+      });
+      
+      // 4. Update allocation if changes are needed
+      const needsUpdate = 
+        allocation.paidAmount !== statusResult.paidAmount || 
+        allocation.status !== statusResult.status;
+        
+      if (needsUpdate) {
+        await storage.updateFundAllocation(allocationId, {
+          paidAmount: statusResult.paidAmount,
+          status: statusResult.status
+        });
+        
+        console.log(`✅ Updated allocation ${allocationId}:`);
+        console.log(`  Paid Amount: ${allocation.paidAmount || 0} → ${statusResult.paidAmount}`);
+        console.log(`  Status: ${allocation.status} → ${statusResult.status}`);
+        console.log(`  Progress: ${statusResult.paidPercentage.toFixed(1)}% paid`);
+      }
+      
+    } catch (error) {
+      console.error(`Failed to update allocation status for ${allocationId}:`, error);
+      throw error;
+    }
   }
   
   /**
@@ -40,10 +109,12 @@ export class AllocationStatusService {
       status = 'committed';
     }
     
+    const finalPaidAmount = Math.min(paidAmount, amount);
     return {
       status,
-      paidAmount: Math.min(paidAmount, amount), // Cannot exceed committed amount
-      paidPercentage
+      paidAmount: finalPaidAmount,
+      paidPercentage,
+      remainingAmount: Math.max(0, amount - finalPaidAmount)
     };
   }
   
