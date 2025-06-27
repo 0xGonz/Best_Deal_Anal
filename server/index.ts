@@ -113,8 +113,7 @@ async function initialize() {
 
   }
 
-  // Debug the session store to verify it remains consistent
-  console.log("⏱️  Session store is", sessionStore.constructor.name);
+
 
   // Add metrics middleware to track request metrics
   app.use(metricsMiddleware());
@@ -153,22 +152,13 @@ async function initialize() {
     })
   );
 
-  // Session debugging (only in development and only for login/logout)
-  app.use((req, res, next) => {
-    if (!isProd && (req.path === '/api/auth/login' || req.path === '/api/auth/logout')) {
-      const sessionID = req.sessionID?.substring(0, 10) + '...';
-      const hasSession = !!req.session;
-      const userId = req.session?.userId;
-      console.log(`Session debug [${req.method} ${req.path}]: sessionID=${sessionID}, hasSession=${hasSession}, userId=${userId}`);
-    }
-    next();
-  });
+
 
   // Ensure the persistent uploads directory exists
   const uploadDir = path.join(process.cwd(), 'data/uploads');
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
-    console.log('Created persistent uploads directory:', uploadDir);
+
   }
   
   // Also ensure old public/uploads exists for backwards compatibility
@@ -190,15 +180,15 @@ async function initialize() {
   // Initialize background job queues
   try {
     initJobQueues();
-    console.log('Background job processing system initialized');
+
   } catch (error) {
     console.error('Failed to initialize background jobs:', error);
-    console.log('Continuing without background processing');
+
   }
   
   // Auto-allocation sync system disabled due to data corruption issues
   // TODO: Fix status logic before re-enabling
-  console.log('Auto-allocation sync system disabled for data safety');
+
   
   const server = await registerRoutes(app);
 
