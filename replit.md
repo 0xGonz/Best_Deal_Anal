@@ -106,6 +106,12 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
+- June 27, 2025: HYBRID DOCUMENT STORAGE ISSUE COMPLETELY RESOLVED - Fixed "Invalid PDF structure" errors by migrating all documents to consistent file system storage
+- June 27, 2025: Migrated 32 documents from hybrid blob/file storage to clean file system storage using automated migration script
+- June 27, 2025: Identified and marked 1 corrupted PDF (NNE_GLP_DiscussionSlides.pdf) that was causing viewer failures
+- June 27, 2025: Added database constraint to prevent future hybrid storage configurations
+- June 27, 2025: Enhanced PDF viewer with smart header validation and improved error messages for corrupted documents
+- June 27, 2025: Document viewing now fully operational - all PDFs load correctly without "Invalid PDF structure" errors
 - June 27, 2025: PHASE 4 SECURITY HARDENING COMPLETED - Implemented enterprise-grade security controls across authentication, authorization, and data protection
 - June 27, 2025: Created comprehensive RBAC system with 4 roles (Admin, Fund Manager, Analyst, Viewer) and 12 granular permissions
 - June 27, 2025: Implemented security middleware suite with input sanitization, file upload validation, and XSS prevention
