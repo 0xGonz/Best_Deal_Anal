@@ -106,6 +106,10 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
+- June 27, 2025: DOCUMENT EDIT/UPDATE FUNCTIONALITY COMPLETELY FIXED - Added missing PUT endpoint and GET route
+- June 27, 2025: Fixed 404 errors when editing documents - PUT /api/documents/:id now works correctly
+- June 27, 2025: Added GET /api/documents/:id route for individual document metadata retrieval
+- June 27, 2025: Document editing workflow fully operational - frontend can now update document metadata
 - June 27, 2025: PRODUCTION PDF DISPLAY ISSUE COMPLETELY RESOLVED - Fixed MIME type and file serving errors
 - June 27, 2025: Fixed critical PDF worker version error "API version 4.8.69 does not match Worker version 3.11.174"
 - June 27, 2025: Implemented static PDF worker file serving with correct MIME type (application/javascript)
