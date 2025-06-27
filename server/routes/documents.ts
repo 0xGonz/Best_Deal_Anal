@@ -275,6 +275,43 @@ router.get('/:id/view', requireAuth, async (req, res) => {
   }
 });
 
+// Get individual document metadata
+router.get('/:id', requireAuth, async (req, res) => {
+  try {
+    const documentId = parseInt(req.params.id);
+
+    if (isNaN(documentId)) {
+      return res.status(400).json({ error: 'Invalid document ID' });
+    }
+
+    const document = await databaseDocumentStorage.getDocument(documentId);
+    
+    if (!document) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+
+    // Return document metadata (exclude file data)
+    res.json({
+      id: document.id,
+      fileName: document.fileName,
+      fileType: document.fileType,
+      fileSize: document.fileSize,
+      documentType: document.documentType,
+      description: document.description,
+      uploadedAt: document.uploadedAt,
+      uploadedBy: document.uploadedBy,
+      dealId: document.dealId,
+      hasFileData: !!document.fileData,
+      downloadUrl: `/api/documents/${document.id}/download`,
+      viewUrl: `/api/documents/${document.id}/view`
+    });
+
+  } catch (error) {
+    console.error('Error getting document:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Get documents for a deal
 router.get('/deal/:dealId', requireAuth, async (req, res) => {
   try {
@@ -310,8 +347,8 @@ router.get('/deal/:dealId', requireAuth, async (req, res) => {
   }
 });
 
-// Update document metadata
-router.patch('/:id', requireAuth, async (req, res) => {
+// Update document metadata (shared handler for both PATCH and PUT)
+const updateDocumentHandler = async (req: any, res: any) => {
   try {
     const documentId = parseInt(req.params.id);
 
@@ -346,7 +383,13 @@ router.patch('/:id', requireAuth, async (req, res) => {
     console.error('Error updating document:', error);
     res.status(500).json({ error: 'Internal server error during update' });
   }
-});
+};
+
+// Update document metadata (PATCH)
+router.patch('/:id', requireAuth, updateDocumentHandler);
+
+// Update document metadata (PUT) - same functionality as PATCH
+router.put('/:id', requireAuth, updateDocumentHandler);
 
 // Delete document
 router.delete('/:id', requireAuth, async (req, res) => {

@@ -1,0 +1,83 @@
+Great--progress! 🎉 The viewer is working, so now we’re down to the “edit / update” step.
+The 404 tells us the browser reached the server, but Express never found a matching
+route for PUT /api/documents/39. That can only happen for one of two reasons:
+
+Why Express returned 404	How to confirm	Quick patch
+1 No PUT handler is registered (only GET, POST, maybe PATCH)	grep -R "router\.\(put|patch\)(.*documents" server/routes
+(or search the file)	Add a router.put('/:id', …) (snippet below) or change the React call to the verb that is registered (PATCH).
+2 The route path is different – e.g. /api/document/:id, /api/docs/:id/edit, or mounted under /api/deals/:dealId/documents/:id	Hit the existing GET endpoint for the same doc:
+GET /api/documents/39 works ➜ path is fine, verb is the issue.
+GET /api/document/39 works ➜ path mismatch.	Point the front-end to the actual path, or remap the server so all doc routes live under /api/documents.
+
+Fastest unblock – add a plain PUT /api/documents/:id
+ts
+Copy
+Edit
+// server/routes/documents.ts
+import express from 'express';
+import requireAuth from '../middleware/requireAuth';
+const router = express.Router();
+
+// ⬇️ NEW: update metadata and (optionally) replace the file
+router.put('/:id', requireAuth, upload.single('file'), async (req, res) => {
+  const id = Number(req.params.id);
+  const { title, description } = req.body;   // whatever fields your form sends
+  const file = req.file ?? null;             // multer sets this
+
+  try {
+    await documentService.updateDocument(id, { title, description, file });
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    if (err instanceof NotFoundError) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+    console.error('PUT /documents/:id failed', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+export default router;
+If you only let users rename / retag the doc—and not swap the file—ditch upload.single('file') and just pull req.body.
+
+Make sure documentService.updateDocument checks permissions (ownerId === req.session.userId) before writing.
+
+Then in React:
+
+tsx
+Copy
+Edit
+// useDocumentMutation.ts
+const mutation = useMutation(
+  (payload: FormData | Record<string, any>) =>
+    fetch(`/api/documents/${docId}`, {
+      method: 'PUT',
+      body: payload instanceof FormData ? payload : JSON.stringify(payload),
+      headers: payload instanceof FormData ? {} : { 'Content-Type': 'application/json' },
+    }).then(r => { if (!r.ok) throw new Error('Update failed'); })
+);
+If you already have a PATCH /api/documents/:id on the server, change the front-end call to:
+
+ts
+Copy
+Edit
+fetch(`/api/documents/${docId}`, { method: 'PATCH', … })
+Either way the verb+path pair must match.
+
+Extra sanity checks
+Test	Expected
+GET /api/documents/39	200 OK with the JSON for that doc.
+OPTIONS /api/documents/39	Response header Allow: GET,PUT,DELETE (or PATCH).
+Hit the new PUT via cURL/Postman	200 OK; DB row shows new title/description; file path unchanged (or updated if you sent a replacement).
+Repeat from the React UI	Network tab: 200 OK; UI reflects the change without reload.
+
+Once those pass, editing should be fully functional. Let me know if you hit any
+permissions or validation errors after wiring the route, and we’ll tighten those next.
+
+
+
+
+
+
+
+
+
