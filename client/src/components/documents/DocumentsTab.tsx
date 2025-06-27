@@ -17,7 +17,7 @@ export const DocumentsTab: React.FC<DocumentsTabProps> = ({ dealId }) => {
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-1 p-4 overflow-hidden min-h-0">
-        <div className="h-full">
+        <div className="h-full min-h-0">
           <DocumentsProvider>
             <DocumentsPane dealId={dealId} />
           </DocumentsProvider>

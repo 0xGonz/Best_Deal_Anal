@@ -19,13 +19,13 @@ export const DocumentsPane: React.FC<DocumentsPaneProps> = ({ dealId }) => {
       </div>
       
       {/* Main PDF viewer area */}
-      <div className="flex-1 overflow-hidden min-w-0">
+      <div className="flex-1 overflow-auto min-w-0">
         {isLoading ? (
           <div className="h-full flex items-center justify-center">
             <p className="text-muted-foreground">Loading documents...</p>
           </div>
         ) : (
-          <div className="h-full overflow-hidden">
+          <div className="h-full">
             <PdfViewer />
           </div>
         )}

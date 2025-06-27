@@ -1,0 +1,54 @@
+Below is a focused teardown of the Documents stack as it exists in the DealFlowLifecyclev1-main (8).zip snapshot you just uploaded. I’ve separated critical fixes (green-light the UI immediately) from structural clean-ups that will save you headaches once the basics work.
+
+1 — Why the Documents pane still “looks wrong”
+Layer	What I’m seeing	Why it breaks	Fastest unblock
+React layout	DocumentsTab → CardContent → div.h-full → DocumentsPane.h-full.flex.
+The chain loses min-h-0 once (div.h-full doesn’t have it).	A flex child with no min-h-0 will collapse inside a calc-height card on short screens, so your viewer area shrinks to 0 px and appears blank.	Add min-h-0 to the outer wrapper:
+<div className="h-full min-h-0">
+Over-scroll	DocumentsPane grants the sidebar its own overflow-y-auto, but the main viewer wraps another overflow-hidden. PDF.js needs its canvas to size itself; when the parent is overflow-hidden and height-0 (see above), it can’t.	Same root cause; once height is fixed, you may still want scroll inside the viewer (e.g., long Word docs).	Replace the inner wrapper with overflow-auto or keep it but let UniversalDocumentViewer handle scrolling.
+React-Query refresh	After a successful upload the sidebar list is stale until manual reload.	uploadMutation in Sidebar.tsx resolves, but nothing invalidates ['/api/documents/deal', dealId].	Immediately after onSuccess, call:
+queryClient.invalidateQueries({ queryKey: ['/api/documents/deal', dealId] });
+
+2 — Route & storage confusion (the silent killer)
+File	Role	Collision	What to do
+server/routes/documents-database.ts	Live v1 router, stores blobs in Postgres (fileData)	OK (mounted at /api/documents)	Keep it; this is the one your front-end calls.
+server/routes/documents.ts (plus documents-fixed.ts, documents-persistent.ts)	Alt prototypes—one writes to temp files, another mixes the two	Registered nowhere now, but the code is in the repo and devs open it in editors. People “fix” the wrong file and wonder why nothing changes.	Delete or archive these variants so there’s a single source of truth.
+server/storage-factory.ts + MemStorage, DatabaseStorage	Abstraction layer (nice)	StorageFactory.getStorage() still checks USE_MEMORY_SESSIONS to decide storage, not USE_MEMORY_STORAGE. If you flip that flag accidentally you’ll seem to “lose” docs.	Introduce a dedicated STORAGE_BACKEND env (`memory
+
+3 — Database / blob pitfalls
+Column type – you’re casting fileData to text; that truncates at ~1 GB and chews memory.
+Switch to bytea in Drizzle for proper binary storage and streaming.
+
+Big uploads stall Node – uploads go multer.memoryStorage() → Base-64 → SQL insert.
+For anything > 5 MB, switch to streaming inserts (pg-COPY or large-object API) or push the file to S3/GCS and only store a signed-URL + metadata.
+
+Temp-file leak guard – if you ever re-enable the filesystem route, boot-time cron to delete temp/* older than X hours will keep disk usage sane.
+
+4 — PDF worker duplication fixed (✅)
+Only one copy left: public/pdf.worker.min.js. Good.
+Double-check that import '@/lib/setupPdfWorker' appears once (it does—inside EmbeddedPDFViewer) so you don’t spin up multiple workers.
+
+5 — Security & validation quick wins
+Risk	Current state	One-liner fix
+MIME spoofing	You trust file.mimetype.	Validate with file-type library or magic-bytes check before insert.
+Upload flood	50 MB limit is set, but no per-user rate-limit.	Mount apiRateLimiter (you already have one) on the /documents router.
+XSS via filename	You never escape fileName when echoing back into the DOM (sidebar list).	DOMPurify.sanitize(documentName) or use React’s string prop (React escapes, but don’t pass as dangerouslySetInnerHTML).
+
+6 — Clean-up checklist
+Consolidate: keep documents-database.ts, delete the others, rename to documents.ts for clarity.
+
+Env clarity: new STORAGE_BACKEND var checked in StorageFactory.
+
+UI polish:
+
+Add min-h-0 (outer wrapper) and optionally overflow-auto on viewer container.
+
+Use CSS scrollbar-gutter: stable so layout doesn’t jump when the sidebar scroll bar appears.
+
+React-Query hygiene: always invalidateQueries after uploads/patches.
+
+Schema migration: change fileData → bytea, add CHECK (file_size = octet_length(file_data)) so corruption is caught early.
+
+Streaming uploads: adopt busboy or Multer’s disk storage + S3 SDK to avoid in-RAM buffering.
+
+Do those six steps and the Documents architecture will behave on-screen, survive large files, and be a lot less mysterious for the next dev to touch it. Let me know once the layout tweak is in—you should see the PDF/Word preview snap into place immediately.
