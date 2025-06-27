@@ -7,7 +7,6 @@
 
 import fs from 'fs';
 import path from 'path';
-import { DatabaseStorage } from '../server/database-storage';
 
 interface PerformanceIssue {
   category: string;
@@ -20,7 +19,6 @@ interface PerformanceIssue {
 }
 
 class Phase3PerformanceOptimizer {
-  private storage = new DatabaseStorage();
   private issues: PerformanceIssue[] = [];
   private fixes: string[] = [];
 
