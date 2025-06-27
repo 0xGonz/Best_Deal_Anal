@@ -358,16 +358,53 @@ const updateDocumentHandler = async (req: any, res: any) => {
 
     const { fileName, description, documentType } = req.body;
 
-    const updatedDocument = await databaseDocumentStorage.updateDocument(documentId, {
-      fileName,
-      description,
-      documentType
-    });
+    // Build update object only with provided fields to avoid overwriting with undefined
+    const updateData: any = { uploadedAt: new Date() };
+    
+    if (fileName !== undefined && fileName !== '') {
+      updateData.fileName = DOMPurify.sanitize(fileName);
+    }
+    if (description !== undefined) {
+      updateData.description = description;
+    }
+    if (documentType !== undefined && documentType !== '') {
+      updateData.documentType = documentType;
+    }
+
+    // Handle file replacement if a new file is uploaded
+    if (req.file) {
+      console.log(`📝 Replacing file for document ${documentId}: ${req.file.originalname} (${req.file.size} bytes)`);
+      
+      // Validate the new file
+      const validation = await databaseDocumentStorage.validateFile(
+        req.file.originalname,
+        req.file.mimetype,
+        req.file.size
+      );
+
+      if (!validation.valid) {
+        return res.status(400).json({ error: validation.reason });
+      }
+
+      // Add file data to update
+      updateData.fileData = req.file.buffer.toString('base64');
+      updateData.fileType = req.file.mimetype;
+      updateData.fileSize = req.file.size;
+      updateData.filePath = null; // Clear old filesystem path since we're using database storage
+      
+      // Use the new filename if not provided separately
+      if (!updateData.fileName) {
+        updateData.fileName = DOMPurify.sanitize(req.file.originalname);
+      }
+    }
+
+    const updatedDocument = await databaseDocumentStorage.updateDocument(documentId, updateData);
 
     if (!updatedDocument) {
       return res.status(404).json({ error: 'Document not found' });
     }
 
+    console.log(`✓ Document ${documentId} updated successfully`);
     res.json({
       id: updatedDocument.id,
       fileName: updatedDocument.fileName,
@@ -386,10 +423,10 @@ const updateDocumentHandler = async (req: any, res: any) => {
 };
 
 // Update document metadata (PATCH)
-router.patch('/:id', requireAuth, updateDocumentHandler);
+router.patch('/:id', requireAuth, upload.single('file'), updateDocumentHandler);
 
 // Update document metadata (PUT) - same functionality as PATCH
-router.put('/:id', requireAuth, updateDocumentHandler);
+router.put('/:id', requireAuth, upload.single('file'), updateDocumentHandler);
 
 // Delete document
 router.delete('/:id', requireAuth, async (req, res) => {

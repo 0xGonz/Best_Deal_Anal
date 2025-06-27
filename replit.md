@@ -106,6 +106,10 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
+- June 27, 2025: MULTIPART FORM DATA ISSUE FIXED - PUT endpoint now properly handles document updates with multer middleware
+- June 27, 2025: Document update functionality fully operational - Both JSON and multipart form data requests work correctly
+- June 27, 2025: Enhanced update handler with file replacement support and defensive null value handling
+- June 27, 2025: PUT /api/documents/:id returns 200 OK with correct document metadata instead of 404 errors
 - June 27, 2025: DOCUMENT EDIT/UPDATE FUNCTIONALITY COMPLETELY FIXED - Added missing PUT endpoint and GET route
 - June 27, 2025: Fixed 404 errors when editing documents - PUT /api/documents/:id now works correctly
 - June 27, 2025: Added GET /api/documents/:id route for individual document metadata retrieval
