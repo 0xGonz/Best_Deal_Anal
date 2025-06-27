@@ -1,0 +1,75 @@
+The viewer works, so the front end → server pipeline is alive; the new blocker is the PUT /api/documents/39 → 404.
+That 404 is coming from your own handler, not from Express’ “no-route” fallback.
+Inside server/routes/documents.ts you return a 404 when databaseDocumentStorage.updateDocument(...)
+doesn’t hand back a row:
+
+ts
+Copy
+Edit
+const [updatedDocument] = await db
+  .update(documents)
+  …
+  .where(eq(documents.id, documentId))
+  .returning();          //  ← returns [] if no rows matched
+
+if (!updatedDocument) {  // ← you hit this path
+  return res.status(404).json({ error: 'Document not found' });
+}
+Why no rows match even though the PDF loaded?
+Missing multipart parser on the PUT
+
+You send the update as multipart/form-data (because the UI can also swap out the file).
+
+The current router.put('/:id', requireAuth, updateDocumentHandler) has no multer middleware,
+so Express never parses the body.
+
+fileName, description, documentType all come through undefined, Drizzle still runs the
+SQL (SET uploaded_at = NOW()) but Postgres ignores the row because every column in the SET
+would end up NULL and violate NOT NULL constraints. Drizzle therefore sends an empty
+RETURNING set → your handler thinks the doc doesn’t exist.
+
+Deal/owner-scoped row-level security (if enabled)
+If you added RLS later (e.g. WHERE uploaded_by = current_setting('jwt.claims.user_id')),
+a row that exists for downloads could still be invisible to an UPDATE run under a different user
+ID. The quick way to tell is to console.log(req.session.userId) and compare it to the
+uploaded_by column in the documents table.
+
+Two-line patch that usually fixes it
+ts
+Copy
+Edit
+// server/routes/documents.ts  (near the top)
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50*1024*1024 } });
+
+// replace the current put/patch lines with one that parses multipart *before* your handler
+router.put('/:id', requireAuth, upload.single('file'), updateDocumentHandler);
+router.patch('/:id', requireAuth, upload.single('file'), updateDocumentHandler);
+Now req.body and req.file are populated whether the user sends JSON or a
+FormData payload.
+
+If they didn’t choose a replacement file, req.file is simply undefined,
+but the text fields still arrive.
+
+Drizzle hits the row, RETURNING gives you one object, and your handler responds 200.
+
+Additional defensive tweaks
+What	One-liner
+Skip columns that are undefined so you don’t accidentally overwrite with NULL.	ts const setObj = { uploadedAt: new Date() }; if (updateData.fileName) setObj.fileName = updateData.fileName; if (updateData.description) setObj.description = updateData.description; … db.update(documents).set(setObj)…
+Log row-level security hits	await db.raw('SET LOCAL debug_print_plan = true'); just before the update (dev only).
+Return 400 instead of 404 when nothing changed	After the update, if (!updatedDocument) return res.status(400).json({ error: 'No updatable fields supplied' });
+
+Quick smoke-test checklist
+PUT a JSON-only payload: { "description": "Confidential v2" }
+→ 200 OK, DB row shows new description.
+
+PUT a FormData payload with a new file
+→ 200 OK, file_path (or file_data) updated, version bumped.
+
+Replay the original failing request in DevTools
+→ Now returns 200, Network tab shows the updated JSON.
+
+Refresh the UI – the document card shows the new title/description without a hard reload.
+
+Apply the upload.single('file') middleware first; nine times out of ten that alone
+eliminates the 404.
+Ping me once you see the 200 and we can tighten validation or add versioning if you’d like.
