@@ -106,6 +106,11 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
+- June 27, 2025: PRODUCTION PDF DISPLAY ISSUE FIXED - Resolved version mismatch between PDF library and worker
+- June 27, 2025: Fixed critical PDF worker version error "API version 4.8.69 does not match Worker version 3.11.174"
+- June 27, 2025: Updated PDF worker configuration to use node_modules version ensuring version consistency
+- June 27, 2025: Removed obsolete local PDF worker file that was causing version conflicts in production
+- June 27, 2025: PDF documents now load correctly in production without version mismatch errors
 - June 26, 2025: DOCUMENT UPLOAD FLOW COMPLETELY FIXED - Resolved all 6 critical upload issues identified in comprehensive analysis
 - June 26, 2025: Removed problematic simple-upload route causing 500 errors, consolidated to single /api/documents/upload endpoint
 - June 26, 2025: Fixed hard-coded deal ID validation that was blocking uploads to specific deals
