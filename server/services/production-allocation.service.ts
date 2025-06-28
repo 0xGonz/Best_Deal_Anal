@@ -90,7 +90,7 @@ export class ProductionAllocationService {
           }, userId);
         }
         
-        const error = `Allocation already exists: Fund ${request.fundId} → Deal ${request.dealId} (ID: ${duplicate.id})`;
+        const error = `Allocation already exists: Fund ${request.fundId} → Deal ${request.dealId} (ID: ${duplicate.id}, Status: ${duplicate.status}, Amount: $${duplicate.amount?.toLocaleString()})`;
         await this.audit.logError(auditId, error);
         return {
           success: false,

@@ -90,6 +90,7 @@ router.post('/', requireAuth, requirePermission('create', 'allocation'), async (
       }
 
       if (result.error?.includes('already exists')) {
+        console.warn("[ALLOCATE] conflict —", result.error, req.body);
         return res.status(409).json({
           error: 'Allocation already exists',
           message: result.error

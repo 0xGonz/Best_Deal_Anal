@@ -1,0 +1,90 @@
+Quick way to prove which guard fired
+Add one log line in allocation.controller.ts right before it returns 409:
+
+ts
+Copy
+Edit
+if (errorMsg) {
+  console.warn("[ALLOCATE] conflict —", errorMsg, req.body);
+  return res.status(409).json({ message: errorMsg });
+}
+Redeploy, repeat the allocation, and check the server console. You’ll see either:
+
+pgsql
+Copy
+Edit
+[ALLOCATE] conflict — Allocation would exceed investor’s unfunded commitment { …payload… }
+or
+
+pgsql
+Copy
+Edit
+[ALLOCATE] conflict — Allocation exceeds fund's available capital { …payload… }
+What to check next
+Investor’s remaining commitment
+
+sql
+Copy
+Edit
+SELECT total_commitment,
+       called_amount,
+       total_commitment - called_amount AS unfunded
+FROM   investor_commitments
+WHERE  investor_id = '<investor>'
+  AND  fund_id     = '<fund>';
+If unfunded is < the amount you’re trying to allocate, the guard is working as designed.
+
+Fund capacity
+
+sql
+Copy
+Edit
+SELECT hard_cap,
+       committed_capital,
+       hard_cap - committed_capital AS available
+FROM   funds
+WHERE  id = '<fund>';
+If available is smaller than the allocation amount, you’ll hit the same 409.
+
+Off-by-a-penny bugs
+Both checks use Math.round to two decimals before comparing. A stored value of $1,000,000.004 vs $1,000,000.00 will read as “greater”. Running:
+
+sql
+Copy
+Edit
+SELECT amount
+FROM   allocations
+WHERE  fund_id = '<fund>' AND investor_id = '<investor>';
+will show any weird fractional cents.
+
+How to surface the real message in the UI (one-liner)
+ts
+Copy
+Edit
+if (!res.ok) {
+  const { message } = await res.json().catch(() => ({}));
+  throw new Error(message || `HTTP ${res.status}`);
+}
+Your react-query error handler will then show the exact reason, e.g.:
+
+bash
+Copy
+Edit
+❌ Allocation would exceed investor’s unfunded commitment ($250k remaining)
+If neither guard is the culprit
+Confirm you’re hitting the expected environment: dev vs prod DBs sometimes have different data.
+
+Look for a Postgres trigger (allocations_before_insert) that might return raise exception '409'.
+
+Check for another UNIQUE index (external_id, allocation_code, etc.) that you might be violating.
+
+Run those SQL snippets and let me know what you see—then we’ll zero in on the exact mismatch.
+
+
+
+
+
+
+
+
+
