@@ -1,0 +1,80 @@
+What’s actually happening
+Front-end request
+The React component (probably inside useAllocations.ts) calls
+
+http
+Copy
+Edit
+GET /api/allocations         ← no “/production” prefix
+Back-end route table
+In server/routes/index.ts you mounted the allocation router like this:
+
+ts
+Copy
+Edit
+router.use("/api/production/allocations", allocationRouter);
+//        └──────────── prefix ───────────┘
+so only paths that begin with /api/production/allocations exist.
+No router is listening on plain /api/allocations, therefore Express falls through to the catch-all 404 handler and returns
+
+json
+Copy
+Edit
+{ "message": "Route not found: GET /api/allocations" }
+Front-end error handler
+After fetch() fails, your code tries to read the body twice:
+
+ts
+Copy
+Edit
+const json = await res.json();   // stream consumed here
+const text = await res.text();   // boom → “body stream already read”
+Two quick ways to fix it
+If you want environment prefixes (/production, /staging…)	If you don’t care about prefixes
+A. Update the React query
+ts<br>await api.get("/api/production/allocations");<br>	B. Add an alias route in Express
+ts<br>router.use("/api/allocations", allocationRouter);<br>
+
+Either approach makes the endpoint line up again and turns the 404 into the real 200 + data you expect.
+
+Clean-up your error handling (optional but recommended)
+ts
+Copy
+Edit
+if (!res.ok) {
+  // Read once
+  const body = await res.text().catch(() => "");
+  throw new Error(body || `HTTP ${res.status}`);
+}
+No duplicate stream reads → no more
+TypeError: Failed to execute 'text' on 'Response': body stream already read.
+
+Sanity checks
+Verify the working path
+
+bash
+Copy
+Edit
+curl -I http://localhost:3000/api/production/allocations
+# should return 200 (or 204) once the router matches
+Remove dead prefixes
+If you keep hitting this in other modules (deals, funds, etc.), consider putting the environment segment in an Axios base URL:
+
+ts
+Copy
+Edit
+const api = axios.create({
+  baseURL: `/api/${import.meta.env.VITE_API_ENV || "production"}`,
+});
+Then every request can just say api.get("/allocations").
+
+Give that a try—once /allocations resolves correctly the rest of the dashboard should load without those 404s. Ping me if you still see issues after aligning the paths.
+
+
+
+
+
+
+
+
+

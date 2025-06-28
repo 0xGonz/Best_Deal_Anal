@@ -34,6 +34,28 @@ async function recalculatePortfolioWeights(fundId: number): Promise<void> {
 
 // Multi-fund allocation endpoints
 
+// GET /api/allocations - Get all allocations
+router.get('/', requireAuth, async (req: Request, res: Response) => {
+  try {
+    // Get all funds first, then get allocations for each fund
+    const funds = await storage.getFunds();
+    const allAllocations = [];
+    
+    for (const fund of funds) {
+      const allocations = await storage.getAllocationsByFund(fund.id);
+      allAllocations.push(...allocations);
+    }
+    
+    res.json(allAllocations);
+  } catch (error) {
+    console.error('Error fetching allocations:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch allocations',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 // GET /api/allocations/deal/:dealId - Get all allocations for a specific deal
 router.get('/deal/:dealId', requireAuth, async (req: Request, res: Response) => {
   try {
