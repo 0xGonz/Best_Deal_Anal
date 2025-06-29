@@ -13,9 +13,24 @@ export interface CapitalMetrics {
 export function calculateAllocationCapitalMetrics(allocation: FundAllocation): CapitalMetrics {
   const committedAmount = allocation.amount;
   
-  // Use actual capital call data from the API instead of status-based calculations
-  // This ensures we always reflect real capital call transactions
-  const calledAmount = Number(allocation.calledAmount) || 0;
+  // Use the correct field mapping from API response:
+  // - paidAmount = actual capital that has been called and paid
+  // - For funded allocations, called capital equals paid capital (all called capital is paid)
+  // - For partially_paid allocations, some capital is called but not fully paid
+  // - For committed allocations, no capital has been called yet
+  
+  let calledAmount = 0;
+  if (allocation.status === 'funded') {
+    // For funded allocations, we assume all paid amount represents called capital
+    calledAmount = allocation.paidAmount || 0;
+  } else if (allocation.status === 'partially_paid') {
+    // For partially paid, the paid amount is the called amount (since paid <= called)
+    calledAmount = allocation.paidAmount || 0;
+  } else {
+    // For committed/unfunded, no capital has been called
+    calledAmount = 0;
+  }
+  
   const uncalledAmount = committedAmount - calledAmount;
   
   return {

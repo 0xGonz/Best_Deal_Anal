@@ -991,6 +991,9 @@ export default function FundDetail() {
                           const capitalMetrics = calculateAllocationCapitalMetrics(allocation);
                           const displayAmount = getDisplayAmount(capitalMetrics, capitalView);
                           
+                          // Calculate dynamic weight based on capital view
+                          const dynamicWeight = calculateDynamicWeight(allocation, allocations, capitalView);
+                          
                           // Calculate MOIC
                           let moic = 0;
                           if (allocation.amount > 0) {
@@ -1037,7 +1040,7 @@ export default function FundDetail() {
                               </TableCell>
                               <TableCell className="py-1.5 sm:py-2.5 px-2 sm:px-4 text-right">
                                 <span className={`text-2xs xs:text-xs sm:text-sm ${getCapitalViewColorClass(capitalView)}`}>
-                                  {allocation.portfolioWeight ? `${allocation.portfolioWeight.toFixed(1)}%` : '0.0%'}
+                                  {`${dynamicWeight.toFixed(1)}%`}
                                 </span>
                               </TableCell>
                               <TableCell className="py-1.5 sm:py-2.5 px-2 sm:px-4 text-right">
@@ -1156,24 +1159,13 @@ export default function FundDetail() {
                         
                         {/* Dynamic Total Row */}
                         {allocations && allocations.length > 0 && (() => {
-                          // Calculate totals from actual allocation data
-                          const totalWeight = allocations.reduce((sum, allocation) => sum + (allocation.portfolioWeight || 0), 0);
-                          const totalCommitted = allocations.reduce((sum, allocation) => sum + (allocation.amount || 0), 0);
-                          const totalPaid = allocations.reduce((sum, allocation) => sum + (allocation.paidAmount || 0), 0);
-                          const totalCalled = allocations.reduce((sum, allocation) => {
-                            // Calculate called amount based on status
-                            if (allocation.status === 'funded') return sum + (allocation.amount || 0);
-                            if (allocation.status === 'partially_paid') return sum + (allocation.paidAmount || 0);
-                            return sum;
-                          }, 0);
-                          const totalUncalled = totalCommitted - totalCalled;
+                          // Use modular capital calculation service for consistency
+                          const fundMetrics = calculateFundCapitalMetrics(allocations);
+                          const displayTotalAmount = getDisplayAmount(fundMetrics, capitalView);
+                          
+                          // Calculate other totals
                           const totalDistributions = allocations.reduce((sum, allocation) => sum + (allocation.distributionPaid || 0), 0);
                           const totalMarketValue = allocations.reduce((sum, allocation) => sum + (allocation.marketValue || 0), 0);
-                          
-                          // Calculate display amount based on capital view
-                          let displayTotalAmount = totalCommitted;
-                          if (capitalView === 'called') displayTotalAmount = totalCalled;
-                          if (capitalView === 'uncalled') displayTotalAmount = totalUncalled;
                           
                           // Calculate weighted average MOIC
                           const totalMoic = allocations.reduce((sum, allocation) => {
@@ -1182,13 +1174,13 @@ export default function FundDetail() {
                               : 1;
                             return sum + (moic * (allocation.amount || 0));
                           }, 0);
-                          const weightedAvgMoic = totalCommitted > 0 ? totalMoic / totalCommitted : 1;
+                          const weightedAvgMoic = fundMetrics.committedAmount > 0 ? totalMoic / fundMetrics.committedAmount : 1;
                           
                           // Calculate weighted average IRR
                           const totalIrr = allocations.reduce((sum, allocation) => {
                             return sum + ((allocation.irr || 0) * (allocation.amount || 0));
                           }, 0);
-                          const weightedAvgIrr = totalCommitted > 0 ? totalIrr / totalCommitted : 0;
+                          const weightedAvgIrr = fundMetrics.committedAmount > 0 ? totalIrr / fundMetrics.committedAmount : 0;
                           
                           return (
                             <TableRow className="bg-gray-50 border-t-2 border-gray-200 font-semibold">
@@ -1197,7 +1189,7 @@ export default function FundDetail() {
                               <TableCell className="py-3 px-2 sm:px-4"></TableCell>
                               <TableCell className="py-3 px-2 sm:px-4"></TableCell>
                               <TableCell className="py-3 px-2 sm:px-4 text-right font-bold text-gray-800">
-                                {totalWeight.toFixed(1)}%
+                                100.0%
                               </TableCell>
                               <TableCell className="py-3 px-2 sm:px-4 text-right font-bold">
                                 <span className="text-[#000000] font-bold">
