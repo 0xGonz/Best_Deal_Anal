@@ -11,8 +11,8 @@
 
 import { DatabaseStorage } from '../server/database-storage';
 import { capitalCallService } from '../server/services/capital-call.service';
-import { AllocationCreationService } from '../server/services/allocation-creation.service';
-import { AllocationStatusService } from '../server/services/allocation-status.service';
+import { AllocationDomainService } from '../server/services/allocation-domain.service';
+import { AllocationDomainService } from '../server/services/allocation-domain.service';
 
 interface TestResult {
   testName: string;

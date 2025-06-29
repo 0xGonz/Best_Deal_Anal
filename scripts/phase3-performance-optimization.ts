@@ -401,7 +401,7 @@ export class OptimizedAllocationService {
  */
 
 import { Router } from 'express';
-import { OptimizedAllocationService } from './services/optimized-allocation.service';
+import { AllocationDomainService } from '../server/services/allocation-domain.service';
 import { CachingService } from './services/caching.service';
 
 const router = Router();

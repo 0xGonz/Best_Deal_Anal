@@ -405,9 +405,9 @@ export class AllocationDomainService {
  */
 
 // OLD: Multiple allocation services
-// import { AllocationCreationService } from './allocation-creation.service';
-// import { AllocationStatusService } from './allocation-status.service';
-// import { AllocationIntegrityService } from './allocation-integrity.service';
+// import { AllocationDomainService } from '../server/services/allocation-domain.service';
+// import { AllocationDomainService } from '../server/services/allocation-domain.service';
+// import { AllocationDomainService } from '../server/services/allocation-domain.service';
 // ... 14 more allocation services
 
 // NEW: Single allocation domain service

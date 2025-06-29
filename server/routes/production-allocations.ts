@@ -4,8 +4,8 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { productionAllocationService } from '../services/production-allocation.service';
-import { productionCapitalCallsService } from '../services/production-capital-calls.service';
+import { AllocationService } from '../services/allocation.service';
+import { CapitalCallService } from '../services/capital-call.service';
 import { AllocationDeletionService } from '../services/allocation-deletion.service.js';
 import { requireAuth } from '../utils/auth';
 import { requirePermission } from '../utils/permissions';

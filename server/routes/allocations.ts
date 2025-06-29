@@ -4,15 +4,12 @@ import { StorageFactory } from '../storage-factory';
 import { synchronizeAllocationDates } from '../utils/date-integration';
 import { capitalCallService } from '../services/capital-call.service';
 import { allocationService } from '../services/allocation.service';
-import { allocationCoreService } from '../services/allocation-core.service';
+import { AllocationDomainService } from '../services/allocation-domain.service';
 import { AuditService } from '../services/audit.service';
 import { ValidationService } from '../services/validation.service';
 import { metricsCalculator } from '../services/metrics-calculator.service';
 import { ErrorHandlerService, ValidationRules } from '../services/error-handler.service';
-import { multiFundAllocationService } from '../services/multi-fund-allocation.service';
-import { AllocationStatusService } from '../services/allocation-status.service';
 import { PaymentWorkflowService } from '../services/payment-workflow.service';
-import { AllocationSyncService } from '../services/allocation-sync.service';
 import { z } from 'zod';
 import { requireAuth } from '../utils/auth';
 import { requirePermission } from '../utils/permissions';
@@ -98,7 +95,8 @@ router.get('/deal/:dealId/summary', requireAuth, async (req: Request, res: Respo
       return res.status(400).json({ error: 'Invalid deal ID' });
     }
 
-    const summary = await multiFundAllocationService.getDealAllocationSummary(dealId);
+    const allocationDomainService = new AllocationDomainService();
+    const summary = await allocationDomainService.getDealAllocationSummary(dealId);
     res.json(summary);
   } catch (error) {
     console.error('Error getting deal allocation summary:', error);

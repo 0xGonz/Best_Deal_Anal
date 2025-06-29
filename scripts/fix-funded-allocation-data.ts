@@ -1,5 +1,5 @@
 import { DatabaseStorage } from '../server/database-storage';
-import { AllocationStatusService } from '../server/services/allocation-status.service';
+import { AllocationDomainService } from '../server/services/allocation-domain.service';
 
 /**
  * Fixes data inconsistency where funded allocations have paidAmount = 0

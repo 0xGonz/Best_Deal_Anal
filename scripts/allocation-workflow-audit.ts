@@ -10,7 +10,7 @@ import { DatabaseStorage } from '../server/database-storage';
 import { db } from '../server/db';
 import { eq, sql, and } from 'drizzle-orm';
 import { fundAllocations, funds, deals, capitalCalls, timelineEvents } from '../shared/schema.js';
-import { AllocationStatusService } from '../server/services/allocation-status.service';
+import { AllocationDomainService } from '../server/services/allocation-domain.service';
 
 interface AllocationWorkflowIssue {
   severity: 'critical' | 'high' | 'medium' | 'low';

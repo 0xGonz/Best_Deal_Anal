@@ -8,7 +8,7 @@
  */
 
 import { StorageFactory } from '../server/storage-factory';
-import { productionAllocationService } from '../server/services/production-allocation.service';
+import { AllocationDomainService } from '../server/services/allocation-domain.service';
 
 interface TestResult {
   testName: string;
