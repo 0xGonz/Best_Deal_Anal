@@ -11,7 +11,7 @@ import leaderboardRoutes from './routes/leaderboard';
 import activityRoutes from './routes/activity';
 import notificationsRoutes from './routes/notifications';
 import documentsRoutes from './routes/documents';
-import allocationsRoutes from './routes/allocations';
+// Removed legacy allocations route - using production-allocations only
 import productionAllocationsRouter from './routes/production-allocations';
 import capitalCallsRoutes from './routes/capital-calls';
 import closingSchedulesRoutes from './routes/closing-schedules';
@@ -65,7 +65,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/auth', authRoutes);
   // Production allocation routes (current architecture)
   app.use('/api/production/allocations', productionAllocationsRouter);
-  app.use('/api/allocations', allocationsRoutes); // Keep for some components still using legacy endpoints
+  app.use('/api/allocations', productionAllocationsRouter); // Updated to use production allocations after cleanup
   app.use('/api/capital-calls', capitalCallsRoutes);
   app.use('/api/closing-schedules', closingSchedulesRoutes);
   app.use('/api/meetings', meetingsRoutes);
