@@ -11,7 +11,7 @@
  * 5. Clean up service mapping dependencies
  */
 
-import { DatabaseStorage } from '../server/storage';
+import { createStorageInstance } from '../server/storage-factory';
 import { promises as fs } from 'fs';
 import { execSync } from 'child_process';
 import path from 'path';
@@ -26,7 +26,7 @@ interface TechnicalDebtItem {
 }
 
 class FinalTechnicalDebtCleanup {
-  private storage = new DatabaseStorage();
+  private storage = createStorageInstance();
   private debtItems: TechnicalDebtItem[] = [];
   private backupDir = './storage/final-cleanup-backups';
 

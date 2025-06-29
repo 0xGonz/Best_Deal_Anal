@@ -65,7 +65,7 @@ function setupHealthMonitoring() {
   }, 30000); // Update every 30 seconds
   
   // Log processing statistics every 5 minutes
-  setInterval(() => {
+  setInterval(async () => {
     const counts = await jobQueueService.getStatus();
     console.log('📊 Worker stats:', counts);
   }, 5 * 60 * 1000);

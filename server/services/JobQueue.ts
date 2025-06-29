@@ -272,6 +272,60 @@ export class JobQueueService {
   }
   
   /**
+   * Get current status of all job queues
+   */
+  public async getStatus(): Promise<any> {
+    const status: any = {
+      queues: {},
+      totalJobs: 0,
+      activeJobs: 0,
+      completedJobs: 0,
+      failedJobs: 0
+    };
+
+    for (const [queueName, queue] of this.queues.entries()) {
+      try {
+        // For mock queues, provide simplified status
+        if (queue.constructor.name === 'Object') {
+          status.queues[queueName] = {
+            type: 'mock',
+            active: 0,
+            waiting: 0,
+            completed: 0,
+            failed: 0
+          };
+        } else {
+          // For real Bull queues
+          const waiting = await queue.getWaiting();
+          const active = await queue.getActive();
+          const completed = await queue.getCompleted();
+          const failed = await queue.getFailed();
+
+          status.queues[queueName] = {
+            type: 'redis',
+            waiting: waiting.length,
+            active: active.length,
+            completed: completed.length,
+            failed: failed.length
+          };
+
+          status.totalJobs += waiting.length + active.length + completed.length + failed.length;
+          status.activeJobs += active.length;
+          status.completedJobs += completed.length;
+          status.failedJobs += failed.length;
+        }
+      } catch (error) {
+        status.queues[queueName] = { 
+          type: 'error',
+          error: error instanceof Error ? error.message : 'Unknown error'
+        };
+      }
+    }
+
+    return status;
+  }
+
+  /**
    * Close all queues (useful for graceful shutdown)
    */
   public async closeAll(): Promise<void> {
