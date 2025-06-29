@@ -143,7 +143,10 @@ async function initialize() {
   await initializeOrgTables();
   await initializeSecurityAuditLog();
   await initializePerformanceMetrics();
-  await jobQueue.initialize();
+  
+  // Note: Job queue initialization moved to separate worker process (worker.ts)
+  // to prevent heavy tasks from blocking the main web server event loop
+  // await jobQueue.initialize();
 
   // Add performance monitoring middleware (must be early in chain)
   app.use(performanceMonitor);

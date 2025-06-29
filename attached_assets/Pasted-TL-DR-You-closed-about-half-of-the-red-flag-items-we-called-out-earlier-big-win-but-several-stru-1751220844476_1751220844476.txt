@@ -1,0 +1,115 @@
+TL;DR
+You closed about half of the red-flag items we called out earlier (big win!), but several structural problems are still lurking:
+
+Area	Fixed?	Evidence	Remaining Gaps
+Route 404s (/api/allocations)	✅	routes/index.ts now mounts both /api/v1 and bare /api → the plain path resolves.	—
+ENV-var log leak	✅	Grep shows no “PDF generation ready” output.	—
+Idempotent POSTs	✅	New middleware/idempotency.ts + request_idempotency table.	Needs wiring into all mutating routes (only a few use res.idempotency).
+Multi-tenant guard	✅	middleware/multi-tenant-security.ts checks orgId.	Must be added to every route—many routes still omit it.
+Job queue offload	◑	services/JobQueue.ts introduces Bull queues and jobs/reportGenerator.ts, jobs/notificationProcessor.ts.	· No standalone worker script; jobs are processed in the same Node process → heavy tasks still block the event loop.
+· CSV ingest / PDF render haven’t been migrated to the queue yet.
+Duplicate allocation services	❌	Repo still contains 10 + variants (optimized-, transaction-safe-, production-allocation.service.ts, etc.).	Keep one canonical service, delete the rest, update imports.
+Single-process bottleneck	❌	No PM2 / foreman / Docker-compose file spawning a separate worker container.	Add worker.ts that calls new Worker('pdfQueue', …) and run it in its own pod.
+Hot-table partitioning & large blobs	❌	No PARTITION BY DDL; raw CSV still stored in allocations.raw_csv.	Move blobs to S3/MinIO and partition allocations, capital_calls by fund_id or quarter.
+WebSocket storm	❓	No socket.io code found (maybe disabled).	If you re-enable, scope rooms by fund.
+Observability (OTel)	❌	middleware/performance-monitor.ts writes to Postgres; no OpenTelemetry exporter.	Use @opentelemetry/sdk-node and a real trace backend.
+
+What is fixed in detail
+Route alias
+
+ts
+Copy
+Edit
+app.use('/api/v1', apiRateLimiter, v1Routes);
+app.use('/api',    apiRateLimiter, v1Routes);   // back-compat
+The 404 you hit earlier should be gone.
+
+Request idempotency
+
+Middleware generates / honours an Idempotency-Key header, hashes the body, and stores the first response.
+
+Second identical POST returns the cached response instead of inserting a second row.
+
+Org-level isolation
+Every request now carries req.user.orgId; the middleware appends AND org_id = $1 to queries if the route opts-in. Good pattern—just enforce it everywhere.
+
+Rate-limiting & versioning
+Cleaner API gate: standard, auth, and general API limiters plus /api → /api/v1 shim.
+
+Biggest things still blocking scale
+1. Job queue runs inside the web pod
+ts
+Copy
+Edit
+// server/index.ts
+initJobQueues(app);   // registers processors in the same process
+So even though you enqueue jobs, Bull immediately processes them locally. A 40-MB PDF render can still pause the event loop for ~700 ms.
+
+Fix
+
+Create worker.ts:
+
+ts
+Copy
+Edit
+import 'dotenv/config';
+import { pdfQueue } from './services/JobQueue';
+import { Worker } from 'bullmq';
+
+new Worker('pdfQueue', async job => { …render… });
+In Docker / PM2:
+
+yaml
+Copy
+Edit
+web:    node server/index.js
+worker: node worker.js
+2. Service sprawl
+Developers are already reaching for the wrong allocation service in new code. Prune everything except allocation.service.ts and make Jest fail if another path is imported:
+
+ts
+Copy
+Edit
+// jest.config.js
+moduleNameMapper: {
+  '^.*optimized-allocation.service$': '<rootDir>/tests/__fail__/Abort.js'
+}
+3. Large rows & write hot-spots
+allocations.raw_csv keeps multi-MB blobs in-row; every update rewrites the whole 8-kB page and holds an exclusive lock on the table’s hottest block. At 10+ concurrent uploads you’ll feel it.
+
+ALTER TABLE allocations DROP COLUMN raw_csv;
+
+Store the file in S3, keep only the key & SHA-256 hash.
+
+Partition by fund_id or a rolling quarter:
+
+sql
+Copy
+Edit
+CREATE TABLE allocations (
+  LIKE allocations_base INCLUDING ALL
+) PARTITION BY LIST (fund_id);
+4. Observability
+Custom Postgres logging is better than nothing, but you’re blind to cross-service latency and Redis / queue health.
+
+npm i @opentelemetry/sdk-node @opentelemetry/instrumentation-bullmq
+
+Export to Honeycomb / Grafana Tempo.
+One evening of work → flame-graphs for every slow request.
+
+Next verification steps
+Run these in prod-like:
+
+bash
+Copy
+Edit
+# Should return immediately even while a big PDF is rendering
+time curl -s -o /dev/null http://app/api/system/health
+
+# Should see two distinct processes
+ps aux | grep -E "web|worker" | grep node
+
+# Should never find duplicate allocation rows
+SELECT fund_id, investor_id, deal_id, COUNT(*)
+FROM allocations
+GROUP BY 1,2,3 HAVING COUNT(*) > 1;
