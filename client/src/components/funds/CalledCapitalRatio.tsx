@@ -48,9 +48,9 @@ export const VerticalStackedBarChart: React.FC<{
             ticks={[0, 0.25, 0.5, 0.75, 1]}
           />
           <Tooltip 
-            formatter={(value: number, name: string) => {
+            formatter={(value: number, name: any) => {
               // Proper formatting for tooltip keys
-              const displayName = String(name)
+              const displayName = String(name || '')
                 .replace(/_/g, ' ')
                 .split(' ')
                 .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
