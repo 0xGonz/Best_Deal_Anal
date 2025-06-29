@@ -77,10 +77,13 @@ import {
   calculateFundCapitalMetrics, 
   getDisplayAmount, 
   getCapitalViewColorClass,
-  calculateDynamicWeight,
-  calculateCorrectStatus,
-  isStatusCorrect
+  calculateDynamicWeight
 } from "@/lib/services/capitalCalculations";
+import { 
+  generateStatusBadgeProps,
+  findStatusInconsistencies,
+  getInconsistencySummary 
+} from "@/lib/services/allocationStatusService";
 import { TABLE_CONFIGS } from "@/lib/services/tableConfig";
 // Import local types instead of schema types to ensure consistency
 import { Fund, FundAllocation, Deal } from "@/lib/types";
@@ -996,9 +999,8 @@ export default function FundDetail() {
                           // Calculate dynamic weight based on capital view
                           const dynamicWeight = calculateDynamicWeight(allocation, allocations, capitalView);
                           
-                          // Calculate correct status and check for inconsistencies
-                          const correctStatus = calculateCorrectStatus(allocation);
-                          const statusIsCorrect = isStatusCorrect(allocation);
+                          // Use modular status service for scalable status management
+                          const statusBadgeProps = generateStatusBadgeProps(allocation);
                           
                           // Calculate MOIC
                           let moic = 0;
@@ -1032,19 +1034,14 @@ export default function FundDetail() {
                                   <Badge 
                                     className={`
                                       text-[9px] xs:text-xs sm:text-sm px-1.5 py-0.5
-                                      ${correctStatus === "funded" ? "bg-emerald-100 text-emerald-800" : ""}
-                                      ${correctStatus === "committed" ? "bg-blue-100 text-blue-800" : ""}
-                                      ${correctStatus === "unfunded" ? "bg-amber-100 text-amber-800" : ""}
-                                      ${correctStatus === "partially_paid" ? "bg-purple-100 text-purple-800" : ""}
-                                      ${!statusIsCorrect ? "border-2 border-red-500" : ""}
+                                      ${statusBadgeProps.colorClass}
+                                      ${statusBadgeProps.hasError ? "border-2 border-red-500" : ""}
                                     `}
-                                    title={!statusIsCorrect ? `Database shows "${allocation.status}" but should be "${correctStatus}" based on payment data` : undefined}
+                                    title={statusBadgeProps.errorTooltip}
                                   >
-                                    {correctStatus === "partially_paid" 
-                                      ? "Partially Paid" 
-                                      : correctStatus.charAt(0).toUpperCase() + correctStatus.slice(1)}
+                                    {statusBadgeProps.label}
                                   </Badge>
-                                  {!statusIsCorrect && (
+                                  {statusBadgeProps.hasError && (
                                     <span className="text-red-500 text-xs" title="Status inconsistency detected">⚠️</span>
                                   )}
                                 </div>
