@@ -28,32 +28,36 @@ function getStorage(): IStorage {
  */
 export class FundService {
   /**
-   * Calculate the called capital for a fund based on allocation status
-   * This properly recognizes 'funded' allocations as called capital
+   * Calculate the called capital for a fund based on actual capital calls
+   * Called capital = sum of all capital call amounts (regardless of payment status)
    */
   async calculateCalledCapital(fundId: number): Promise<number> {
     const storage = getStorage();
+    
+    // Get all allocations for this fund
     const allocations = await storage.getAllocationsByFund(fundId);
     
-    let calledCapital = 0;
+    let totalCalled = 0;
     
+    // For each allocation, sum the capital call amounts
     for (const allocation of allocations) {
-      const amount = Number(allocation.amount) || 0;
-      
-      switch (allocation.status) {
-        case 'funded':
-          // Fully funded = fully called
-          calledCapital += amount;
-          break;
-        case 'partially_paid':
-          // Use paidAmount if available, otherwise treat as fully called
-          calledCapital += Number(allocation.paidAmount) || amount;
-          break;
-        // 'committed', 'unfunded', 'written_off' = not called
+      try {
+        // Get capital calls for this allocation
+        const capitalCalls = await storage.getCapitalCallsByAllocation(allocation.id);
+        
+        // Sum the call amounts (not paid amounts - that's different)
+        const allocationCalled = capitalCalls.reduce((sum, call) => {
+          return sum + Number(call.callAmount || 0);
+        }, 0);
+        
+        totalCalled += allocationCalled;
+      } catch (error) {
+        console.warn(`Error getting capital calls for allocation ${allocation.id}:`, error);
+        // If we can't get capital calls, assume no calls made (0 called)
       }
     }
     
-    return calledCapital;
+    return totalCalled;
   }
   
   /**
