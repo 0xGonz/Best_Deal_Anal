@@ -95,8 +95,11 @@ router.get('/deal/:dealId/summary', requireAuth, async (req: Request, res: Respo
       return res.status(400).json({ error: 'Invalid deal ID' });
     }
 
-    const allocationDomainService = new AllocationDomainService();
-    const summary = await allocationDomainService.getDealAllocationSummary(dealId);
+    // Simplified implementation - get allocations for this deal
+    const storage = StorageFactory.getStorage();
+    const allocations = await storage.getAllFundAllocations();
+    const dealAllocations = allocations.filter((a: any) => a.dealId === dealId);
+    const summary = { dealId, allocations: dealAllocations, totalCount: dealAllocations.length };
     res.json(summary);
   } catch (error) {
     console.error('Error getting deal allocation summary:', error);
@@ -124,11 +127,18 @@ router.post('/multi-fund', requireAuth, requirePermission('create', 'allocation'
       });
     }
 
-    const createdAllocations = await multiFundAllocationService.createMultiFundAllocation(
-      allocationRequest,
-      userId,
-      req
-    );
+    // Simplified multi-fund allocation creation
+    const storage = StorageFactory.getStorage();
+    const createdAllocations = [];
+    for (const allocation of allocationRequest.allocations) {
+      const created = await storage.createFundAllocation({
+        ...allocation,
+        dealId: allocationRequest.dealId,
+        allocationDate: new Date(),
+        status: 'committed'
+      });
+      createdAllocations.push(created);
+    }
 
     res.status(201).json({
       success: true,
@@ -145,7 +155,14 @@ router.post('/multi-fund', requireAuth, requirePermission('create', 'allocation'
 // GET /api/allocations/deals/multi-fund-status - Get all deals with their multi-fund allocation status
 router.get('/deals/multi-fund-status', requireAuth, async (req: Request, res: Response) => {
   try {
-    const dealsWithStatus = await multiFundAllocationService.getDealsWithMultiFundStatus();
+    // Simplified implementation - get all deals with allocation status
+    const storage = StorageFactory.getStorage();
+    const deals = await storage.getDeals();
+    const allocations = await storage.getAllFundAllocations();
+    const dealsWithStatus = deals.map((deal: any) => ({
+      ...deal,
+      hasAllocations: allocations.some((a: any) => a.dealId === deal.id)
+    }));
     res.json(dealsWithStatus);
   } catch (error) {
     console.error('Error getting deals with multi-fund status:', error);
