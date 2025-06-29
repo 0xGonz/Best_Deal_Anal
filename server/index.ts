@@ -15,6 +15,29 @@ import { initJobQueues } from "./jobs";
 import { metricsMiddleware } from "./middleware/metrics";
 import { LoggingService } from "./services";
 
+// Performance improvements imports
+import { 
+  uploadLimiter, 
+  uploadRateLimit, 
+  validateContentLength, 
+  handleUploadErrors, 
+  cleanupTempFiles 
+} from "./middleware/upload-limits";
+import { 
+  idempotencyMiddleware, 
+  initializeIdempotencyTable 
+} from "./middleware/idempotency";
+import { 
+  tenantIsolationMiddleware, 
+  initializeOrgTables, 
+  initializeSecurityAuditLog 
+} from "./middleware/multi-tenant-security";
+import { 
+  performanceMonitor, 
+  initializePerformanceMetrics 
+} from "./middleware/performance-monitor";
+import { jobQueue } from "./services/queue-processor.service";
+
 // Main async function to allow using await
 async function initialize() {
   const app = express();
