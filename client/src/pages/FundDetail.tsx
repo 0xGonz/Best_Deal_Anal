@@ -77,7 +77,9 @@ import {
   calculateFundCapitalMetrics, 
   getDisplayAmount, 
   getCapitalViewColorClass,
-  calculateDynamicWeight 
+  calculateDynamicWeight,
+  calculateCorrectStatus,
+  isStatusCorrect
 } from "@/lib/services/capitalCalculations";
 import { TABLE_CONFIGS } from "@/lib/services/tableConfig";
 // Import local types instead of schema types to ensure consistency
@@ -994,6 +996,10 @@ export default function FundDetail() {
                           // Calculate dynamic weight based on capital view
                           const dynamicWeight = calculateDynamicWeight(allocation, allocations, capitalView);
                           
+                          // Calculate correct status and check for inconsistencies
+                          const correctStatus = calculateCorrectStatus(allocation);
+                          const statusIsCorrect = isStatusCorrect(allocation);
+                          
                           // Calculate MOIC
                           let moic = 0;
                           if (allocation.amount > 0) {
@@ -1022,21 +1028,26 @@ export default function FundDetail() {
                                 </span>
                               </TableCell>
                               <TableCell className="py-1 sm:py-2 px-2 sm:px-4">
-                                {allocation.status && (
+                                <div className="flex items-center gap-1">
                                   <Badge 
                                     className={`
                                       text-[9px] xs:text-xs sm:text-sm px-1.5 py-0.5
-                                      ${allocation.status === "funded" ? "bg-emerald-100 text-emerald-800" : ""}
-                                      ${allocation.status === "committed" ? "bg-blue-100 text-blue-800" : ""}
-                                      ${allocation.status === "unfunded" ? "bg-amber-100 text-amber-800" : ""}
-                                      ${allocation.status === "partially_paid" ? "bg-purple-100 text-purple-800" : ""}
+                                      ${correctStatus === "funded" ? "bg-emerald-100 text-emerald-800" : ""}
+                                      ${correctStatus === "committed" ? "bg-blue-100 text-blue-800" : ""}
+                                      ${correctStatus === "unfunded" ? "bg-amber-100 text-amber-800" : ""}
+                                      ${correctStatus === "partially_paid" ? "bg-purple-100 text-purple-800" : ""}
+                                      ${!statusIsCorrect ? "border-2 border-red-500" : ""}
                                     `}
+                                    title={!statusIsCorrect ? `Database shows "${allocation.status}" but should be "${correctStatus}" based on payment data` : undefined}
                                   >
-                                    {allocation.status === "partially_paid" 
+                                    {correctStatus === "partially_paid" 
                                       ? "Partially Paid" 
-                                      : allocation.status.charAt(0).toUpperCase() + allocation.status.slice(1)}
+                                      : correctStatus.charAt(0).toUpperCase() + correctStatus.slice(1)}
                                   </Badge>
-                                )}
+                                  {!statusIsCorrect && (
+                                    <span className="text-red-500 text-xs" title="Status inconsistency detected">⚠️</span>
+                                  )}
+                                </div>
                               </TableCell>
                               <TableCell className="py-1.5 sm:py-2.5 px-2 sm:px-4 text-right">
                                 <span className={`text-2xs xs:text-xs sm:text-sm ${getCapitalViewColorClass(capitalView)}`}>

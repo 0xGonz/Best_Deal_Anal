@@ -7,30 +7,23 @@ export interface CapitalMetrics {
 }
 
 /**
- * Calculate capital metrics for a single allocation based on its status and capital call history
- * This is a scalable service that can be extended to integrate with actual capital call data
+ * Calculate capital metrics for a single allocation based on its actual payment data
+ * Implements correct business logic: committed → partially_paid → funded
  */
 export function calculateAllocationCapitalMetrics(allocation: FundAllocation): CapitalMetrics {
   const committedAmount = allocation.amount;
+  const paidAmount = allocation.paidAmount || 0;
   
-  // Use the correct field mapping from API response:
-  // - paidAmount = actual capital that has been called and paid
-  // - For funded allocations, called capital equals paid capital (all called capital is paid)
-  // - For partially_paid allocations, some capital is called but not fully paid
-  // - For committed allocations, no capital has been called yet
+  // CORRECT BUSINESS LOGIC:
+  // - calledAmount = what has been called (equals paidAmount for now, will integrate with capital calls later)
+  // - Status should be determined by payment percentage, not used to determine amounts
+  // - 0% paid = committed, 0-99% paid = partially_paid, 100% paid = funded
   
-  let calledAmount = 0;
-  if (allocation.status === 'funded') {
-    // For funded allocations, we assume all paid amount represents called capital
-    calledAmount = allocation.paidAmount || 0;
-  } else if (allocation.status === 'partially_paid') {
-    // For partially paid, the paid amount is the called amount (since paid <= called)
-    calledAmount = allocation.paidAmount || 0;
-  } else {
-    // For committed/unfunded, no capital has been called
-    calledAmount = 0;
-  }
+  // For now, assume called amount equals paid amount
+  // TODO: Integrate with actual capital call data when available
+  const calledAmount = paidAmount;
   
+  // Calculate what hasn't been called yet
   const uncalledAmount = committedAmount - calledAmount;
   
   return {
@@ -88,6 +81,31 @@ export function getCapitalViewColorClass(view: 'total' | 'called' | 'uncalled'):
     default:
       return 'text-blue-700 font-medium';
   }
+}
+
+/**
+ * Calculate what the status SHOULD be based on payment percentage
+ * This reveals when database status is incorrect
+ */
+export function calculateCorrectStatus(allocation: FundAllocation): string {
+  const committedAmount = allocation.amount;
+  const paidAmount = allocation.paidAmount || 0;
+  
+  if (committedAmount === 0) return 'unfunded';
+  
+  const paymentPercentage = (paidAmount / committedAmount) * 100;
+  
+  if (paymentPercentage === 0) return 'committed';
+  if (paymentPercentage >= 100) return 'funded';
+  return 'partially_paid';
+}
+
+/**
+ * Check if allocation status in database matches what it should be
+ */
+export function isStatusCorrect(allocation: FundAllocation): boolean {
+  const correctStatus = calculateCorrectStatus(allocation);
+  return allocation.status === correctStatus;
 }
 
 /**
