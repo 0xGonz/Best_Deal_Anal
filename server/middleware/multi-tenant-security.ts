@@ -88,13 +88,18 @@ export async function initializeOrgTables() {
 export const tenantIsolationMiddleware = async (req: TenantRequest, res: Response, next: NextFunction) => {
   try {
     // Skip for auth and system endpoints
-    const skipPaths = ['/auth/', '/system/', '/health'];
-    if (skipPaths.some(path => req.path.includes(path))) {
+    const skipPaths = ['/auth', '/system', '/health'];
+    if (skipPaths.some(path => req.path.startsWith(path))) {
+      return next();
+    }
+
+    // Only apply tenant isolation to API routes
+    if (!req.path.startsWith('/api/')) {
       return next();
     }
 
     if (!req.user?.id) {
-      return res.status(401).json({ error: 'Authentication required' });
+      return next(); // Let the auth middleware handle this
     }
 
     // Get user's org context
