@@ -1,0 +1,120 @@
+1. Single-process bottlenecks
+Everything (HTTP, CSV parsing, PDF rendering, AI calls) runs in the same Node/Express worker.
+
+Under load one slow CSV upload blocks ALL other requests in the event loop.
+
+A single WeasyPrint job can spike memory > 450 MB and trigger the Replit OOM killer, taking the whole API down.
+
+Fix – break the monolith in two steps:
+
+Spin the PDF/AI work out to a proper queue (BullMQ, Redis Streams).
+
+Run the web process stateless behind a load balancer; scale workers separately.
+
+2. Missing back-pressure on uploads
+You accept multi-MB CSVs and PDFs with no size limit or stream-to-disk piping.
+
+Users can open four concurrent tabs, drag in four 50 MB CSVs and saturate the Node heap.
+
+Fix – set content-length limits, stream directly to S3/MinIO, and acknowledge receipt before kicking a job.
+
+3. Non-idempotent allocation workflow
+“Create allocation” POST isn’t idempotent; retries from the React Query layer can double-insert rows (the UNIQUE index hides most but not all cases—tranches, amended deals, etc.).
+
+No saga or compensation step when a follow-on capital-call fails (allocation stays “partially_paid” forever).
+
+Fix – give every client request a request_id, store it, and make inserts ON CONFLICT DO NOTHING. Build a nightly reconciler that walks allocations → calls → payments and re-opens broken ones.
+
+4. Database hot-spots
+allocations, capital_calls, payments all cluster on an id SERIAL PK → new rows fight for the same Postgres page under write bursts.
+
+A couple of long JSON columns (meta, raw_csv) live in the same row; updating a single field rewrites the full 8 kB page.
+
+Fix – use UUID v7 keys (monotonic but wider) or partition hot tables by fund_id. Move raw CSV blobs to object storage.
+
+5. N+1 queries resurfaced
+Drizzle’s relation helpers were introduced, but several “optimized” services got forked before that refactor.
+
+Fund dashboard still does:
+
+SELECT * FROM allocations WHERE fund_id = ? (N rows)
+
+loop → SELECT SUM(...) FROM capital_calls WHERE allocation_id = ? (N queries)
+
+Fix – use a single JOIN/CTE or a materialized view for fund-level aggregates.
+
+6. WebSocket spam
+You broadcast all allocation change events to every connected client (io.emit('allocation:update', ...)).
+
+Once multiple funds are live, each browser tab processes dozens of irrelevant messages per second and React Query invalidates caches nonstop.
+
+Fix – namespaced rooms (/fund/{id}) and server-side filtering.
+
+7. Front-end memory leaks
+Some pages mount a new PDFPreview Web Worker on every route change and never terminate it. Heavy multi-tab usage steadily grows RAM.
+
+Fix – singleton worker per tab + worker.terminate() in useEffect cleanup.
+
+8. Cron jobs without watchdogs
+Two cron-style Node scripts (daily NAV, weekly reminders) run via node schedule.js &. If the job throws once, it crashes silently; health-check still shows “OK”.
+
+Fix – move to a queue consumer or Cloud Scheduler; export Prometheus metrics and alert on last-run-age.
+
+9. Poor secrets hygiene
+ENV vars are printed at startup (“✅ PDF generation ready!”) then committed to Replit logs. Anyone with repl read access can see DB creds.
+
+Fix – remove log line, rotate credentials, and use Replit secrets store or AWS SSM.
+
+10. No multi-tenant hardening
+The authorization middleware only checks that req.user.role === 'admin' for admin routes. It does not verify that the user belongs to the same firm/fund as the data being requested.
+
+A rogue investor who guesses an allocation UUID could hit /api/production/allocations/:id and get JSON for another investor.
+
+Fix – include org_id on every auth token and add AND org_id = $userOrg to queries.
+
+11. Observability gaps
+Aside from a generic /api/system/health, there is no tracing or high-cardinality request logging. When the app “feels slow”, you have zero visibility on where the time goes.
+
+Fix – integrate OpenTelemetry SDK (it works with Express + BullMQ), export to Grafana Cloud or Honeycomb.
+
+12. CICD / migrations race
+You run drizzle kit:push on every deploy. If two pods roll at once both may apply the same migration → collision → roll-out stalls.
+
+Fix – gate migrations behind a “leader” job or run them externally in your pipeline.
+
+13. Future pain you can dodge now
+S3 key naming – currently /statements/${investorId}.pdf. When you regenerate statements quarterly the old one is overwritten and CloudFront caches stale copies. Add period in the path.
+
+Capital-call schedule time-zone drift – dates are stored without TZ; scheduler uses server local time. When you move from Replit (UTC) to AWS (EST) calls will fire at weird hours. Store timestamptz.
+
+Immediate action plan (90-day horizon)
+Introduce BullMQ + Redis; move CSV-ingest, PDF, and GPT summaries off the web thread.
+
+Refactor allocation endpoints for idempotency + saga reconciliation.
+
+Partition or at least index-tune hot Postgres tables; archive raw_csv to S3.
+
+Add OpenTelemetry traces + Prom metrics; set an alert on p95 request time.
+
+Lock down multi-tenancy checks and rotate secrets.
+
+Swap global WebSocket broadcast for fund-scoped rooms.
+
+Harden CI pipeline so only the first pod runs migrations.
+
+Tackle those and you’ll be safe scaling from dozens to the first few hundred active users. Past that we can talk sharding strategies, read replicas, and regional edges, but the list above will remove the big red flags today.
+
+
+
+
+
+
+
+
+
+
+
+
+Tools
+
+
