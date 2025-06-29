@@ -196,10 +196,10 @@ router.post('/', requireAuth, requirePermission('create', 'allocation'), async (
     }
     
     try {
-      // Use transaction-safe allocation service for atomic operations
-      const { transactionSafeAllocationService } = await import('../services/transaction-safe-allocation.service');
+      // Use allocation domain service for safe allocation creation
+      const allocationDomainService = new AllocationDomainService();
       
-      const result = await transactionSafeAllocationService.createAllocationSafely({
+      const result = await allocationDomainService.createAllocation({
         fundId: allocationData.fundId,
         dealId: allocationData.dealId,
         amount: allocationData.amount,
