@@ -5,6 +5,11 @@ import { MemStorage } from '../storage';
 import { pool } from '../db';
 import { metricsHandler } from '../middleware/metrics';
 import { MetricsService, LoggingService } from '../services';
+import { 
+  getPerformanceMetrics, 
+  getCurrentSystemHealth 
+} from '../middleware/performance-monitor';
+import { jobQueue } from '../services/queue-processor.service';
 
 const metricsService = MetricsService.getInstance();
 const logger = LoggingService.getInstance();
@@ -147,3 +152,76 @@ systemRouter.get('/health', async (req: Request, res: Response) => {
 
 // Endpoint to expose metrics in Prometheus format
 systemRouter.get('/metrics', metricsHandler);
+
+// Performance monitoring endpoints
+systemRouter.get('/performance', async (req: Request, res: Response) => {
+  try {
+    const hours = parseInt(req.query.hours as string) || 24;
+    const metrics = await getPerformanceMetrics(hours);
+    const systemHealth = getCurrentSystemHealth();
+    const queueStats = await jobQueue.getQueueStats();
+    
+    res.json({
+      success: true,
+      performance: metrics,
+      systemHealth,
+      queueStats,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Failed to get performance metrics:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve performance metrics'
+    });
+  }
+});
+
+// Queue management endpoints
+systemRouter.get('/queue/stats', async (req: Request, res: Response) => {
+  try {
+    const stats = await jobQueue.getQueueStats();
+    res.json({
+      success: true,
+      queueStats: stats,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Failed to get queue stats:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve queue statistics'
+    });
+  }
+});
+
+systemRouter.post('/queue/job', async (req: Request, res: Response) => {
+  try {
+    const { type, payload, priority, delay, maxAttempts } = req.body;
+    
+    if (!type || !payload) {
+      return res.status(400).json({
+        success: false,
+        error: 'Job type and payload are required'
+      });
+    }
+    
+    const jobId = await jobQueue.addJob(type, payload, {
+      priority: priority || 0,
+      delay: delay || 0,
+      maxAttempts: maxAttempts || 3
+    });
+    
+    res.json({
+      success: true,
+      jobId,
+      message: `Job ${type} queued successfully`
+    });
+  } catch (error) {
+    console.error('Failed to queue job:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to queue job'
+    });
+  }
+});

@@ -138,8 +138,29 @@ async function initialize() {
 
 
 
+  // Initialize performance improvements
+  await initializeIdempotencyTable();
+  await initializeOrgTables();
+  await initializeSecurityAuditLog();
+  await initializePerformanceMetrics();
+  await jobQueue.initialize();
+
+  // Add performance monitoring middleware (must be early in chain)
+  app.use(performanceMonitor);
+
   // Add metrics middleware to track request metrics
   app.use(metricsMiddleware());
+
+  // Add security and performance middleware
+  app.use(tenantIsolationMiddleware);
+  app.use(idempotencyMiddleware());
+
+  // Upload security middleware (applied globally, but only affects upload routes)
+  app.use('/api/documents/upload', uploadRateLimit);
+  app.use('/api/documents/upload', validateContentLength);
+  app.use('/api/documents/upload', uploadLimiter.single('file'));
+  app.use('/api/documents/upload', handleUploadErrors);
+  app.use('/api/documents/upload', cleanupTempFiles);
 
   // Configure CORS to allow cross-origin requests for development/embedding
   app.use((req, res, next) => {
@@ -203,10 +224,11 @@ async function initialize() {
   // Initialize background job queues
   try {
     initJobQueues();
-
+    // Start the performance-optimized job queue
+    jobQueue.start();
+    console.log('✅ Background job processing started');
   } catch (error) {
     console.error('Failed to initialize background jobs:', error);
-
   }
   
   // Auto-allocation sync system disabled due to data corruption issues
