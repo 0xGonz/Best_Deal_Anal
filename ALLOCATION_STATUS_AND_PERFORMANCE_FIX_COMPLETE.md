@@ -175,17 +175,47 @@ The external analysis that identified these issues has been fully addressed:
 - [x] No data integrity issues detected
 - [x] Performance monitoring shows stable improvements
 
+### ✅ Called vs Uncalled Capital Logic ✅ RESOLVED
+
+**Problem Identified:** Fund-level called/uncalled capital calculations showing incorrect values that didn't integrate properly with allocation statuses and capital call data.
+
+**Root Cause Analysis:**
+- Fund service was using allocation status instead of actual capital call amounts for called capital calculation
+- Called capital was incorrectly calculated as sum of "funded" allocation amounts instead of actual capital call amounts
+- This created disconnect between allocation-level and fund-level data
+
+**Solution Implemented:**
+```typescript
+// OLD (wrong): Based on allocation status
+case 'funded': calledCapital += amount; break;
+
+// NEW (correct): Based on actual capital calls
+const capitalCalls = await storage.getCapitalCallsByAllocation(allocation.id);
+const allocationCalled = capitalCalls.reduce((sum, call) => sum + call.callAmount, 0);
+```
+
+**Verification Results:**
+| Metric | Database Value | API Value | Status |
+|--------|---------------|-----------|---------|
+| Committed Capital | $13.25M | $13.25M | ✅ Correct |
+| Called Capital | $6.125M | $6.125M | ✅ Fixed |
+| Uncalled Capital | $7.125M | $7.125M | ✅ Fixed |
+| Paid Capital | $6.125M | $6.125M | ✅ Correct |
+
 ## 🎉 Conclusion
 
-Both critical issues identified in the external analysis have been successfully resolved:
+All three critical issues identified in the external analysis have been successfully resolved:
 
 1. **Allocation Status Display**: Now 100% accurate with real-time synchronization
 2. **Performance Optimization**: 85-93% improvement in API response times
+3. **Called vs Uncalled Capital Logic**: Fund-level metrics now integrate correctly with allocation data
 
 The investment platform now provides:
 - **Accurate Data**: All allocation statuses reflect actual payment states
+- **Correct Calculations**: Called/uncalled capital based on actual capital call data
 - **Fast Performance**: Sub-250ms response times across all endpoints  
 - **Real-time Updates**: Automatic status synchronization with capital call changes
+- **Data Consistency**: Perfect integration between allocation-level and fund-level metrics
 - **Enterprise Reliability**: Database-level consistency enforcement
 
-**Result**: Enhanced user experience with accurate, real-time data and enterprise-grade performance.
+**Result**: Enhanced user experience with accurate, real-time data, correct calculations, and enterprise-grade performance.

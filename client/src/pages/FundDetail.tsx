@@ -147,7 +147,7 @@ export default function FundDetail() {
 
   // Fetch all allocations for this fund
   const { data: allocations, isLoading: isAllocationsLoading } = useQuery<FundAllocation[]>({
-    queryKey: [`/api/allocations/fund/${fundId}`],
+    queryKey: [`/api/production/allocations/fund/${fundId}`],
     enabled: !!fundId,
     // Transform the data to ensure proper type compatibility
     select: (data: any) => {

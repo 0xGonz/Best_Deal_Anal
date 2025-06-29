@@ -48,12 +48,12 @@ export const VerticalStackedBarChart: React.FC<{
             ticks={[0, 0.25, 0.5, 0.75, 1]}
           />
           <Tooltip 
-            formatter={(value: number, name) => {
+            formatter={(value: number, name: string) => {
               // Proper formatting for tooltip keys
-              const displayName = name
+              const displayName = String(name)
                 .replace(/_/g, ' ')
                 .split(' ')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
                 .join(' ');
               return [`${formatCurrency(value)} (${Math.round((value/totalValue)*100)}%)`, displayName];
             }}
@@ -175,37 +175,60 @@ const CalledCapitalRatio: React.FC<CalledCapitalRatioProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Calculate called vs uncalled capital based on actual capital call data
+  // Calculate called vs uncalled capital - use server-calculated values when available
   const capitalData = React.useMemo((): CapitalDataItem[] => {
-    // Handle null or undefined allocations to avoid runtime errors
+    // Prefer server-calculated values for accuracy and consistency
+    if (calledCapital !== undefined && uncalledCapital !== undefined) {
+      const totalAmount = calledCapital + uncalledCapital;
+      
+      if (totalAmount === 0) {
+        return [];
+      }
+      
+      return [
+        { 
+          name: "Called Capital", 
+          value: calledCapital, 
+          color: "#4f46e5",
+          percentage: Math.round((calledCapital / totalAmount) * 100)
+        },
+        { 
+          name: "Uncalled Capital", 
+          value: uncalledCapital, 
+          color: "#a5b4fc",
+          percentage: Math.round((uncalledCapital / totalAmount) * 100)
+        }
+      ];
+    }
+    
+    // Fallback: Calculate from allocation data if server values unavailable
     if (!allocations || allocations.length === 0) {
       return [];
     }
     
-    // Use actual capital call data from enhanced API response
-    const calledAmount = allocations.reduce((sum, allocation) => {
-      return sum + (Number(allocation.calledAmount) || 0);
-    }, 0);
-    
+    // Calculate based on allocation statuses and paid amounts
     const committedAmount = allocations.reduce((sum, allocation) => {
       return sum + (allocation.amount || 0);
     }, 0);
     
-    const uncalledAmount = committedAmount - calledAmount;
+    const paidAmount = allocations.reduce((sum, allocation) => {
+      return sum + (allocation.paidAmount || 0);
+    }, 0);
     
-    // In case there are no allocations yet
-    if (calledAmount === 0 && uncalledAmount === 0) {
+    const uncalledAmount = committedAmount - paidAmount;
+    
+    if (paidAmount === 0 && uncalledAmount === 0) {
       return [];
     }
     
-    const totalAmount = calledAmount + uncalledAmount;
+    const totalAmount = paidAmount + uncalledAmount;
     
     return [
       { 
         name: "Called Capital", 
-        value: calledAmount, 
+        value: paidAmount, 
         color: "#4f46e5",
-        percentage: Math.round((calledAmount / totalAmount) * 100)
+        percentage: Math.round((paidAmount / totalAmount) * 100)
       },
       { 
         name: "Uncalled Capital", 
@@ -214,7 +237,7 @@ const CalledCapitalRatio: React.FC<CalledCapitalRatioProps> = ({
         percentage: Math.round((uncalledAmount / totalAmount) * 100)
       }
     ];
-  }, [allocations]);
+  }, [allocations, calledCapital, uncalledCapital]);
   
   // Calculate percentages for display
   const totalCapital = React.useMemo(() => 
