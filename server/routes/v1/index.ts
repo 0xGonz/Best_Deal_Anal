@@ -8,7 +8,7 @@ import dealsRoutes from '../deals';
 import fundsRoutes from '../funds';
 import usersRoutes from '../users';
 import authRoutes from '../auth';
-import allocationsRoutes from '../allocations';
+import allocationsRoutes from '../production-allocations';
 import activityRoutes from '../activity';
 import dashboardRoutes from '../dashboard';
 import leaderboardRoutes from '../leaderboard';

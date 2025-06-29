@@ -49,7 +49,7 @@ function setupHealthMonitoring() {
       const stats = {
         timestamp: new Date().toISOString(),
         status: 'running',
-        processingCounts: jobQueueService.getProcessingCounts(),
+        processingCounts: await jobQueueService.getStatus(),
         uptime: process.uptime(),
         memoryUsage: process.memoryUsage(),
       };
@@ -66,7 +66,7 @@ function setupHealthMonitoring() {
   
   // Log processing statistics every 5 minutes
   setInterval(() => {
-    const counts = jobQueueService.getProcessingCounts();
+    const counts = await jobQueueService.getStatus();
     console.log('📊 Worker stats:', counts);
   }, 5 * 60 * 1000);
 }
