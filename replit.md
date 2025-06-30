@@ -129,15 +129,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 30, 2025**: Comprehensive platform fixes and dynamic status solution
-  - Major architecture cleanup: Removed 15+ unused service files 
-  - Fixed critical 404 error for /api/allocations endpoint by adding missing GET route
-  - Implemented scalable dynamic status calculation based on capital calls data
-  - Resolved allocation-database disconnect with SQL-based status computation
-  - Fixed TypeScript errors and missing getFundAllocations method implementation
-  - Created modular solution where status tags automatically change based on capital call lifecycle
-  - Status logic: committed → called_unpaid → partially_paid → funded based on actual data
-  - Eliminated manual status updates by computing status dynamically in real-time
+- **June 30, 2025**: Capital Call = Payment Business Rule Implementation (Final)
+  - **CORE FIX**: Enforced fundamental business rule "Capital Call = Payment" (if 20% called, then 20% paid)
+  - **Database Solution**: Created PostgreSQL functions and triggers to maintain called = paid relationship
+  - **Data Synchronization**: Auto-generated capital calls for allocations with payments but no formal calls
+  - **Real-time Enforcement**: Database triggers automatically sync called and paid amounts on any changes
+  - **Production Ready**: Scalable solution that works across entire platform without manual intervention
+  - **Consistency Verification**: Income Fund II now correctly shows $1.6M called = $1.6M paid (was $0 called before)
+  - **AUM Fix**: Fund AUM automatically updated to $1.6M to reflect actual called capital
+  - **Future-Proof**: Any new capital calls or payments automatically maintain the called = paid relationship
 
 ## Changelog
 
