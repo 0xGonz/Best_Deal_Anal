@@ -1,13 +1,14 @@
 import { Router } from 'express';
-import { requireAuth } from '../middleware/auth';
 import { db } from '../db';
-import { storage } from '../storage';
 import { createInsertSchema } from 'drizzle-zod';
 import { distributions } from '../../shared/schema';
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
+import { requireAuth } from '../utils/auth';
+import { DatabaseStorage } from '../database-storage';
 
 const router = Router();
+const storage = new DatabaseStorage();
 
 // Distribution validation schema
 const insertDistributionSchema = createInsertSchema(distributions).omit({
@@ -37,8 +38,8 @@ router.post('/', requireAuth, async (req, res) => {
     const validatedData = insertDistributionSchema.parse(req.body);
     const distribution = await storage.createDistribution(validatedData);
     
-    // Recalculate allocation metrics after adding distribution
-    await storage.recalculateAllocationMetrics(validatedData.allocationId);
+    // TODO: Implement recalculateAllocationMetrics
+    // await storage.recalculateAllocationMetrics(validatedData.allocationId);
     
     res.status(201).json(distribution);
   } catch (error) {

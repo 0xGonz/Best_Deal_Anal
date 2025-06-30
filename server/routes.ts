@@ -11,6 +11,7 @@ import leaderboardRoutes from './routes/leaderboard';
 import activityRoutes from './routes/activity';
 import notificationsRoutes from './routes/notifications';
 import documentsRoutes from './routes/documents';
+import distributionsRoutes from './routes/distributions';
 // Removed legacy allocations route - using production-allocations only
 import productionAllocationsRouter from './routes/production-allocations';
 import capitalCallsRoutes from './routes/capital-calls';
@@ -79,6 +80,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/activity', activityRoutes);
   app.use('/api/notifications', notificationsRoutes);
   app.use('/api/documents', documentsRoutes);
+  app.use('/api/distributions', distributionsRoutes);
   app.use('/api/enums', enumsRoutes); // Centralized enum values for dropdowns
   app.use('/api/fund-overview', fundOverviewRoutes); // Single source of truth for fund metrics
   app.use('/api/system', systemRouter);
