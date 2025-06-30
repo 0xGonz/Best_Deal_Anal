@@ -1,0 +1,115 @@
+What the log is really telling you
+Symptom in console	Root cause
+/api/allocations → 404 Not Found	There is no route registered at that path. Your server only exposes /api/production/allocations (and maybe /api/admin/allocations). The front-end is hitting the wrong URL.
+TypeError: body stream already read	Your fetch helper (throwIfResNotOk in src/lib/queryClient.ts) calls res.text() and then something else tries to read the body again (res.json() or another text()), but a fetch Response can be read only once.
+
+1 — Fix the 404 first
+Pick one of these:
+
+A. Point the front-end at the existing route
+In every React Query that reads allocations:
+
+ts
+Copy
+Edit
+useQuery(['allocations'], () =>
+  fetch('/api/production/allocations').then(r => r.json())
+);
+(Update any POST/PUT paths the same way.)
+
+B. Expose a short alias on the backend
+If you prefer /api/allocations, add this to server/routes/index.ts (or whatever file mounts your routers):
+
+ts
+Copy
+Edit
+import productionAllocationsRouter from './production-allocations';
+
+app.use('/api/allocations', productionAllocationsRouter);
+Restart the server and both URLs will work.
+
+(Don’t forget to add the GET handler if you only had POST before.)
+
+2 — Stop the “body stream already read” error
+throwIfResNotOk probably looks like this:
+
+ts
+Copy
+Edit
+export async function throwIfResNotOk(res: Response) {
+  if (!res.ok) {
+    const msg = await res.text();     // body consumed here
+    throw new Error(msg);
+  }
+  return res;
+}
+Then the calling code does:
+
+ts
+Copy
+Edit
+fetch(url).then(throwIfResNotOk).then(res => res.json()); // ← second read
+Two quick ways to fix it
+Return the parsed body inside the helper
+
+ts
+Copy
+Edit
+export async function fetchJson(url: string, options?: RequestInit) {
+  const res = await fetch(url, options);
+  if (!res.ok) {
+    const msg = await res.text();
+    throw new Error(msg);
+  }
+  return res.json();       // body read exactly once
+}
+Then in queries:
+
+ts
+Copy
+Edit
+useQuery(['allocations'], () => fetchJson('/api/production/allocations'));
+Clone the response before reading (if you must keep the helper separate):
+
+ts
+Copy
+Edit
+if (!res.ok) {
+  const clone = res.clone();
+  const msg = await clone.text();
+  throw new Error(msg);
+}
+res.clone() creates a second stream so later code can still call json().
+
+3 — Give yourself better error messages
+Wrap your Express route with a tiny “not-found” handler so you don’t wonder which path is wrong:
+
+ts
+Copy
+Edit
+app.use('/api', apiRouter);
+
+// fallback
+app.use('/api/*', (req, res) =>
+  res.status(404).json({ success: false, error: `Route not found: ${req.originalUrl}` })
+);
+Now the JSON will say exactly what’s missing rather than the generic “Not found – …”.
+
+TL;DR checklist
+Front-end URL → use /api/production/allocations or add an alias on the backend.
+
+Read the fetch body only once (return res.json() directly or use res.clone()).
+
+Add a fallback 404 handler for human-friendly messages.
+
+Fix those two lines and both the 404s and the “body stream already read” exceptions will disappear. Ping me with the new stack trace if you run into anything else!
+
+
+
+
+
+
+
+
+
+Ask ChatGPT

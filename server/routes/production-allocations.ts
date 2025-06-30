@@ -57,6 +57,22 @@ const createCapitalCallSchema = z.object({
 // Allocation endpoints
 
 /**
+ * GET /api/allocations - List all allocations
+ */
+router.get('/', requireAuth, requirePermission('view', 'allocation'), async (req: Request, res: Response) => {
+  try {
+    const allocations = await allocationService.getAllAllocations();
+    res.json(allocations);
+  } catch (error) {
+    console.error('Error fetching allocations:', error);
+    res.status(500).json({
+      error: 'Failed to fetch allocations',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
  * POST /api/allocations - Create new allocation
  */
 router.post('/', requireAuth, requirePermission('create', 'allocation'), async (req: Request, res: Response) => {

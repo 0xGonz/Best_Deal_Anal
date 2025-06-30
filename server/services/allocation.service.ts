@@ -129,6 +129,20 @@ export class AllocationService {
   }
 
   /**
+   * Gets all allocations with enriched data
+   * Returns allocations with deal and fund information
+   */
+  async getAllAllocations(): Promise<any[]> {
+    try {
+      const allocations = await this.storage.getFundAllocations();
+      return allocations;
+    } catch (error) {
+      console.error('Error fetching all allocations:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Creates a new allocation with proper integration and duplicate handling
    * Ensures all downstream calculations are triggered
    */
