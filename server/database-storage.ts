@@ -600,51 +600,40 @@ export class DatabaseStorage implements IStorage {
       throw new Error('Database not initialized');
     }
 
+    // Use derived status view for single source of truth
     const results = await db
       .select({
-        id: fundAllocations.id,
-        fundId: fundAllocations.fundId,
-        dealId: fundAllocations.dealId,
-        amount: fundAllocations.amount,
-        paidAmount: fundAllocations.paidAmount,
-        amountType: fundAllocations.amountType,
-        securityType: fundAllocations.securityType,
-        allocationDate: fundAllocations.allocationDate,
-        notes: fundAllocations.notes,
-        status: fundAllocations.status,
-        portfolioWeight: fundAllocations.portfolioWeight,
-        interestPaid: fundAllocations.interestPaid,
-        distributionPaid: fundAllocations.distributionPaid,
-        totalReturned: fundAllocations.totalReturned,
-        marketValue: fundAllocations.marketValue,
-        moic: fundAllocations.moic,
-        irr: fundAllocations.irr,
+        id: sql<number>`vw.id`,
+        fundId: sql<number>`vw.fund_id`,
+        dealId: sql<number>`vw.deal_id`,
+        amount: sql<number>`vw.amount`,
+        paidAmount: sql<number>`vw.paid_amount`,
+        amountType: sql<'percentage' | 'dollar' | null>`vw.amount_type`,
+        securityType: sql<string>`vw.security_type`,
+        allocationDate: sql<Date>`vw.allocation_date`,
+        notes: sql<string>`vw.notes`,
+        status: sql<'committed' | 'funded' | 'unfunded' | 'partially_paid' | 'written_off'>`vw.derived_status`, // Use derived status instead of stored status
+        portfolioWeight: sql<number>`vw.portfolio_weight`,
+        interestPaid: sql<number>`vw.interest_paid`,
+        distributionPaid: sql<number>`vw.distribution_paid`,
+        totalReturned: sql<number>`vw.total_returned`,
+        marketValue: sql<number>`vw.market_value`,
+        moic: sql<number>`vw.moic`,
+        irr: sql<number>`vw.irr`,
         dealName: deals.name,
         dealSector: deals.sector,
-        // Calculate called amounts directly from capital_calls table
-        calledAmount: sql<number>`COALESCE(capital_call_totals.total_called, 0)`,
+        calledAmount: sql<number>`vw.total_called`,
         calledPercentage: sql<number>`
           CASE 
-            WHEN ${fundAllocations.amount} > 0 
-            THEN ROUND((COALESCE(capital_call_totals.total_called, 0) / ${fundAllocations.amount}) * 100, 1)
+            WHEN vw.amount > 0 
+            THEN ROUND((vw.total_called / vw.amount) * 100, 1)
             ELSE 0.0
           END
         `
       })
-      .from(fundAllocations)
-      .leftJoin(deals, eq(fundAllocations.dealId, deals.id))
-      .leftJoin(
-        sql`(
-          SELECT 
-            allocation_id,
-            SUM(call_amount) as total_called,
-            SUM(paid_amount) as total_paid
-          FROM capital_calls 
-          GROUP BY allocation_id
-        ) as capital_call_totals`,
-        sql`capital_call_totals.allocation_id = ${fundAllocations.id}`
-      )
-      .where(eq(fundAllocations.fundId, fundId));
+      .from(sql`vw_fund_allocations_with_status vw`)
+      .leftJoin(deals, sql`vw.deal_id = ${deals.id}`)
+      .where(sql`vw.fund_id = ${fundId}`);
     
     // Transform results to include deal information and proper type conversion
     return results.map(result => ({

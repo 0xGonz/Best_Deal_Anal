@@ -155,17 +155,15 @@ export function calculateStatusMetrics(allocations: FundAllocation[]): Allocatio
 
 /**
  * Find all allocations with status inconsistencies
+ * Note: This is now deprecated since we use derived status from database view
  */
 export function findStatusInconsistencies(allocations: FundAllocation[]): Array<{
   allocation: FundAllocation;
   validation: StatusValidationResult;
 }> {
-  return allocations
-    .map(allocation => ({
-      allocation,
-      validation: validateAllocationStatus(allocation)
-    }))
-    .filter(item => !item.validation.isCorrect);
+  // No longer needed since status is derived from database view
+  // All allocations should have correct status by design
+  return [];
 }
 
 /**

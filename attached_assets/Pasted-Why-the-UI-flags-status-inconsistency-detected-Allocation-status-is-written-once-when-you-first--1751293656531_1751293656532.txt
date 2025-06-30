@@ -1,0 +1,84 @@
+Why the UI flags “status inconsistency detected”
+
+Allocation status is written once (when you first save the commitment) and never updated again.
+─ In allocation.service.ts the createAllocation() method sets
+
+ts
+Copy
+Edit
+status = commitmentPaid === commitment ? 'funded'
+         : commitmentPaid === 0      ? 'committed'
+         : 'partially_paid';
+─ The update route for capital-calls only inserts rows into
+capital_calls; it never re-evaluates the parent allocation’s status.
+
+UI validator recomputes status every time it queries the API.
+It does:
+
+ts
+Copy
+Edit
+const called = sumBy(allocation.capitalCalls,'amount');
+const expectedStatus =
+    called === 0               ? 'committed'
+  : called <  allocation.amount ? 'partially_paid'
+  :                               'funded';
+if (allocation.status !== expectedStatus) throw 'status inconsistency';
+The database still says "funded" (from day-one) while the
+computed rule says "partially_paid" because only $1 M of the $2.5 M
+has been called (40 %).
+
+That is the entire disconnect.
+Backend never updates fund_allocations.status after the first save, front-end keeps calculating it live.
+
+Two clean ways to fix it (pick one)
+Option	What you change	Pros	Cons
+A. Derive status on the fly, never store it	1. Drop the status column from fund_allocations (or mark it deprecated).
+2. Expose a view that adds a computed derived_status column:
+sql<br>create or replace view vw_fund_allocations as<br>select a.*, <br> case<br> when coalesce(c.called,0) = 0 then 'committed'<br> when coalesce(c.called,0) < a.amount then 'partially_paid'<br> else then 'funded'<br> end as status<br>from fund_allocations a<br>left join (select allocation_id, sum(amount) called<br> from capital_calls group by allocation_id) c<br> on c.allocation_id = a.id;
+3. Change every API query to select * from vw_fund_allocations.	Single source of truth. No risk of stale data. UI & reports always agree.	One-time refactor (update service & any raw SQL selects).
+B. Keep the column, but update it every time a capital-call is inserted / updated	1. Add a trigger:
+sql<br>create or replace function sync_allocation_status() returns trigger as $$<br>begin<br> update fund_allocations a<br> set status = case<br> when new_tot.called = 0 then 'committed'<br> when new_tot.called < a.amount then 'partially_paid'<br> else 'funded'<br> end<br> from (select allocation_id, sum(amount) called<br> from capital_calls where allocation_id = new.allocation_id<br> group by allocation_id) new_tot<br> where a.id = new.allocation_id;<br> return null;<br>end;$$ language plpgsql;<br><br>create trigger trg_capcall_sync<br>after insert or update on capital_calls<br>for each row execute function sync_allocation_status();
+2. Remove the UI inconsistency check (it will always match).	Minimal code churn. Keeps explicit status for quick look-ups.	Requires DB trigger knowledge; risk of drift if someone bulk-updates capital_calls without firing trigger (COPY, etc.).
+
+If you plan to run analytics in SQL or PowerBI, Option A is usually cleaner.
+But if you like having a physical column for indexes or legacy exports, pick Option B.
+
+Quick migration script for Option B
+sql
+Copy
+Edit
+BEGIN;
+
+-- 1. Back-fill status for existing rows
+update fund_allocations a
+set    status = case
+                  when c.called = 0                 then 'committed'
+                  when c.called <  a.amount         then 'partially_paid'
+                  else                                'funded'
+                end
+from  (select allocation_id, sum(amount) called
+       from capital_calls
+       group by allocation_id) c
+where a.id = c.allocation_id;
+
+-- 2. Create the trigger (as in code block above)
+--    …
+
+COMMIT;
+Front-end changes (both options)
+Stop hard-coding the enum list in the <Select>
+Fetch GET /api/enums/fund_allocation_status on app init and drive the list from there.
+
+Remove the “status inconsistency” toast once the backend is fixed.
+
+Invalidate allocations and funds queries in the onSuccess of the createCapitalCall mutation so the dashboard refreshes immediately.
+
+Next actions for you
+Decide: derive status (Option A) or keep column + trigger (Option B).
+
+Apply the SQL above.
+
+Restart the backend, click Balerion Space Ventures again — it should now read “Partially Paid (1.0 / 2.5 MM)” and the red error ribbon disappears.
+
+Ping me when that’s done or if you need the trigger/view script tweaked for your exact table names.
