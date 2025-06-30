@@ -63,5 +63,4 @@ export function registerRoutes(app: Express): Server {
 
   const httpServer = createServer(app);
   return httpServer;
-import productionAllocations from './production-allocations';
 }
