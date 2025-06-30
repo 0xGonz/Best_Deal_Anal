@@ -11,7 +11,7 @@ import { requireAuth } from '../utils/auth';
 import { requirePermission } from '../utils/permissions';
 import { z, ZodError } from 'zod';
 import { db } from '../db';
-import { fundAllocations, deals } from '../../shared/schema';
+import { fundAllocations, deals, funds } from '../../shared/schema';
 import { eq, sql } from 'drizzle-orm';
 
 const router = Router();
@@ -313,6 +313,66 @@ router.delete('/:id', requireAuth, requirePermission('delete', 'allocation'), as
     console.error('Error in allocation deletion:', error);
     res.status(500).json({
       error: 'Internal server error',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
+ * GET /api/allocations/deal/:dealId - Get allocations for a specific deal across all funds
+ */
+router.get('/deal/:dealId', requireAuth, requirePermission('view', 'allocation'), async (req: Request, res: Response) => {
+  try {
+    const dealId = parseInt(req.params.dealId);
+    if (isNaN(dealId)) {
+      return res.status(400).json({ error: 'Invalid deal ID' });
+    }
+
+    console.log(`Getting allocations for deal ${dealId}`);
+
+    // Get detailed deal allocations with fund and deal information using derived status view
+    const result = await db.execute(sql`
+      SELECT 
+        vw.id,
+        vw.fund_id as "fundId",
+        vw.deal_id as "dealId", 
+        vw.amount,
+        vw.paid_amount as "paidAmount",
+        vw.amount_type as "amountType",
+        vw.security_type as "securityType",
+        vw.allocation_date as "allocationDate",
+        vw.notes,
+        vw.derived_status as status,  -- Use derived status instead of stored status
+        vw.portfolio_weight as "portfolioWeight",
+        vw.interest_paid as "interestPaid",
+        vw.distribution_paid as "distributionPaid",
+        vw.total_returned as "totalReturned",
+        vw.market_value as "marketValue",
+        vw.moic,
+        vw.irr,
+        vw.total_called as "calledAmount",
+        CASE 
+          WHEN vw.amount > 0 
+          THEN ROUND((vw.total_called / vw.amount) * 100, 1)
+          ELSE 0.0
+        END as "calledPercentage",
+        deals.name as "dealName",
+        deals.sector as "dealSector",
+        funds.name as "fundName"
+      FROM vw_fund_allocations_with_status vw
+      LEFT JOIN deals ON vw.deal_id = deals.id
+      LEFT JOIN funds ON vw.fund_id = funds.id
+      WHERE vw.deal_id = ${dealId}
+      ORDER BY vw.allocation_date
+    `);
+
+    console.log(`Retrieved ${result.rows.length} allocations for deal ${dealId}`);
+    res.json(result.rows);
+
+  } catch (error) {
+    console.error('Error getting deal allocations:', error);
+    res.status(500).json({
+      error: 'Failed to get deal allocations',
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
