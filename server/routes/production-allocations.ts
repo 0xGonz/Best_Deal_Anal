@@ -12,7 +12,7 @@ import { requirePermission } from '../utils/permissions';
 import { z, ZodError } from 'zod';
 import { db } from '../db';
 import { fundAllocations, deals } from '../../shared/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 const router = Router();
 
@@ -328,35 +328,41 @@ router.get('/fund/:fundId', requireAuth, requirePermission('view', 'allocation')
       return res.status(400).json({ error: 'Invalid fund ID' });
     }
 
-    // Get detailed fund allocations with deal information
-    const allocations = await db
-      .select({
-        id: fundAllocations.id,
-        fundId: fundAllocations.fundId,
-        dealId: fundAllocations.dealId,
-        amount: fundAllocations.amount,
-        paidAmount: fundAllocations.paidAmount,
-        amountType: fundAllocations.amountType,
-        securityType: fundAllocations.securityType,
-        allocationDate: fundAllocations.allocationDate,
-        notes: fundAllocations.notes,
-        status: fundAllocations.status,
-        portfolioWeight: fundAllocations.portfolioWeight,
-        interestPaid: fundAllocations.interestPaid,
-        distributionPaid: fundAllocations.distributionPaid,
-        totalReturned: fundAllocations.totalReturned,
-        marketValue: fundAllocations.marketValue,
-        moic: fundAllocations.moic,
-        irr: fundAllocations.irr,
-        dealName: deals.name,
-        dealSector: deals.sector
-      })
-      .from(fundAllocations)
-      .leftJoin(deals, eq(fundAllocations.dealId, deals.id))
-      .where(eq(fundAllocations.fundId, fundId))
-      .orderBy(fundAllocations.allocationDate);
+    // Get detailed fund allocations with deal information using derived status view
+    const result = await db.execute(sql`
+      SELECT 
+        vw.id,
+        vw.fund_id as "fundId",
+        vw.deal_id as "dealId", 
+        vw.amount,
+        vw.paid_amount as "paidAmount",
+        vw.amount_type as "amountType",
+        vw.security_type as "securityType",
+        vw.allocation_date as "allocationDate",
+        vw.notes,
+        vw.derived_status as status,  -- Use derived status instead of stored status
+        vw.portfolio_weight as "portfolioWeight",
+        vw.interest_paid as "interestPaid",
+        vw.distribution_paid as "distributionPaid",
+        vw.total_returned as "totalReturned",
+        vw.market_value as "marketValue",
+        vw.moic,
+        vw.irr,
+        vw.total_called as "calledAmount",
+        CASE 
+          WHEN vw.amount > 0 
+          THEN ROUND((vw.total_called / vw.amount) * 100, 1)
+          ELSE 0.0
+        END as "calledPercentage",
+        deals.name as "dealName",
+        deals.sector as "dealSector"
+      FROM vw_fund_allocations_with_status vw
+      LEFT JOIN deals ON vw.deal_id = deals.id
+      WHERE vw.fund_id = ${fundId}
+      ORDER BY vw.allocation_date
+    `);
 
-    res.json(allocations);
+    res.json(result.rows);
 
   } catch (error) {
     console.error('Error getting fund allocations:', error);
