@@ -549,6 +549,7 @@ export class DatabaseStorage implements IStorage {
         irr: fundAllocations.irr,
         dealName: deals.name,
         dealSector: deals.sector,
+        fundName: funds.name,
         // Calculate dynamic status based on capital calls and payments
         calledAmount: sql<number>`COALESCE(capital_call_totals.total_called, 0)`,
         calledPercentage: sql<number>`
@@ -570,6 +571,7 @@ export class DatabaseStorage implements IStorage {
       })
       .from(fundAllocations)
       .leftJoin(deals, eq(fundAllocations.dealId, deals.id))
+      .leftJoin(funds, eq(fundAllocations.fundId, funds.id))
       .leftJoin(
         sql`(
           SELECT 
@@ -588,7 +590,8 @@ export class DatabaseStorage implements IStorage {
       // Override stored status with calculated status for accuracy
       status: result.calculatedStatus as any,
       dealName: result.dealName || undefined,
-      dealSector: result.dealSector || undefined
+      dealSector: result.dealSector || undefined,
+      fundName: result.fundName || undefined
     }));
   }
 
