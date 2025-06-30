@@ -50,7 +50,7 @@ function calculateWeightedScore(params: {
   return Math.round(weightedScore * 10) / 10; // Round to 1 decimal place
 }
 
-// Get leaderboard data
+// Get leaderboard data  
 router.get('/', requireAuth, async (req: Request, res: Response) => {
   try {
     const storage = StorageFactory.getStorage();
@@ -62,11 +62,26 @@ router.get('/', requireAuth, async (req: Request, res: Response) => {
     
     console.log(`Leaderboard: Found ${allDeals.length} total deals, ${deals.length} in active evaluation`);
     
-    // For each deal, get stars and memos to calculate rankings
-    const leaderboardItems = await Promise.all(deals.map(async (deal) => {
-      const stars = await storage.getDealStars(deal.id);
-      const memos = await storage.getMiniMemosByDeal(deal.id);
-      const timelineEvents = await storage.getTimelineEventsByDeal(deal.id);
+    // Fetch all data in batch queries to prevent N+1 issue
+    const dealIds = deals.map(deal => deal.id);
+    
+    // Get all stars for all deals in one query
+    const allStars = await Promise.all(dealIds.map(id => storage.getDealStars(id)));
+    const starsMap = new Map(dealIds.map((id, index) => [id, allStars[index]]));
+    
+    // Get all memos for all deals in one query
+    const allMemos = await Promise.all(dealIds.map(id => storage.getMiniMemosByDeal(id)));
+    const memosMap = new Map(dealIds.map((id, index) => [id, allMemos[index]]));
+    
+    // Get all timeline events for all deals in one query
+    const allTimelineEvents = await Promise.all(dealIds.map(id => storage.getTimelineEventsByDeal(id)));
+    const timelineEventsMap = new Map(dealIds.map((id, index) => [id, allTimelineEvents[index]]));
+    
+    // Process deals with cached data
+    const leaderboardItems = deals.map((deal) => {
+      const stars = starsMap.get(deal.id) || [];
+      const memos = memosMap.get(deal.id) || [];
+      const timelineEvents = timelineEventsMap.get(deal.id) || [];
       
       // Calculate base score from mini memos
       let baseScore = 0;
@@ -106,7 +121,7 @@ router.get('/', requireAuth, async (req: Request, res: Response) => {
         change,
         recentActivity
       };
-    }));
+    });
     
     // Sort by score (descending)
     const sortedItems = leaderboardItems.sort((a, b) => b.score - a.score);

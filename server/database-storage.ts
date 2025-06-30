@@ -394,8 +394,13 @@ export class DatabaseStorage implements IStorage {
   
   // Documents
   async createDocument(document: InsertDocument): Promise<Document> {
-    const [newDocument] = await db.insert(documents).values(document).returning();
-    return newDocument;
+    try {
+      const [newDocument] = await db.insert(documents).values(document).returning();
+      return newDocument;
+    } catch (error) {
+      this.handleDbError(error as Error, 'createDocument');
+      throw error;
+    }
   }
   
   async getDocument(id: number): Promise<Document | undefined> {
