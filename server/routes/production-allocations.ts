@@ -77,13 +77,14 @@ router.post('/', requireAuth, requirePermission('create', 'allocation'), async (
 
     const request = validationResult.data;
 
-    // Convert date string to Date object for database
-    if (request.allocationDate && typeof request.allocationDate === 'string') {
-      request.allocationDate = new Date(request.allocationDate);
-    }
+    // Create allocation data with proper date conversion
+    const allocationData = {
+      ...request,
+      allocationDate: request.allocationDate ? new Date(request.allocationDate) : new Date()
+    } as any; // Type assertion to handle mixed string/Date interface
 
     // Create allocation with proper error handling
-    const result = await allocationService.createAllocation(request, userId);
+    const result = await allocationService.createAllocation(allocationData, userId);
     
     // Auto-trigger system updates disabled due to status corruption
     // TODO: Fix before re-enabling

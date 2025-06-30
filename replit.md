@@ -127,6 +127,16 @@ DealFlowLifecycle is a full-stack TypeScript application for managing private eq
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+- **June 30, 2025**: Major architecture cleanup completed
+  - Removed 15+ unused/duplicate service files for cleaner codebase
+  - Fixed all broken imports after cleanup process
+  - Resolved critical TypeScript errors causing 500 responses in allocation endpoints
+  - Created comprehensive README documenting platform architecture
+  - Organized all documentation into docs/archive folder
+  - Server now running stably with clean, maintainable code structure
+
 ## Changelog
 
 Changelog:
