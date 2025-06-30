@@ -520,6 +520,10 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getAllocationsByFund(fundId: number): Promise<FundAllocation[]> {
+    if (!db) {
+      throw new Error('Database not initialized');
+    }
+
     const results = await db
       .select({
         id: fundAllocations.id,
@@ -541,13 +545,13 @@ export class DatabaseStorage implements IStorage {
         irr: fundAllocations.irr,
         dealName: deals.name,
         dealSector: deals.sector,
-        // Add calculated fields from actual capital calls data
-        calledAmount: sql<number>`COALESCE(capital_call_totals.total_called, 0)`,
-        calledPercentage: sql<number>`
+        // Calculate called amounts directly from capital_calls table
+        calledAmount: sql<string>`COALESCE(capital_call_totals.total_called, 0)::text`,
+        calledPercentage: sql<string>`
           CASE 
             WHEN ${fundAllocations.amount} > 0 
-            THEN ROUND((COALESCE(capital_call_totals.total_called, 0) / ${fundAllocations.amount}) * 100, 1)
-            ELSE 0 
+            THEN ROUND((COALESCE(capital_call_totals.total_called, 0) / ${fundAllocations.amount}) * 100, 1)::text
+            ELSE '0.0'
           END
         `
       })
@@ -566,11 +570,13 @@ export class DatabaseStorage implements IStorage {
       )
       .where(eq(fundAllocations.fundId, fundId));
     
-    // Transform results to include deal information, preserving all allocations
+    // Transform results to include deal information and proper type conversion
     return results.map(result => ({
       ...result,
       dealName: result.dealName ?? undefined,
-      dealSector: result.dealSector ?? undefined
+      dealSector: result.dealSector ?? undefined,
+      calledAmount: result.calledAmount || "0",
+      calledPercentage: result.calledPercentage || "0.0"
     }));
   }
 
