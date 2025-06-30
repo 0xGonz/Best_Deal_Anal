@@ -923,6 +923,7 @@ export default function FundDetail() {
                 totalFundSize={fund?.aum || 0}
                 calledCapital={fund?.calledCapital}
                 uncalledCapital={fund?.uncalledCapital}
+                capitalView={capitalView}
               />
             </div>
             

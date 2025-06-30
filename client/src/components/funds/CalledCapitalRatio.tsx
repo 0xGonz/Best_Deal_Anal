@@ -3,6 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Cell, CartesianGrid, Tooltip, LabelList } from 'recharts';
 import { FundAllocation } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils/formatters";
+import { useFundMetrics } from '@/hooks/useFundMetrics';
 
 // Reusable type for capital data visualization
 export type CapitalDataItem = {
@@ -159,13 +160,15 @@ interface CalledCapitalRatioProps {
   totalFundSize: number;
   calledCapital?: number;  // Optional server-calculated value
   uncalledCapital?: number; // Optional server-calculated value
+  capitalView?: 'total' | 'called' | 'uncalled'; // Capital view integration
 }
 
 const CalledCapitalRatio: React.FC<CalledCapitalRatioProps> = ({ 
   allocations,
   totalFundSize,
   calledCapital,
-  uncalledCapital
+  uncalledCapital,
+  capitalView = 'total'
 }) => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -175,86 +178,56 @@ const CalledCapitalRatio: React.FC<CalledCapitalRatioProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Calculate called vs uncalled capital - use server-calculated values when available
+  // Use unified metrics hook for consistent data
+  const fundMetrics = useFundMetrics(allocations, capitalView);
+
+  // Calculate capital data based on unified metrics
   const capitalData = React.useMemo((): CapitalDataItem[] => {
-    // Prefer server-calculated values for accuracy and consistency
-    if (calledCapital !== undefined && uncalledCapital !== undefined) {
-      const totalAmount = calledCapital + uncalledCapital;
-      
-      if (totalAmount === 0) {
-        return [];
-      }
-      
-      return [
-        { 
-          name: "Called Capital", 
-          value: calledCapital, 
-          color: "#4f46e5",
-          percentage: Math.round((calledCapital / totalAmount) * 100)
-        },
-        { 
-          name: "Uncalled Capital", 
-          value: uncalledCapital, 
-          color: "#a5b4fc",
-          percentage: Math.round((uncalledCapital / totalAmount) * 100)
-        }
-      ];
-    }
+    const { capitalViewData } = fundMetrics;
     
-    // Fallback: Calculate from allocation data if server values unavailable
-    if (!allocations || allocations.length === 0) {
+    if (capitalViewData.totalAmount === 0) {
       return [];
     }
-    
-    // Calculate based on allocation statuses and paid amounts
-    const committedAmount = allocations.reduce((sum, allocation) => {
-      return sum + (allocation.amount || 0);
-    }, 0);
-    
-    const paidAmount = allocations.reduce((sum, allocation) => {
-      return sum + (allocation.paidAmount || 0);
-    }, 0);
-    
-    const uncalledAmount = committedAmount - paidAmount;
-    
-    if (paidAmount === 0 && uncalledAmount === 0) {
-      return [];
-    }
-    
-    const totalAmount = paidAmount + uncalledAmount;
     
     return [
       { 
         name: "Called Capital", 
-        value: paidAmount, 
+        value: capitalViewData.calledAmount, 
         color: "#4f46e5",
-        percentage: Math.round((paidAmount / totalAmount) * 100)
+        percentage: capitalViewData.calledPercentage
       },
       { 
         name: "Uncalled Capital", 
-        value: uncalledAmount, 
+        value: capitalViewData.uncalledAmount, 
         color: "#a5b4fc",
-        percentage: Math.round((uncalledAmount / totalAmount) * 100)
+        percentage: capitalViewData.uncalledPercentage
       }
     ];
-  }, [allocations, calledCapital, uncalledCapital]);
+  }, [fundMetrics]);
   
-  // Calculate percentages for display
-  const totalCapital = React.useMemo(() => 
-    capitalData && capitalData.length > 0
-      ? capitalData.reduce((sum, item) => sum + (item.value || 0), 0)
-      : 0,
-    [capitalData]
-  );
+  // Total capital from unified metrics
+  const totalCapital = fundMetrics.capitalViewData.totalAmount;
 
   // Calculate dynamic sizes based on viewport
   const isSmallScreen = windowWidth < 640;
   const isMediumScreen = windowWidth >= 640 && windowWidth < 1024;
+
+  // Dynamic title based on capital view
+  const getTitle = () => {
+    switch (capitalView) {
+      case 'called':
+        return 'Called Capital Breakdown';
+      case 'uncalled':
+        return 'Uncalled Capital Breakdown';
+      default:
+        return 'Called vs. Uncalled Capital';
+    }
+  };
   
   return (
     <Card className="h-full w-full flex flex-col">
       <CardHeader className="pb-2">
-        <CardTitle className="mb-1">Called vs. Uncalled Capital</CardTitle>
+        <CardTitle className="mb-1">{getTitle()}</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col justify-center py-2">
         {capitalData && capitalData.length > 0 ? (
