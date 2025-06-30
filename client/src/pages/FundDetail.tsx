@@ -399,6 +399,8 @@ export default function FundDetail() {
       setIsDeleteAllocationDialogOpen(true);
     }
   };
+
+
   
   // Mark allocation status mutation
   const updateAllocationStatusMutation = useMutation({
@@ -1264,6 +1266,16 @@ export default function FundDetail() {
                                           Create Capital Call
                                         </a>
                                       </DropdownMenuItem>
+                                      <DropdownMenuItem 
+                                        className="cursor-pointer flex items-center text-xs sm:text-sm text-blue-600"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleManageDistributions(allocation);
+                                        }}
+                                      >
+                                        <TrendingDown className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-2" />
+                                        Add Distributions
+                                      </DropdownMenuItem>
                                       <DropdownMenuSeparator />
                                       <DropdownMenuItem 
                                         disabled={allocation.status === 'funded'}
@@ -1434,6 +1446,201 @@ export default function FundDetail() {
                     ) : (
                       <>Delete Allocation</>
                     )}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            {/* Distributions Management Dialog */}
+            <Dialog open={isDistributionsDialogOpen} onOpenChange={setIsDistributionsDialogOpen}>
+              <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Manage Distributions</DialogTitle>
+                  <DialogDescription>
+                    Add and track distributions for this allocation
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="space-y-6">
+                  {/* Add New Distribution Form */}
+                  <Card>
+                    <CardHeader className="pb-4">
+                      <CardTitle className="text-lg">Add New Distribution</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <form 
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          const formData = new FormData(e.target as HTMLFormElement);
+                          if (!currentAllocationId) return;
+                          
+                          createDistribution.mutate({
+                            allocationId: currentAllocationId,
+                            distributionDate: formData.get('distributionDate') as string,
+                            amount: parseFloat(formData.get('amount') as string),
+                            distributionType: formData.get('distributionType') as string,
+                            description: formData.get('description') as string || undefined,
+                          });
+                          
+                          // Reset form
+                          (e.target as HTMLFormElement).reset();
+                        }}
+                        className="space-y-4"
+                      >
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <label htmlFor="distributionDate" className="text-sm font-medium">
+                              Distribution Date *
+                            </label>
+                            <Input 
+                              id="distributionDate"
+                              name="distributionDate"
+                              type="date"
+                              required
+                              defaultValue={format(new Date(), "yyyy-MM-dd")}
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <label htmlFor="amount" className="text-sm font-medium">
+                              Amount *
+                            </label>
+                            <div className="relative">
+                              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-500" />
+                              <Input 
+                                id="amount"
+                                name="amount"
+                                type="number"
+                                step="0.01"
+                                required
+                                className="pl-10"
+                                placeholder="0.00"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <label htmlFor="distributionType" className="text-sm font-medium">
+                            Distribution Type *
+                          </label>
+                          <Select name="distributionType" defaultValue="dividend" required>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select distribution type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="dividend">Dividend</SelectItem>
+                              <SelectItem value="capital_gain">Capital Gain</SelectItem>
+                              <SelectItem value="return_of_capital">Return of Capital</SelectItem>
+                              <SelectItem value="liquidation">Liquidation</SelectItem>
+                              <SelectItem value="other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <label htmlFor="description" className="text-sm font-medium">
+                            Description
+                          </label>
+                          <Textarea 
+                            id="description"
+                            name="description"
+                            placeholder="Optional notes about this distribution"
+                            rows={2}
+                          />
+                        </div>
+                        
+                        <Button 
+                          type="submit" 
+                          disabled={createDistribution.isPending}
+                          className="w-full"
+                        >
+                          {createDistribution.isPending ? "Adding..." : "Add Distribution"}
+                        </Button>
+                      </form>
+                    </CardContent>
+                  </Card>
+
+                  {/* Existing Distributions List */}
+                  <Card>
+                    <CardHeader className="pb-4">
+                      <CardTitle className="text-lg">Distribution History</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {distributions && Array.isArray(distributions) && distributions.length > 0 ? (
+                        <div className="space-y-3">
+                          {distributions.map((distribution: any) => (
+                            <div 
+                              key={distribution.id}
+                              className="flex items-center justify-between p-3 border rounded-lg bg-gray-50"
+                            >
+                              <div className="flex-1">
+                                <div className="flex items-center gap-4">
+                                  <div>
+                                    <p className="font-medium">
+                                      {formatCurrency(parseFloat(distribution.amount))}
+                                    </p>
+                                    <p className="text-sm text-gray-600">
+                                      {format(new Date(distribution.distributionDate), "MMM dd, yyyy")}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <Badge variant="outline" className="text-xs">
+                                      {distribution.distributionType.replace('_', ' ').toUpperCase()}
+                                    </Badge>
+                                  </div>
+                                  {distribution.description && (
+                                    <div className="flex-1">
+                                      <p className="text-sm text-gray-600">
+                                        {distribution.description}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => deleteDistribution.mutate(distribution.id)}
+                                disabled={deleteDistribution.isPending}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                          
+                          {/* Total Distributions */}
+                          <div className="pt-3 border-t">
+                            <div className="flex justify-between items-center font-semibold">
+                              <span>Total Distributions:</span>
+                              <span>
+                                {formatCurrency(
+                                  distributions.reduce((sum: number, d: any) => 
+                                    sum + parseFloat(d.amount), 0
+                                  )
+                                )}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-gray-500">
+                          <TrendingDown className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                          <p>No distributions recorded yet</p>
+                          <p className="text-sm">Add your first distribution above</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <DialogFooter>
+                  <Button 
+                    variant="outline"
+                    onClick={() => setIsDistributionsDialogOpen(false)}
+                  >
+                    Close
                   </Button>
                 </DialogFooter>
               </DialogContent>
