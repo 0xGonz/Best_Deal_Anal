@@ -7,6 +7,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { v4 as uuidv4 } from 'uuid';
+import { createHash } from 'crypto';
 import { pool } from '../db';
 
 interface IdempotencyRecord {
@@ -45,7 +46,6 @@ export async function initializeIdempotencyTable() {
 
 // Generate request hash for deduplication
 function generateRequestHash(req: Request): string {
-  const crypto = require('crypto');
   const hashData = {
     method: req.method,
     path: req.path,
@@ -55,8 +55,7 @@ function generateRequestHash(req: Request): string {
     userAgent: req.headers['user-agent'],
   };
   
-  return crypto
-    .createHash('sha256')
+  return createHash('sha256')
     .update(JSON.stringify(hashData))
     .digest('hex');
 }
