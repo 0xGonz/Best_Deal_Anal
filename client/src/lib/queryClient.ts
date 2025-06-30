@@ -86,12 +86,13 @@ export const getQueryFn: <T>(options: {
         try {
           const errorText = await res.text();
           console.error(`Error response from ${url}:`, { status: res.status, text: errorText });
+          throw new Error(`${res.status}: ${errorText}`);
         } catch (readError) {
           console.error(`Failed to read error response from ${url}:`, readError);
+          throw new Error(`${res.status}: ${res.statusText}`);
         }
       }
       
-      await throwIfResNotOk(res);
       const data = await res.json();
       console.log(`Query data received from ${url}:`, data);
       return data;
