@@ -1,136 +1,150 @@
-import { format, parseISO } from 'date-fns';
-import { DATE_FORMATS, TIME_MS } from '../constants/time-constants';
-import { 
-  CURRENCY_FORMAT, 
-  NUMBER_FORMAT, 
-  PERCENTAGE_FORMAT, 
-  NA_PLACEHOLDERS,
-  type CurrencyFormatOption,
-  type NumberFormatOption,
-  type PercentageFormatOption
-} from '../constants/formatting-constants';
-
 /**
- * Utility functions for consistent data formatting throughout the application
+ * Centralized formatting utilities to ensure consistency across the application
+ * Eliminates multiple currency formatting implementations that can differ
  */
 
-/**
- * Format a date string into a consistent display format
- * 
- * @param dateString ISO date string
- * @param formatStr Date format string (defaults to DATE_FORMATS.DEFAULT)
- * @returns Formatted date string
- */
-export function formatDate(dateString: string, formatStr: string = DATE_FORMATS.DEFAULT): string {
-  if (!dateString) return NA_PLACEHOLDERS.DEFAULT;
-  try {
-    const date = typeof dateString === 'string' ? parseISO(dateString) : dateString;
-    return format(date, formatStr);
-  } catch (error) {
-    console.error('Error formatting date:', error);
-    return 'Invalid date';
-  }
-}
-
-/**
- * Format a date string into a relative time (e.g., "2 days ago")
- * 
- * @param dateString ISO date string
- * @returns Relative time string
- */
-export function formatRelativeTime(dateString: string): string {
-  if (!dateString) return NA_PLACEHOLDERS.DEFAULT;
+export const formatMoney = (
+  amount: number | null | undefined,
+  options: {
+    showCents?: boolean;
+    compact?: boolean;
+    prefix?: string;
+  } = {}
+): string => {
+  const { showCents = true, compact = false, prefix = '' } = options;
   
-  try {
-    const date = typeof dateString === 'string' ? parseISO(dateString) : dateString;
-    const now = new Date();
-    const diffInMs = now.getTime() - date.getTime();
-    
-    // Define time thresholds in milliseconds
-    if (diffInMs < TIME_MS.MINUTE) return 'just now';
-    if (diffInMs < TIME_MS.HOUR) return `${Math.floor(diffInMs / TIME_MS.MINUTE)} minutes ago`;
-    if (diffInMs < TIME_MS.DAY) return `${Math.floor(diffInMs / TIME_MS.HOUR)} hours ago`;
-    if (diffInMs < TIME_MS.WEEK) return `${Math.floor(diffInMs / TIME_MS.DAY)} days ago`;
-    if (diffInMs < TIME_MS.MONTH) return `${Math.floor(diffInMs / TIME_MS.WEEK)} weeks ago`;
-    
-    return format(date, DATE_FORMATS.DEFAULT);
-  } catch (error) {
-    console.error('Error formatting relative time:', error);
-    return 'Invalid date';
+  if (amount === null || amount === undefined || isNaN(amount)) {
+    return `${prefix}$0${showCents ? '.00' : ''}`;
   }
-}
 
-/**
- * Format a currency value
- * 
- * @param value Number to format as currency
- * @param formatOption Currency format options (defaults to CURRENCY_FORMAT.DEFAULT)
- * @returns Formatted currency string
- */
-export function formatCurrency(
-  value: number, 
-  formatOption: CurrencyFormatOption = CURRENCY_FORMAT.DEFAULT
-): string {
-  if (value === undefined || value === null) return NA_PLACEHOLDERS.DEFAULT;
-  
-  try {
-    const { LOCALE, CURRENCY, MIN_FRACTION_DIGITS, MAX_FRACTION_DIGITS } = formatOption;
-    return new Intl.NumberFormat(LOCALE, {
-      style: 'currency',
-      currency: CURRENCY,
-      minimumFractionDigits: MIN_FRACTION_DIGITS,
-      maximumFractionDigits: MAX_FRACTION_DIGITS,
-    }).format(value);
-  } catch (error) {
-    console.error('Error formatting currency:', error);
-    return `${value}`;
+  if (compact && Math.abs(amount) >= 1000000) {
+    const millions = amount / 1000000;
+    return `${prefix}$${millions.toFixed(1)}M`;
   }
-}
 
-/**
- * Format a number with thousands separators
- * 
- * @param value Number to format
- * @param formatOption Number format options (defaults to NUMBER_FORMAT.DEFAULT)
- * @returns Formatted number string
- */
-export function formatNumber(
-  value: number,
-  formatOption: NumberFormatOption = NUMBER_FORMAT.DEFAULT
-): string {
-  if (value === undefined || value === null) return NA_PLACEHOLDERS.DEFAULT;
-  
-  try {
-    const { LOCALE, MIN_FRACTION_DIGITS, MAX_FRACTION_DIGITS } = formatOption;
-    return new Intl.NumberFormat(LOCALE, {
-      minimumFractionDigits: MIN_FRACTION_DIGITS,
-      maximumFractionDigits: MAX_FRACTION_DIGITS,
-    }).format(value);
-  } catch (error) {
-    console.error('Error formatting number:', error);
-    return `${value}`;
+  if (compact && Math.abs(amount) >= 1000) {
+    const thousands = amount / 1000;
+    return `${prefix}$${thousands.toFixed(1)}K`;
   }
-}
 
-/**
- * Format a percentage value
- * 
- * @param value Number to format as percentage
- * @param formatOption Percentage format options (defaults to PERCENTAGE_FORMAT.DEFAULT)
- * @returns Formatted percentage string
- */
-export function formatPercentage(
-  value: number, 
-  formatOption: PercentageFormatOption = PERCENTAGE_FORMAT.DEFAULT
-): string {
-  if (value === undefined || value === null) return NA_PLACEHOLDERS.DEFAULT;
+  return `${prefix}${amount.toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: showCents ? 2 : 0,
+    maximumFractionDigits: showCents ? 2 : 0,
+  })}`;
+};
+
+export const formatPercentage = (
+  value: number | null | undefined,
+  options: {
+    decimals?: number;
+    showSign?: boolean;
+  } = {}
+): string => {
+  const { decimals = 1, showSign = false } = options;
   
-  try {
-    const { DECIMAL_PLACES, INCLUDE_SYMBOL } = formatOption;
-    const formattedValue = value.toFixed(DECIMAL_PLACES);
-    return INCLUDE_SYMBOL ? `${formattedValue}%` : formattedValue;
-  } catch (error) {
-    console.error('Error formatting percentage:', error);
-    return `${value}%`;
+  if (value === null || value === undefined || isNaN(value)) {
+    return '0%';
   }
-}
+
+  const formatted = `${value.toFixed(decimals)}%`;
+  
+  if (showSign && value > 0) {
+    return `+${formatted}`;
+  }
+  
+  return formatted;
+};
+
+export const formatNumber = (
+  value: number | null | undefined,
+  options: {
+    decimals?: number;
+    compact?: boolean;
+  } = {}
+): string => {
+  const { decimals = 0, compact = false } = options;
+  
+  if (value === null || value === undefined || isNaN(value)) {
+    return '0';
+  }
+
+  if (compact && Math.abs(value) >= 1000000) {
+    const millions = value / 1000000;
+    return `${millions.toFixed(1)}M`;
+  }
+
+  if (compact && Math.abs(value) >= 1000) {
+    const thousands = value / 1000;
+    return `${thousands.toFixed(1)}K`;
+  }
+
+  return value.toLocaleString('en-US', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+};
+
+export const formatDate = (
+  date: string | Date | null | undefined,
+  options: {
+    format?: 'short' | 'medium' | 'long';
+    showTime?: boolean;
+  } = {}
+): string => {
+  const { format = 'short', showTime = false } = options;
+  
+  if (!date) return 'N/A';
+  
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  
+  if (isNaN(dateObj.getTime())) return 'Invalid Date';
+
+  const formatOptions: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: format === 'short' ? 'numeric' : format === 'medium' ? 'short' : 'long',
+    day: 'numeric',
+  };
+
+  if (showTime) {
+    formatOptions.hour = '2-digit';
+    formatOptions.minute = '2-digit';
+  }
+
+  return dateObj.toLocaleDateString('en-US', formatOptions);
+};
+
+export const formatMultiple = (
+  value: number | null | undefined,
+  suffix: string = 'x'
+): string => {
+  if (value === null || value === undefined || isNaN(value)) {
+    return `0${suffix}`;
+  }
+  
+  return `${value.toFixed(2)}${suffix}`;
+};
+
+export const formatStatus = (status: string): string => {
+  return status
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
+// Business-specific formatters
+export const formatAUM = (aum: number | null | undefined): string => {
+  return formatMoney(aum, { compact: true, showCents: false });
+};
+
+export const formatIRR = (irr: number | null | undefined): string => {
+  return formatPercentage(irr, { decimals: 1 });
+};
+
+export const formatMOIC = (moic: number | null | undefined): string => {
+  return formatMultiple(moic);
+};
+
+// Legacy compatibility - alias formatCurrency to formatMoney for existing imports
+export const formatCurrency = formatMoney;

@@ -129,7 +129,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 30, 2025**: Capital Call = Payment Business Rule Implementation (Final)
+- **June 30, 2025**: Capital Call = Payment Business Rule Implementation (Final) + Platform Architecture Fixes
   - **CORE FIX**: Enforced fundamental business rule "Capital Call = Payment" (if 20% called, then 20% paid)
   - **Database Solution**: Created PostgreSQL functions and triggers to maintain called = paid relationship
   - **Data Synchronization**: Auto-generated capital calls for allocations with payments but no formal calls
@@ -138,6 +138,9 @@ Preferred communication style: Simple, everyday language.
   - **Consistency Verification**: Income Fund II now correctly shows $1.6M called = $1.6M paid (was $0 called before)
   - **AUM Fix**: Fund AUM automatically updated to $1.6M to reflect actual called capital
   - **Future-Proof**: Any new capital calls or payments automatically maintain the called = paid relationship
+  - **Architecture Improvements**: Created centralized formatting utilities, database view for metrics, and enum API for dropdowns
+  - **Error Handling**: Fixed frontend "body stream already read" errors and improved API error surfacing
+  - **Single Source of Truth**: vw_fund_metrics view ensures consistent calculations across all platform components
 
 ## Changelog
 
