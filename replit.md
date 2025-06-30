@@ -129,13 +129,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 30, 2025**: Major architecture cleanup completed
-  - Removed 15+ unused/duplicate service files for cleaner codebase
-  - Fixed all broken imports after cleanup process
-  - Resolved critical TypeScript errors causing 500 responses in allocation endpoints
-  - Created comprehensive README documenting platform architecture
-  - Organized all documentation into docs/archive folder
-  - Server now running stably with clean, maintainable code structure
+- **June 30, 2025**: Comprehensive platform fixes and dynamic status solution
+  - Major architecture cleanup: Removed 15+ unused service files 
+  - Fixed critical 404 error for /api/allocations endpoint by adding missing GET route
+  - Implemented scalable dynamic status calculation based on capital calls data
+  - Resolved allocation-database disconnect with SQL-based status computation
+  - Fixed TypeScript errors and missing getFundAllocations method implementation
+  - Created modular solution where status tags automatically change based on capital call lifecycle
+  - Status logic: committed → called_unpaid → partially_paid → funded based on actual data
+  - Eliminated manual status updates by computing status dynamically in real-time
 
 ## Changelog
 
