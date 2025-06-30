@@ -1,0 +1,87 @@
+Why you’re seeing NaN % in the Weight column
+Root cause	How it shows up	Fix
+committed is 0, null, or the string "0" when React runs amount / committed	Division by zero or undefined → JavaScript returns NaN → toLocaleString() prints NaN %.	1. Make sure every query that feeds the table returns a numeric value (0 not null, number not string).
+2. Guard in the column render:
+ts<br>const weightPct = committed ? (amount / committed) * 100 : 0;<br>
+The table is rendered before the fund-overview query finishes	First render sees committed === undefined → NaN; after query resolves the cell never re-calculates if it’s not in state.	Wrap the calculation in useMemo with [amount, committed] as deps or compute it in the selector of useQuery, so React recalcs when data arrives.
+Data type mismatch coming from SQL (numeric→string in pg + Node pg driver)	committed arrives as "2500000" (string) → numeric division makes weight = NaN.	In the service layer, cast once:
+Number(row.committed) (or use Drizzle’s numeric() ➜ as number​).
+
+Quick patch in table component
+
+ts
+Copy
+Edit
+const weightPct = useMemo(() => {
+  const fundCommitted = Number(overview?.committed ?? 0);  // safe numeric
+  return fundCommitted ? (allocation.amount / fundCommitted) * 100 : 0;
+}, [allocation.amount, overview?.committed]);
+Display with:
+
+jsx
+Copy
+Edit
+{weightPct.toFixed(2)}%
+Why the Sector Pie-Chart card is blank
+Likely issue	Symptom	Fix
+Empty or malformed data array	chart.js (or Recharts) throws “Cannot read properties of undefined (reading 'length')”.	Feed the chart from the same fund-overview endpoint:
+[{ sector:'Aerospace', value:1200000 }, …]. Guard with if (!data.length) return <EmptyState/>.
+Keys not unique	Console shows “Duplicate keys detected”.	Make sure each slice has a unique id or sector string.
+Numbers are strings → chart library fails to sum	Pie shows 0 % / or nothing.	Parse once in the API: SELECT CAST(sum(amount) AS FLOAT) AS value.
+Component rendered before query resolved	React renders with undefined then never re-draws.	Use the query’s isLoading flag:
+if (isLoading) return <Spinner/>;
+Recharts automatically re-renders when data prop changes.
+
+Minimal React pattern
+
+tsx
+Copy
+Edit
+const { data: sectors = [], isLoading } = useQuery(
+  ['fund-sector-breakdown', fundId],
+  () => fetchJson(`/api/funds/${fundId}/sector-breakdown`)
+);
+
+if (isLoading) return <Spinner />;
+
+return sectors.length
+  ? <PieChart … data={sectors} />
+  : <EmptyState message="No sector data yet" />;
+End-to-end sanity checklist
+API layer
+
+vw_fund_overview returns numeric committed > 0.
+
+GET /funds/:id/sector-breakdown returns [{ sector, value:number }].
+
+React Query
+
+staleTime: 0 for both overview and sector queries.
+
+onSuccess: invalidateQueries(['fund-overview', fundId]) after capital-call mutation.
+
+Table / Card components
+
+Convert every numeric string to Number() once.
+
+Guard against zero/undefined before dividing.
+
+Wrap heavy maths in useMemo.
+
+UI feedback
+
+Show <Spinner/> while loading.
+
+Show <EmptyState/> if array length === 0.
+
+Apply the numeric casting + safe division in the weight column, and feed the pie-chart from the sector-breakdown query with a loading guard—both widgets will update live the moment a capital call or new allocation is saved. Ping me if any specific component still misbehaves and we can step through its props.
+
+
+
+
+
+
+
+
+
+Ask ChatGPT

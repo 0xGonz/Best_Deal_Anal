@@ -129,18 +129,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 30, 2025**: Capital Call = Payment Business Rule Implementation (Final) + Platform Architecture Fixes
-  - **CORE FIX**: Enforced fundamental business rule "Capital Call = Payment" (if 20% called, then 20% paid)
-  - **Database Solution**: Created PostgreSQL functions and triggers to maintain called = paid relationship
-  - **Data Synchronization**: Auto-generated capital calls for allocations with payments but no formal calls
-  - **Real-time Enforcement**: Database triggers automatically sync called and paid amounts on any changes
-  - **Production Ready**: Scalable solution that works across entire platform without manual intervention
-  - **Consistency Verification**: Income Fund II now correctly shows $1.6M called = $1.6M paid (was $0 called before)
-  - **AUM Fix**: Fund AUM automatically updated to $1.6M to reflect actual called capital
-  - **Future-Proof**: Any new capital calls or payments automatically maintain the called = paid relationship
-  - **Architecture Improvements**: Created centralized formatting utilities, database view for metrics, and enum API for dropdowns
-  - **Error Handling**: Fixed frontend "body stream already read" errors and improved API error surfacing
-  - **Single Source of Truth**: vw_fund_metrics view ensures consistent calculations across all platform components
+- **June 30, 2025**: Complete Single Source of Truth Architecture Implementation
+  - **Status Inconsistency RESOLVED**: Created vw_fund_allocations_with_status view that derives status from capital call data, eliminating stored vs actual status mismatches
+  - **Comprehensive Database Views**: Implemented vw_fund_overview as single source of truth for all fund metrics (committed, called, uncalled, weight percentages, MOIC)
+  - **New API Endpoint**: Created /api/fund-overview endpoint serving database-calculated metrics instead of multiple application layers
+  - **Frontend Architecture**: Built useFundOverview hook and useCapitalCallMutations with automatic cache invalidation
+  - **Real-time Updates**: Set staleTime: 0 on critical queries and automatic React Query invalidation after mutations
+  - **Eliminated Multiple Calculation Layers**: Moved all aggregation to database level, removing inconsistencies between SQL, Node, and React layers
+  - **Production Ready Solution**: Balerion Space Fund II now correctly shows "partially_paid" status (40% called: $1M of $2.5M)
+  - **Future-Proof**: All fund metrics now calculated once at database level and served consistently across all UI components
+  - **Architecture Pattern**: Established pattern of database views as single source of truth for complex calculations
 
 ## Changelog
 
