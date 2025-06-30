@@ -15,18 +15,25 @@ async function fixExistingDistributions() {
     
     // Get all allocations that have distributions
     const db = storage.getDbClient();
-    const allocationsWithDistributions = await db.query(`
-      SELECT DISTINCT fa.id, fa.deal_id, d.name as deal_name
-      FROM fund_allocations fa
-      JOIN distributions dist ON fa.id = dist.allocation_id
-      JOIN deals d ON fa.deal_id = d.id
-    `);
+    const { distributions, fundAllocations, deals } = await import('../shared/schema');
+    const { eq } = await import('drizzle-orm');
     
-    console.log(`📊 Found ${allocationsWithDistributions.rows.length} allocations with distributions`);
+    const allocationsWithDistributions = await db
+      .select({
+        id: fundAllocations.id,
+        dealId: fundAllocations.dealId,
+        dealName: deals.name
+      })
+      .from(fundAllocations)
+      .innerJoin(distributions, eq(fundAllocations.id, distributions.allocationId))
+      .innerJoin(deals, eq(fundAllocations.dealId, deals.id))
+      .groupBy(fundAllocations.id, fundAllocations.dealId, deals.name);
+    
+    console.log(`📊 Found ${allocationsWithDistributions.length} allocations with distributions`);
     
     // Recalculate metrics for each allocation
-    for (const alloc of allocationsWithDistributions.rows) {
-      console.log(`🔄 Recalculating metrics for allocation ${alloc.id} (${alloc.deal_name})`);
+    for (const alloc of allocationsWithDistributions) {
+      console.log(`🔄 Recalculating metrics for allocation ${alloc.id} (${alloc.dealName})`);
       await storage.recalculateAllocationMetrics(alloc.id);
     }
     
