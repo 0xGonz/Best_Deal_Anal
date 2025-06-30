@@ -621,6 +621,9 @@ export default function DealDetail() {
               <TabsTrigger value="investments" className="text-xs sm:text-sm h-8 sm:h-10 px-2 sm:px-4 flex-1">
                 Investments
               </TabsTrigger>
+              <TabsTrigger value="distributions" className="text-xs sm:text-sm h-8 sm:h-10 px-2 sm:px-4 flex-1">
+                Distributions
+              </TabsTrigger>
 
             </TabsList>
           </div>

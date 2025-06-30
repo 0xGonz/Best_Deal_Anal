@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { db } from '../db';
 import { createInsertSchema } from 'drizzle-zod';
-import { distributions } from '../../shared/schema';
+import { distributions, fundAllocations, funds } from '../../shared/schema';
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
 import { requireAuth } from '../utils/auth';
@@ -29,6 +29,35 @@ router.get('/allocation/:allocationId', requireAuth, async (req, res) => {
   } catch (error) {
     console.error('Error fetching distributions:', error);
     res.status(500).json({ message: 'Failed to fetch distributions' });
+  }
+});
+
+// Get distributions for a deal (across all allocations)
+router.get('/deal/:dealId', requireAuth, async (req, res) => {
+  try {
+    const { dealId } = req.params;
+    const dealDistributions = await db
+      .select({
+        id: distributions.id,
+        allocationId: distributions.allocationId,
+        distributionDate: distributions.distributionDate,
+        amount: distributions.amount,
+        distributionType: distributions.distributionType,
+        notes: distributions.notes,
+        createdAt: distributions.createdAt,
+        fundName: funds.name,
+        fundId: fundAllocations.fundId,
+        allocationAmount: fundAllocations.amount,
+      })
+      .from(distributions)
+      .innerJoin(fundAllocations, eq(distributions.allocationId, fundAllocations.id))
+      .innerJoin(funds, eq(fundAllocations.fundId, funds.id))
+      .where(eq(fundAllocations.dealId, parseInt(dealId)))
+      .orderBy(distributions.distributionDate);
+    res.json(dealDistributions);
+  } catch (error) {
+    console.error('Error fetching deal distributions:', error);
+    res.status(500).json({ message: 'Failed to fetch deal distributions' });
   }
 });
 

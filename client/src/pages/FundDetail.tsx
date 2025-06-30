@@ -477,7 +477,12 @@ export default function FundDetail() {
         description: "The distribution has been recorded successfully.",
       });
       refetchDistributions();
+      // Invalidate all related queries to update UI
       queryClient.invalidateQueries({ queryKey: [`/api/production/allocations/fund/${fundId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/funds/${fundId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/allocations/fund/${fundId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/distributions`] });
+      setIsDistributionsDialogOpen(false);
     },
     onError: (error) => {
       toast({
