@@ -249,7 +249,7 @@ export function DistributionsManagementHub({
                           <SelectContent>
                             {allocations.map((allocation: any) => (
                               <SelectItem key={allocation.id} value={allocation.id.toString()}>
-                                {allocation.dealName} - {formatCurrency(allocation.amount)}
+                                {allocation.dealName} - {formatDistributionCurrency(allocation.amount)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -389,7 +389,7 @@ export function DistributionsManagementHub({
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(summary.totalDistributions)}</div>
+            <div className="text-2xl font-bold">{formatDistributionCurrency(summary.totalDistributions)}</div>
             <p className="text-xs text-muted-foreground">
               {summary.distributionCount} distributions
             </p>
@@ -402,7 +402,7 @@ export function DistributionsManagementHub({
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(summary.averageDistribution)}</div>
+            <div className="text-2xl font-bold">{formatDistributionCurrency(summary.averageDistribution)}</div>
             <p className="text-xs text-muted-foreground">
               per distribution
             </p>
