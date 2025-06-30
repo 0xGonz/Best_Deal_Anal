@@ -77,6 +77,7 @@ export interface IStorage {
   
   // Fund allocations
   createFundAllocation(allocation: InsertFundAllocation): Promise<FundAllocation>;
+  getFundAllocations(): Promise<FundAllocation[]>;
   getAllocationsByFund(fundId: number): Promise<FundAllocation[]>;
   getAllocationsByDeal(dealId: number): Promise<FundAllocation[]>;
   getAllocationsBatch(fundIds: number[]): Promise<FundAllocation[]>;
@@ -627,6 +628,10 @@ export class MemStorage implements IStorage {
   }
   
   // Fund allocations
+  async getFundAllocations(): Promise<FundAllocation[]> {
+    return Array.from(this.fundAllocations.values());
+  }
+
   async createFundAllocation(allocation: InsertFundAllocation): Promise<FundAllocation> {
     const id = this.allocationIdCounter++;
     const allocationDate = new Date();

@@ -519,6 +519,79 @@ export class DatabaseStorage implements IStorage {
     return newAllocation;
   }
   
+  /**
+   * Get all allocations with dynamic status calculation based on capital calls
+   * This provides scalable solution for status tags that change based on data
+   */
+  async getFundAllocations(): Promise<FundAllocation[]> {
+    if (!db) {
+      throw new Error('Database not initialized');
+    }
+
+    const results = await db
+      .select({
+        id: fundAllocations.id,
+        fundId: fundAllocations.fundId,
+        dealId: fundAllocations.dealId,
+        amount: fundAllocations.amount,
+        paidAmount: fundAllocations.paidAmount,
+        amountType: fundAllocations.amountType,
+        securityType: fundAllocations.securityType,
+        allocationDate: fundAllocations.allocationDate,
+        notes: fundAllocations.notes,
+        status: fundAllocations.status,
+        portfolioWeight: fundAllocations.portfolioWeight,
+        interestPaid: fundAllocations.interestPaid,
+        distributionPaid: fundAllocations.distributionPaid,
+        totalReturned: fundAllocations.totalReturned,
+        marketValue: fundAllocations.marketValue,
+        moic: fundAllocations.moic,
+        irr: fundAllocations.irr,
+        dealName: deals.name,
+        dealSector: deals.sector,
+        // Calculate dynamic status based on capital calls and payments
+        calledAmount: sql<number>`COALESCE(capital_call_totals.total_called, 0)`,
+        calledPercentage: sql<number>`
+          CASE 
+            WHEN ${fundAllocations.amount} > 0 
+            THEN COALESCE(capital_call_totals.total_called, 0) * 100.0 / ${fundAllocations.amount}
+            ELSE 0 
+          END`,
+        // Dynamic status calculation based on actual capital call data
+        calculatedStatus: sql<string>`
+          CASE 
+            WHEN COALESCE(capital_call_totals.total_called, 0) = 0 THEN 'committed'
+            WHEN ${fundAllocations.paidAmount} = 0 THEN 'called_unpaid'
+            WHEN ${fundAllocations.paidAmount} < COALESCE(capital_call_totals.total_called, 0) THEN 'partially_paid'
+            WHEN ${fundAllocations.paidAmount} >= COALESCE(capital_call_totals.total_called, 0) THEN 'funded'
+            ELSE 'committed'
+          END`,
+        uncalledCapital: sql<number>`${fundAllocations.amount} - COALESCE(capital_call_totals.total_called, 0)`
+      })
+      .from(fundAllocations)
+      .leftJoin(deals, eq(fundAllocations.dealId, deals.id))
+      .leftJoin(
+        sql`(
+          SELECT 
+            allocation_id,
+            SUM(call_amount) as total_called
+          FROM capital_calls 
+          GROUP BY allocation_id
+        ) capital_call_totals`,
+        sql`capital_call_totals.allocation_id = ${fundAllocations.id}`
+      )
+      .orderBy(asc(fundAllocations.allocationDate));
+
+    // Return with computed dynamic status
+    return results.map(result => ({
+      ...result,
+      // Override stored status with calculated status for accuracy
+      status: result.calculatedStatus as any,
+      dealName: result.dealName || undefined,
+      dealSector: result.dealSector || undefined
+    }));
+  }
+
   async getAllocationsByFund(fundId: number): Promise<FundAllocation[]> {
     if (!db) {
       throw new Error('Database not initialized');
