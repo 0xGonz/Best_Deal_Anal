@@ -23,7 +23,7 @@ import v1Router from './routes/v1/index'; // V1 API routes including AI analysis
 import aiAnalysisRoutes from './routes/ai-analysis';
 
 // Utils
-import { errorHandler } from './utils/error-handler';
+import { errorHandler, notFoundHandler } from './utils/error-handler';
 import { requireAuth, getCurrentUser } from './utils/auth';
 import { pool } from './db';
 
