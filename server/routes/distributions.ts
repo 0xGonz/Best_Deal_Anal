@@ -35,7 +35,13 @@ router.get('/allocation/:allocationId', requireAuth, async (req, res) => {
 // Create new distribution
 router.post('/', requireAuth, async (req, res) => {
   try {
-    const validatedData = insertDistributionSchema.parse(req.body);
+    // Transform the amount to a string for Drizzle's numeric field
+    const bodyData = {
+      ...req.body,
+      amount: req.body.amount?.toString()
+    };
+    
+    const validatedData = insertDistributionSchema.parse(bodyData);
     const distribution = await storage.createDistribution(validatedData);
     
     // TODO: Implement recalculateAllocationMetrics

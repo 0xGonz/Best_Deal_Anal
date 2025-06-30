@@ -467,7 +467,7 @@ export default function FundDetail() {
       distributionDate: string;
       amount: number;
       distributionType: string;
-      description?: string;
+      notes?: string;
     }) => {
       return apiRequest("POST", `/api/distributions`, distributionData);
     },
@@ -1548,12 +1548,12 @@ export default function FundDetail() {
                         </div>
                         
                         <div className="space-y-2">
-                          <label htmlFor="description" className="text-sm font-medium">
-                            Description
+                          <label htmlFor="notes" className="text-sm font-medium">
+                            Notes
                           </label>
                           <Textarea 
-                            id="description"
-                            name="description"
+                            id="notes"
+                            name="notes"
                             placeholder="Optional notes about this distribution"
                             rows={2}
                           />
@@ -1598,10 +1598,10 @@ export default function FundDetail() {
                                       {distribution.distributionType.replace('_', ' ').toUpperCase()}
                                     </Badge>
                                   </div>
-                                  {distribution.description && (
+                                  {distribution.notes && (
                                     <div className="flex-1">
                                       <p className="text-sm text-gray-600">
-                                        {distribution.description}
+                                        {distribution.notes}
                                       </p>
                                     </div>
                                   )}
