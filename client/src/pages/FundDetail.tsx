@@ -914,6 +914,7 @@ export default function FundDetail() {
               <FundSectorDistribution 
                 allocations={allocations || []} 
                 deals={deals || []} 
+                capitalView={capitalView}
               />
               
               {/* Called Capital Ratio */}

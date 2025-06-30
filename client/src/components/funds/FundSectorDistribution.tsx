@@ -144,7 +144,7 @@ const FundSectorDistribution: React.FC<FundSectorDistributionProps> = ({
   return (
     <Card className="h-full w-full flex flex-col">
       <CardHeader className="pb-3">
-        <CardTitle>Sector Distribution</CardTitle>
+        <CardTitle>{getTitle()}</CardTitle>
       </CardHeader>
       <CardContent className="px-2 sm:px-6">
         {processedData.length === 0 ? (
