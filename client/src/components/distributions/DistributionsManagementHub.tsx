@@ -70,16 +70,16 @@ export function DistributionsManagementHub({
   // Query for distributions based on mode
   const { data: distributions = [], isLoading: distributionsLoading } = useQuery({
     queryKey: mode === 'fund' 
-      ? ['/api/distributions/fund', fundId]
+      ? [`/api/distributions/fund/${fundId}`]
       : mode === 'allocation'
-      ? ['/api/distributions/allocation', allocationId]
-      : ['/api/distributions/deal', dealId],
+      ? [`/api/distributions/allocation/${allocationId}`]
+      : [`/api/distributions/deal/${dealId}`],
     enabled: !!(fundId || allocationId || dealId),
   });
 
   // Query for allocations (for dropdown when adding distributions)
   const { data: allocations = [] } = useQuery({
-    queryKey: fundId ? ['/api/allocations/fund', fundId] : ['/api/allocations'],
+    queryKey: fundId ? [`/api/allocations/fund/${fundId}`] : ['/api/allocations'],
     enabled: mode === 'fund' || mode === 'deal',
   });
 
