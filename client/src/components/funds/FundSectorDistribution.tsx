@@ -4,6 +4,8 @@ import { ResponsiveContainer, PieChart, Pie, Cell, Legend, Tooltip } from 'recha
 import { FundAllocation, Deal } from "@/lib/types";
 import { getSectorColor } from "@/lib/constants/chart-constants";
 import { formatPercentage } from '@/lib/utils/format';
+import { useSectorDistribution } from '@/hooks/useFundMetrics';
+import { formatCurrency } from "@/lib/utils/formatters";
 
 interface SectorData {
   sector: string;
@@ -68,7 +70,7 @@ const CustomTooltip = ({ active, payload, sectorData }: TooltipProps) => {
     return (
       <div className="bg-white p-2 border border-neutral-200 rounded-md shadow-sm">
         <p className="font-medium text-black">{data.sector}</p>
-        <p className="text-black"><span className="font-medium text-black">Amount:</span> ${data.count.toLocaleString()}</p>
+        <p className="text-black"><span className="font-medium text-black">Amount:</span> {formatCurrency(data.count)}</p>
         <p className="text-black"><span className="font-medium text-black">Percentage:</span> <span className="font-bold">{formatPercentage(percentage, 0)}</span></p>
       </div>
     );
@@ -79,11 +81,13 @@ const CustomTooltip = ({ active, payload, sectorData }: TooltipProps) => {
 interface FundSectorDistributionProps {
   allocations: FundAllocation[];
   deals: Deal[];
+  capitalView?: 'total' | 'called' | 'uncalled';
 }
 
 const FundSectorDistribution: React.FC<FundSectorDistributionProps> = ({ 
   allocations,
-  deals
+  deals,
+  capitalView = 'total'
  }) => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -93,64 +97,30 @@ const FundSectorDistribution: React.FC<FundSectorDistributionProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Process allocations into sector data that matches the dashboard format
-  const sectorData = React.useMemo((): SectorData[] => {
-    // Handle null or undefined allocations to avoid runtime errors
-    if (!allocations || allocations.length === 0) {
-      return [];
-    }
-    
-    // Include all allocations, not just funded ones, to show complete portfolio distribution
-    const validAllocations = allocations.filter(allocation => 
-      allocation && allocation.dealSector && allocation.amount > 0
-    );
-    
-    // If no valid allocations with sector data, show nothing
-    if (validAllocations.length === 0) {
-      return [];
-    }
-    
-    // Group by actual deal sector and sum amounts
-    const sectorTotals = new Map<string, number>();
-    const totalAmount = validAllocations.reduce((sum, alloc) => sum + (alloc.amount || 0), 0);
-    
-    validAllocations.forEach(allocation => {
-      // Use the actual deal sector from the allocation data
-      const sector = allocation.dealSector || "Other";
-      const currentTotal = sectorTotals.get(sector) || 0;
-      
-      sectorTotals.set(sector, currentTotal + (allocation.amount || 0));
-    });
-    
-    // Convert to the format needed for the pie chart - matching dashboard format
-    return Array.from(sectorTotals.entries())
-      .sort((a, b) => b[1] - a[1]) // Sort by amount (descending)
-      .map(([sector, amount]): SectorData => ({
-        sector,
-        count: amount,
-        percentage: totalAmount > 0 ? (amount / totalAmount) * 100 : 0
-      }));
-  }, [allocations]);
-  
-  // Get the total called capital (funded allocations) for display
-  const totalCalledCapital = React.useMemo(() => {
-    return allocations
-      .filter(allocation => allocation.status === 'funded')
-      .reduce((sum, allocation) => sum + allocation.amount, 0);
-  }, [allocations]);
+  // Use unified metrics hook for consistent, real-time sector distribution
+  const sectorData = useSectorDistribution(allocations, capitalView);
+
 
   // Process data for chart display - handling "Other" categories
   const processedData = React.useMemo(() => {
-    if (sectorData.length <= 8) return sectorData;
+    if (sectorData.length <= 8) return sectorData.map(item => ({
+      sector: item.sector,
+      count: item.amount, // Map amount to count for chart compatibility
+      percentage: item.percentage
+    }));
     
     const topSectors = sectorData.slice(0, 7);
     const otherSectors = sectorData.slice(7);
     
-    const otherCount = otherSectors.reduce((sum, item) => sum + item.count, 0);
+    const otherCount = otherSectors.reduce((sum, item) => sum + item.amount, 0);
     const otherPercentage = otherSectors.reduce((sum, item) => sum + item.percentage, 0);
     
     return [
-      ...topSectors,
+      ...topSectors.map(item => ({
+        sector: item.sector,
+        count: item.amount,
+        percentage: item.percentage
+      })),
       {
         sector: 'Other Sectors',
         count: otherCount,
@@ -158,6 +128,18 @@ const FundSectorDistribution: React.FC<FundSectorDistributionProps> = ({
       }
     ];
   }, [sectorData]);
+
+  // Dynamic title based on capital view
+  const getTitle = () => {
+    switch (capitalView) {
+      case 'called':
+        return 'Sector Distribution (Called Capital)';
+      case 'uncalled':
+        return 'Sector Distribution (Uncalled Capital)';
+      default:
+        return 'Sector Distribution';
+    }
+  };
   
   return (
     <Card className="h-full w-full flex flex-col">
