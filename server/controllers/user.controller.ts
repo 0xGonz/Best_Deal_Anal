@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { userService } from '../services/user.service';
 import { insertUserSchema } from '@shared/schema';
 import { ZodError } from 'zod';
-import { formatZodError } from '../utils/errorHandlers';
+import { formatZodError } from '../utils/error-handler';
 
 /**
  * Controller for user related endpoints

@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express';
-import { asyncHandler, AppError } from '../utils/errorHandlers';
+import { asyncHandler, AppError } from '../utils/error-handler';
 import { login, logout, getCurrentUser, hashPassword, registerUser } from '../utils/auth';
 import { z, ZodError } from 'zod';
 import { StorageFactory } from '../storage-factory';

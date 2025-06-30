@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { capitalCallService } from '../services/capital-call.service';
 import { insertCapitalCallSchema } from '@shared/schema';
 import { ZodError } from 'zod';
-import { formatZodError } from '../utils/errorHandlers';
+import { formatZodError } from '../utils/error-handler';
 
 /**
  * Controller for capital call related endpoints

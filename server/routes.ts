@@ -2,8 +2,8 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 
 // Route imports
-import dealsRoutes from './routes/new-deals'; // Using refactored modular structure
-import fundsRoutes from './routes/new-funds'; // Using refactored modular structure
+import dealsRoutes from './routes/deals';
+import fundsRoutes from './routes/funds';
 import usersRoutes from './routes/users';
 import authRoutes from './routes/auth';
 import dashboardRoutes from './routes/dashboard';
@@ -23,7 +23,7 @@ import v1Router from './routes/v1/index'; // V1 API routes including AI analysis
 import aiAnalysisRoutes from './routes/ai-analysis';
 
 // Utils
-import { errorHandler, notFoundHandler, AppError } from './utils/errorHandlers';
+import { errorHandler } from './utils/error-handler';
 import { requireAuth, getCurrentUser } from './utils/auth';
 import { pool } from './db';
 

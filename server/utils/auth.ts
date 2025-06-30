@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { AppError } from './errorHandlers';
+import { AppError } from './error-handler';
 import { StorageFactory } from '../storage-factory';
 import * as bcrypt from 'bcrypt';
 import { SALT_ROUNDS, AUTH_ERRORS } from '../constants/auth-constants';

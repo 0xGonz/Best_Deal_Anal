@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { calendarService } from '../services/calendar.service';
-import { asyncHandler } from '../utils/errorHandlers';
+import { asyncHandler } from '../utils/error-handler';
 
 /**
  * Calendar controller for unified calendar event handling

@@ -4,7 +4,7 @@ import { insertClosingScheduleEventSchema, type Deal } from '@shared/schema';
 import { CLOSING_EVENT_STATUS } from '../constants/status-constants';
 import { requireAuth } from '../utils/auth';
 import { requirePermission } from '../utils/permissions';
-import { AppError } from '../utils/errorHandlers';
+import { AppError } from '../utils/error-handler';
 
 const router = Router();
 const storage = StorageFactory.getStorage();

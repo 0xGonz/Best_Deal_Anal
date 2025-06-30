@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { AppError } from './errorHandlers';
+import { AppError } from './error-handler';
 import { AUTH_ERRORS } from '../constants/auth-constants';
 
 /**
