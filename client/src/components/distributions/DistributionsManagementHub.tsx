@@ -723,6 +723,194 @@ export function DistributionsManagementHub({
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Edit Distribution Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Distribution</DialogTitle>
+          </DialogHeader>
+          {editingDistribution && (
+            <EditDistributionForm
+              distribution={editingDistribution}
+              allocations={allocations}
+              onSubmit={(data) => {
+                updateDistributionMutation.mutate({
+                  id: editingDistribution.id,
+                  data
+                });
+              }}
+              onCancel={() => {
+                setIsEditDialogOpen(false);
+                setEditingDistribution(null);
+              }}
+              isLoading={updateDistributionMutation.isPending}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
+  );
+}
+
+// Edit Distribution Form Component
+function EditDistributionForm({
+  distribution,
+  allocations,
+  onSubmit,
+  onCancel,
+  isLoading
+}: {
+  distribution: any;
+  allocations: any[];
+  onSubmit: (data: any) => void;
+  onCancel: () => void;
+  isLoading: boolean;
+}) {
+  const form = useForm({
+    resolver: zodResolver(distributionFormSchema),
+    defaultValues: {
+      allocationId: distribution.allocationId,
+      distributionDate: new Date(distribution.distributionDate),
+      amount: parseFloat(distribution.amount),
+      distributionType: distribution.distributionType,
+      notes: distribution.notes || '',
+      isHistorical: false,
+    },
+  });
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="allocationId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Allocation</FormLabel>
+              <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select allocation" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {allocations.map((allocation) => (
+                    <SelectItem key={allocation.id} value={allocation.id.toString()}>
+                      {allocation.dealName} - {formatCurrency(allocation.amount)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="distributionDate"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Distribution Date</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        format(field.value, "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    disabled={(date) =>
+                      date > new Date() || date < new Date("1900-01-01")
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="amount"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Amount</FormLabel>
+              <FormControl>
+                <Input type="number" step="0.01" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="distributionType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Distribution Type</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="dividend">Dividend</SelectItem>
+                  <SelectItem value="return_of_capital">Return of Capital</SelectItem>
+                  <SelectItem value="realized_gain">Realized Gain</SelectItem>
+                  <SelectItem value="interest">Interest</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Notes</FormLabel>
+              <FormControl>
+                <Textarea placeholder="Optional notes" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex justify-end space-x-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? 'Updating...' : 'Update Distribution'}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }
