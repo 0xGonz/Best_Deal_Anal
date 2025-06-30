@@ -28,8 +28,8 @@ function getStorage(): IStorage {
  */
 export class FundService {
   /**
-   * Calculate the called capital for a fund based on actual capital calls
-   * Called capital = sum of all capital call amounts (regardless of payment status)
+   * Calculate the called capital for a fund based on actual capital calls and paid amounts
+   * Called capital = sum of capital call amounts OR paid amounts (when no formal calls exist)
    */
   async calculateCalledCapital(fundId: number): Promise<number> {
     const storage = getStorage();
@@ -39,21 +39,33 @@ export class FundService {
     
     let totalCalled = 0;
     
-    // For each allocation, sum the capital call amounts
+    // For each allocation, determine called capital
     for (const allocation of allocations) {
       try {
         // Get capital calls for this allocation
         const capitalCalls = await storage.getCapitalCallsByAllocation(allocation.id);
         
-        // Sum the call amounts (not paid amounts - that's different)
-        const allocationCalled = capitalCalls.reduce((sum, call) => {
-          return sum + Number(call.callAmount || 0);
-        }, 0);
-        
-        totalCalled += allocationCalled;
+        if (capitalCalls.length > 0) {
+          // If formal capital calls exist, use their call amounts
+          const allocationCalled = capitalCalls.reduce((sum, call) => {
+            return sum + Number(call.callAmount || 0);
+          }, 0);
+          totalCalled += allocationCalled;
+        } else {
+          // If no capital calls but there are paid amounts, use paid amounts as called capital
+          // This handles cases where allocations are funded without formal capital call process
+          const paidAmount = Number(allocation.paidAmount || 0);
+          if (paidAmount > 0) {
+            totalCalled += paidAmount;
+          }
+        }
       } catch (error) {
         console.warn(`Error getting capital calls for allocation ${allocation.id}:`, error);
-        // If we can't get capital calls, assume no calls made (0 called)
+        // If we can't get capital calls, check if there are paid amounts to use instead
+        const paidAmount = Number(allocation.paidAmount || 0);
+        if (paidAmount > 0) {
+          totalCalled += paidAmount;
+        }
       }
     }
     
