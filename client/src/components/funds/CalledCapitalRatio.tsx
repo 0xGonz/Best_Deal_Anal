@@ -45,7 +45,7 @@ export const VerticalStackedBarChart: React.FC<{
           <YAxis 
             type="number"
             domain={[0, 1]}
-            tickFormatter={(value) => `${(value * 100).toFixed(2)}%`}
+            tickFormatter={(value) => `${Math.round(value * 100)}%`}
             ticks={[0, 0.25, 0.5, 0.75, 1]}
           />
           <Tooltip 
@@ -56,7 +56,7 @@ export const VerticalStackedBarChart: React.FC<{
                 .split(' ')
                 .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
                 .join(' ');
-              return [`${formatCurrency(value)} (${((value/totalValue)*100).toFixed(2)}%)`, displayName];
+              return [`${formatCurrency(value)} (${Math.round((value/totalValue)*100)}%)`, displayName];
             }}
             labelFormatter={() => "Capital Distribution"}
           />
