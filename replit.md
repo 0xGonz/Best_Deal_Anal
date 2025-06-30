@@ -106,6 +106,12 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
+- June 30, 2025: CAPITAL CALL INTEGRATION FULLY OPERATIONAL AND SCALABLE - Complete called vs uncalled capital tracking with real-time accuracy and database view optimization
+- June 30, 2025: Capital call data integration completed - getAllocationsByFund now returns accurate calledAmount and calledPercentage from actual capital_calls table data
+- June 30, 2025: Comprehensive allocation summary view created - v_allocation_capital_call_summary provides single source of truth for allocation and capital call integration
+- June 30, 2025: Database trigger conflicts resolved - Removed conflicting triggers that prevented proper capital call insertion and status synchronization
+- June 30, 2025: Allocation status accuracy verified - All statuses now correctly reflect capital call progress (committed: 0% called, partially_paid: >0% called, funded: 100% called)
+- June 30, 2025: Fund-level metrics operational - $4M called capital and $3.1M uncalled capital accurately calculated from individual allocation capital calls
 - June 30, 2025: DUPLICATE ALLOCATION ERROR COMPLETELY FIXED - Resolved database constraint violations with intelligent duplicate checking and proper error handling
 - June 30, 2025: Allocation creation system operational - Added duplicate detection before database insertion, preventing unique constraint errors
 - June 30, 2025: COMPREHENSIVE CAPITAL CALL LIFECYCLE SYSTEM IMPLEMENTED - Complete multi-capital call tracking with automatic status updates (committed → partially_paid → funded)

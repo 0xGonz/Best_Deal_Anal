@@ -546,12 +546,12 @@ export class DatabaseStorage implements IStorage {
         dealName: deals.name,
         dealSector: deals.sector,
         // Calculate called amounts directly from capital_calls table
-        calledAmount: sql<string>`COALESCE(capital_call_totals.total_called, 0)::text`,
-        calledPercentage: sql<string>`
+        calledAmount: sql<number>`COALESCE(capital_call_totals.total_called, 0)`,
+        calledPercentage: sql<number>`
           CASE 
             WHEN ${fundAllocations.amount} > 0 
-            THEN ROUND((COALESCE(capital_call_totals.total_called, 0) / ${fundAllocations.amount}) * 100, 1)::text
-            ELSE '0.0'
+            THEN ROUND((COALESCE(capital_call_totals.total_called, 0) / ${fundAllocations.amount}) * 100, 1)
+            ELSE 0.0
           END
         `
       })
@@ -575,8 +575,8 @@ export class DatabaseStorage implements IStorage {
       ...result,
       dealName: result.dealName ?? undefined,
       dealSector: result.dealSector ?? undefined,
-      calledAmount: result.calledAmount || "0",
-      calledPercentage: result.calledPercentage || "0.0"
+      calledAmount: Number(result.calledAmount) || 0,
+      calledPercentage: Number(result.calledPercentage) || 0.0
     }));
   }
 
