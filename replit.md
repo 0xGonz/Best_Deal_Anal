@@ -106,6 +106,9 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
+- June 30, 2025: CRITICAL ALLOCATION API CRASH FIXED - Resolved ReferenceError causing 500 errors when creating allocations due to undefined productionAllocationService and productionCapitalCallsService variables
+- June 30, 2025: Production allocation routes operational - Fixed service instantiation in production-allocations.ts, now properly creates AllocationService and CapitalCallService instances
+- June 30, 2025: Server stability restored - API endpoints now respond with proper HTTP status codes instead of crashing with undefined service references
 - June 29, 2025: COMPREHENSIVE SCALABLE DATA INTEGRITY SYSTEM IMPLEMENTED - Extended allocation status pattern to entire platform with modular services and database triggers
 - June 29, 2025: Data integrity dashboard deployed - Real-time monitoring of data quality across allocations, capital calls, deals, and funds modules
 - June 29, 2025: Modular service architecture established - Consistent data validation patterns deployable to any module in the application

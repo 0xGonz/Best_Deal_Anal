@@ -18,6 +18,7 @@ const router = Router();
 
 // Initialize services
 const allocationService = new AllocationService();
+const capitalCallService = new CapitalCallService();
 const allocationDeletionService = new AllocationDeletionService();
 
 // Validation schemas
@@ -423,7 +424,7 @@ router.post('/:allocationId/capital-calls', requireAuth, requirePermission('crea
     const request = validationResult.data;
 
     // Create capital call
-    const result = await productionCapitalCallsService.createCapitalCall(request, userId);
+    const result = await capitalCallService.createCapitalCall(request, userId);
 
     if (!result.success) {
       if (result.validationErrors) {
@@ -464,7 +465,7 @@ router.get('/:allocationId/capital-calls', requireAuth, async (req: Request, res
       return res.status(400).json({ error: 'Invalid allocation ID' });
     }
 
-    const capitalCalls = await productionCapitalCallsService.getCapitalCallsForAllocation(allocationId);
+    const capitalCalls = await capitalCallService.getCapitalCallsForAllocation(allocationId);
 
     res.json({
       success: true,
@@ -513,7 +514,7 @@ router.post('/capital-calls/:capitalCallId/payment', requireAuth, requirePermiss
     const { amount, paymentDate, notes } = validationResult.data;
 
     // Process payment
-    const result = await productionCapitalCallsService.processPayment(
+    const result = await capitalCallService.processPayment(
       capitalCallId,
       amount,
       new Date(paymentDate),
