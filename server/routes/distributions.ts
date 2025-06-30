@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { db } from '../db';
 import { createInsertSchema } from 'drizzle-zod';
-import { distributions, fundAllocations, funds } from '../../shared/schema';
+import { distributions, fundAllocations, funds, deals } from '../../shared/schema';
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
 import { requireAuth } from '../utils/auth';
@@ -154,13 +154,12 @@ router.get('/fund/:fundId', requireAuth, async (req, res) => {
         distributionType: distributions.distributionType,
         notes: distributions.notes,
         createdAt: distributions.createdAt,
-        allocation: {
-          dealName: fundAllocations.dealName,
-          amount: fundAllocations.amount,
-        }
+        dealName: deals.name,
+        allocationAmount: fundAllocations.amount,
       })
       .from(distributions)
       .innerJoin(fundAllocations, eq(distributions.allocationId, fundAllocations.id))
+      .innerJoin(deals, eq(fundAllocations.dealId, deals.id))
       .where(eq(fundAllocations.fundId, parseInt(fundId)))
       .orderBy(distributions.distributionDate);
     res.json(fundDistributions);

@@ -68,13 +68,29 @@ export function DistributionsManagementHub({
   const queryClient = useQueryClient();
 
   // Query for distributions based on mode
-  const { data: distributions = [], isLoading: distributionsLoading } = useQuery({
+  const { data: distributions = [], isLoading: distributionsLoading, error: distributionsError } = useQuery({
     queryKey: mode === 'fund' 
       ? [`/api/distributions/fund/${fundId}`]
       : mode === 'allocation'
       ? [`/api/distributions/allocation/${allocationId}`]
       : [`/api/distributions/deal/${dealId}`],
     enabled: !!(fundId || allocationId || dealId),
+  });
+
+  // Debug logging
+  console.log('DistributionsManagementHub state:', {
+    mode,
+    fundId,
+    allocationId,
+    dealId,
+    distributions,
+    distributionsLoading,
+    distributionsError,
+    queryKey: mode === 'fund' 
+      ? [`/api/distributions/fund/${fundId}`]
+      : mode === 'allocation'
+      ? [`/api/distributions/allocation/${allocationId}`]
+      : [`/api/distributions/deal/${dealId}`]
   });
 
   // Query for allocations (for dropdown when adding distributions)
@@ -395,7 +411,23 @@ export function DistributionsManagementHub({
             </CardHeader>
             <CardContent>
               {distributionsLoading ? (
-                <div>Loading distributions...</div>
+                <div className="flex items-center space-x-2 py-6">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                  <span>Loading distributions...</span>
+                </div>
+              ) : distributionsError ? (
+                <div className="text-red-600 py-6">
+                  <h4 className="font-semibold">Error Loading Distributions</h4>
+                  <p className="text-sm mt-1">
+                    Failed to load distributions data. Please try again.
+                  </p>
+                  <details className="mt-2 text-xs">
+                    <summary className="cursor-pointer">Technical Details</summary>
+                    <pre className="mt-1 bg-gray-100 p-2 rounded overflow-auto">
+                      {JSON.stringify(distributionsError, null, 2)}
+                    </pre>
+                  </details>
+                </div>
               ) : distributions.length === 0 ? (
                 <div className="text-center py-6 text-muted-foreground">
                   No distributions found
