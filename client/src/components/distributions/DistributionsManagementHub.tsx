@@ -77,21 +77,7 @@ export function DistributionsManagementHub({
     enabled: !!(fundId || allocationId || dealId),
   });
 
-  // Debug logging
-  console.log('DistributionsManagementHub state:', {
-    mode,
-    fundId,
-    allocationId,
-    dealId,
-    distributions,
-    distributionsLoading,
-    distributionsError,
-    queryKey: mode === 'fund' 
-      ? [`/api/distributions/fund/${fundId}`]
-      : mode === 'allocation'
-      ? [`/api/distributions/allocation/${allocationId}`]
-      : [`/api/distributions/deal/${dealId}`]
-  });
+
 
   // Query for allocations (for dropdown when adding distributions)
   const { data: allocations = [] } = useQuery({
@@ -459,7 +445,7 @@ export function DistributionsManagementHub({
                           </Badge>
                         </TableCell>
                         {mode !== 'allocation' && (
-                          <TableCell>{distribution.allocation?.dealName || 'Unknown'}</TableCell>
+                          <TableCell>{distribution.dealName || 'Unknown'}</TableCell>
                         )}
                         <TableCell className="max-w-xs truncate">
                           {distribution.notes || '-'}
