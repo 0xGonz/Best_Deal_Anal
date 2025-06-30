@@ -125,7 +125,17 @@ export function calculateDynamicWeight(
   const allocationAmount = getDisplayAmount(allocationMetrics, capitalView);
   const totalFundAmount = getDisplayAmount(fundMetrics, capitalView);
   
-  // Calculate weight as percentage of total
-  if (totalFundAmount === 0) return 0;
-  return (allocationAmount / totalFundAmount) * 100;
+  // Safe numeric conversion and division guard
+  const safeAllocationAmount = Number(allocationAmount) || 0;
+  const safeTotalFundAmount = Number(totalFundAmount) || 0;
+  
+  // Calculate weight as percentage of total - guard against division by zero
+  if (safeTotalFundAmount === 0 || isNaN(safeAllocationAmount) || isNaN(safeTotalFundAmount)) {
+    return 0;
+  }
+  
+  const weight = (safeAllocationAmount / safeTotalFundAmount) * 100;
+  
+  // Additional guard against NaN result
+  return isNaN(weight) ? 0 : weight;
 }

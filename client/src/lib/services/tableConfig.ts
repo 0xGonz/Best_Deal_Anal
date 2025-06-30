@@ -101,7 +101,13 @@ export const COLUMN_DEFINITIONS = {
     label: 'Weight',
     align: 'right' as const,
     responsive: 'always' as const,
-    formatter: (value: number) => value ? `${value.toFixed(2)}%` : '0.00%',
+    formatter: (value: number) => {
+      // Safe handling of NaN and invalid values
+      if (isNaN(value) || value === null || value === undefined) {
+        return '0.00%';
+      }
+      return `${Number(value).toFixed(2)}%`;
+    },
     sortable: true,
     dynamic: true // Indicates this column changes with capital view
   },

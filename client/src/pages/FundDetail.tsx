@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRoute } from "wouter";
 import AppLayout from "@/components/layout/AppLayout";
@@ -996,8 +996,11 @@ export default function FundDetail() {
                           const capitalMetrics = calculateAllocationCapitalMetrics(allocation);
                           const displayAmount = getDisplayAmount(capitalMetrics, capitalView);
                           
-                          // Calculate dynamic weight based on capital view
-                          const dynamicWeight = calculateDynamicWeight(allocation, allocations, capitalView);
+                          // Calculate dynamic weight based on capital view with NaN protection
+                          const dynamicWeight = useMemo(() => {
+                            const weight = calculateDynamicWeight(allocation, allocations, capitalView);
+                            return isNaN(weight) ? 0 : weight;
+                          }, [allocation.amount, allocations, capitalView]);
                           
                           // Use modular status service for scalable status management
                           const statusBadgeProps = generateStatusBadgeProps(allocation);
