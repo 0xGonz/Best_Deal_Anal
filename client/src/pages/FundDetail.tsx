@@ -1240,6 +1240,15 @@ export default function FundDetail() {
                                   >
                                     <FilePenLine className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-neutral-600" />
                                   </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => { e.stopPropagation(); handleManageDistributions(allocation); }}
+                                    className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 p-0"
+                                    title="Manage distributions"
+                                  >
+                                    <TrendingDown className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-blue-600" />
+                                  </Button>
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                                       <Button
@@ -1479,7 +1488,7 @@ export default function FundDetail() {
                             distributionDate: formData.get('distributionDate') as string,
                             amount: parseFloat(formData.get('amount') as string),
                             distributionType: formData.get('distributionType') as string,
-                            description: formData.get('description') as string || undefined,
+                            notes: formData.get('notes') as string || undefined,
                           });
                           
                           // Reset form

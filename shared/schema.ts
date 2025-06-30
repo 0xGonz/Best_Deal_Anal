@@ -507,7 +507,7 @@ export const distributions = pgTable("distributions", {
   distributionType: text("distribution_type", { 
     enum: ["dividend", "capital_gain", "return_of_capital", "liquidation", "other"] 
   }).notNull().default("dividend"),
-  description: text("description"),
+  notes: text("notes"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
