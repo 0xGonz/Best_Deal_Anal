@@ -22,6 +22,7 @@ import { UserAvatar } from "@/components/common/UserAvatar";
 import AIAnalysisTab from "@/components/AIAnalysisTab";
 import { DocumentAnalysisPanel } from "@/components/DocumentAnalysisPanel";
 import InvestmentTrackingTab from "@/components/deals/InvestmentTrackingTab";
+import { DealDistributionsTab } from "@/components/deals/DealDistributionsTab";
 import { 
   Card, 
   CardHeader, 
@@ -757,6 +758,10 @@ export default function DealDetail() {
 
           <TabsContent value="investments">
             <InvestmentTrackingTab dealId={Number(dealId)} />
+          </TabsContent>
+
+          <TabsContent value="distributions">
+            <DealDistributionsTab dealId={Number(dealId)} />
           </TabsContent>
 
         </Tabs>

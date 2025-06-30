@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { CreditCard, Eye, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
+import { CreditCard, Eye, MoreHorizontal, Edit, Trash2, TrendingDown } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import type { FundAllocation } from '@/lib/types';
 
@@ -14,6 +14,7 @@ interface InvestmentAllocationsTableProps {
   onEditAllocation?: (allocation: FundAllocation) => void;
   onDeleteAllocation?: (allocationId: number) => void;
   onViewCapitalCalls?: (allocationId: number) => void;
+  onManageDistributions?: (allocation: FundAllocation) => void;
   capitalView?: 'committed' | 'called' | 'paid';
   showCapitalCallColumn?: boolean;
 }
@@ -24,6 +25,7 @@ export const InvestmentAllocationsTable: React.FC<InvestmentAllocationsTableProp
   onEditAllocation,
   onDeleteAllocation,
   onViewCapitalCalls,
+  onManageDistributions,
   capitalView = 'committed',
   showCapitalCallColumn = true
 }) => {
