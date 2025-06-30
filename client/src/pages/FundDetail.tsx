@@ -166,10 +166,20 @@ export default function FundDetail() {
       if (Array.isArray(data)) {
         return data.map((allocation: any) => ({
           ...allocation,
+          // Convert string amounts to numbers for proper validation
+          amount: parseFloat(allocation.amount) || 0,
+          paidAmount: allocation.paidAmount ? parseFloat(allocation.paidAmount) : null,
+          marketValue: allocation.marketValue ? parseFloat(allocation.marketValue) : null,
+          calledAmount: allocation.calledAmount ? parseFloat(allocation.calledAmount) : null,
+          portfolioWeight: parseFloat(allocation.portfolioWeight) || 0,
+          interestPaid: parseFloat(allocation.interestPaid) || 0,
+          distributionPaid: parseFloat(allocation.distributionPaid) || 0,
+          totalReturned: parseFloat(allocation.totalReturned) || 0,
+          moic: parseFloat(allocation.moic) || 0,
+          irr: parseFloat(allocation.irr) || 0,
+          // Handle string fields properly
           notes: allocation.notes || null,
           status: allocation.status || "committed",
-          portfolioWeight: allocation.portfolioWeight || 0,
-          totalReturned: allocation.totalReturned || 0,
           dealName: allocation.dealName || undefined,
           dealSector: allocation.dealSector || undefined
         }));
@@ -903,7 +913,17 @@ export default function FundDetail() {
                         <p>• {dataIntegrityReport.sectors.missingSectorCount} allocations missing sector data</p>
                       )}
                       {!dataIntegrityReport.financial.valid && (
-                        <p>• {dataIntegrityReport.financial.issues.length} financial data inconsistencies found</p>
+                        <div>
+                          <p>• {dataIntegrityReport.financial.issues.length} financial data inconsistencies found:</p>
+                          <div className="ml-4 mt-1 text-sm">
+                            {dataIntegrityReport.financial.issues.slice(0, 3).map((issue, index) => (
+                              <p key={index}>- Allocation {issue.allocationId}: {issue.issue}</p>
+                            ))}
+                            {dataIntegrityReport.financial.issues.length > 3 && (
+                              <p>- ...and {dataIntegrityReport.financial.issues.length - 3} more issues</p>
+                            )}
+                          </div>
+                        </div>
                       )}
                     </div>
                   </AlertDescription>
