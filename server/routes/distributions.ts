@@ -73,8 +73,8 @@ router.post('/', requireAuth, async (req, res) => {
     const validatedData = insertDistributionSchema.parse(bodyData);
     const distribution = await storage.createDistribution(validatedData);
     
-    // TODO: Implement recalculateAllocationMetrics
-    // await storage.recalculateAllocationMetrics(validatedData.allocationId);
+    // Recalculate allocation metrics to update distributionPaid field
+    await storage.recalculateAllocationMetrics(validatedData.allocationId);
     
     res.status(201).json(distribution);
   } catch (error) {
@@ -102,8 +102,8 @@ router.put('/:id', requireAuth, async (req, res) => {
       return res.status(404).json({ message: 'Distribution not found' });
     }
     
-    // TODO: Implement recalculateAllocationMetrics  
-    // await storage.recalculateAllocationMetrics(updatedDistribution.allocationId);
+    // Recalculate allocation metrics after update
+    await storage.recalculateAllocationMetrics(updatedDistribution.allocationId);
     
     res.json(updatedDistribution);
   } catch (error) {
@@ -131,8 +131,8 @@ router.delete('/:id', requireAuth, async (req, res) => {
     
     await storage.deleteDistribution(parseInt(id));
     
-    // TODO: Implement recalculateAllocationMetrics
-    // await storage.recalculateAllocationMetrics(distribution.allocationId);
+    // Recalculate allocation metrics after deletion
+    await storage.recalculateAllocationMetrics(distribution.allocationId);
     
     res.json({ message: 'Distribution deleted successfully' });
   } catch (error) {
