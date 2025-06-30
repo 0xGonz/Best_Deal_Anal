@@ -257,6 +257,15 @@ export const InvestmentAllocationsTable: React.FC<InvestmentAllocationsTableProp
                               View Capital Calls
                             </DropdownMenuItem>
                           )}
+                          {onManageDistributions && (
+                            <DropdownMenuItem 
+                              onClick={() => onManageDistributions(allocation)}
+                              className="cursor-pointer"
+                            >
+                              <TrendingDown className="h-4 w-4 mr-2" />
+                              Manage Distributions
+                            </DropdownMenuItem>
+                          )}
                           {onEditAllocation && (
                             <DropdownMenuItem 
                               onClick={() => onEditAllocation(allocation)}
