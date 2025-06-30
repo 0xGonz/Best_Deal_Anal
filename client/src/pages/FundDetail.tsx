@@ -65,7 +65,8 @@ import {
   Calendar,
   AlertCircle,
   Eye,
-  CheckCircle
+  CheckCircle,
+  TrendingDown
 } from "lucide-react";
 import { format } from "date-fns";
 import { formatCurrency } from "@/lib/services/formatters";
@@ -103,6 +104,10 @@ export default function FundDetail() {
   const [isEditAllocationDialogOpen, setIsEditAllocationDialogOpen] = useState(false);
   const [isDeleteAllocationDialogOpen, setIsDeleteAllocationDialogOpen] = useState(false);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  
+  // Distributions management state
+  const [isDistributionsDialogOpen, setIsDistributionsDialogOpen] = useState(false);
+  const [currentAllocationId, setCurrentAllocationId] = useState<number | null>(null);
   
   // Define types for editing allocation with dealName added
   type EditingAllocation = FundAllocation & { dealName?: string };
@@ -445,6 +450,68 @@ export default function FundDetail() {
   // Handler for marking allocation as unfunded
   const handleMarkAsUnfunded = (allocation: FundAllocation) => {
     updateAllocationStatusMutation.mutate({ allocationId: allocation.id, status: "unfunded" });
+  };
+
+  // Distributions query for the selected allocation
+  const { data: distributions, refetch: refetchDistributions } = useQuery({
+    queryKey: [`/api/distributions/allocation/${currentAllocationId}`],
+    enabled: !!currentAllocationId,
+  });
+
+  // Create distribution mutation
+  const createDistribution = useMutation({
+    mutationFn: async (distributionData: {
+      allocationId: number;
+      distributionDate: string;
+      amount: number;
+      distributionType: string;
+      description?: string;
+    }) => {
+      return apiRequest("POST", `/api/distributions`, distributionData);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Distribution added",
+        description: "The distribution has been recorded successfully.",
+      });
+      refetchDistributions();
+      queryClient.invalidateQueries({ queryKey: [`/api/production/allocations/fund/${fundId}`] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error adding distribution",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete distribution mutation
+  const deleteDistribution = useMutation({
+    mutationFn: async (distributionId: number) => {
+      return apiRequest("DELETE", `/api/distributions/${distributionId}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Distribution deleted",
+        description: "The distribution has been removed successfully.",
+      });
+      refetchDistributions();
+      queryClient.invalidateQueries({ queryKey: [`/api/production/allocations/fund/${fundId}`] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error deleting distribution",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Handler for opening distributions dialog
+  const handleManageDistributions = (allocation: FundAllocation) => {
+    setCurrentAllocationId(allocation.id);
+    setIsDistributionsDialogOpen(true);
   };
 
   // We don't need to warn about invalid allocations anymore

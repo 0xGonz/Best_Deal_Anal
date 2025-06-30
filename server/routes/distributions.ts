@@ -67,8 +67,8 @@ router.put('/:id', requireAuth, async (req, res) => {
       return res.status(404).json({ message: 'Distribution not found' });
     }
     
-    // Recalculate allocation metrics after updating distribution
-    await storage.recalculateAllocationMetrics(updatedDistribution.allocationId);
+    // TODO: Implement recalculateAllocationMetrics  
+    // await storage.recalculateAllocationMetrics(updatedDistribution.allocationId);
     
     res.json(updatedDistribution);
   } catch (error) {
@@ -96,8 +96,8 @@ router.delete('/:id', requireAuth, async (req, res) => {
     
     await storage.deleteDistribution(parseInt(id));
     
-    // Recalculate allocation metrics after deleting distribution
-    await storage.recalculateAllocationMetrics(distribution.allocationId);
+    // TODO: Implement recalculateAllocationMetrics
+    // await storage.recalculateAllocationMetrics(distribution.allocationId);
     
     res.json({ message: 'Distribution deleted successfully' });
   } catch (error) {
