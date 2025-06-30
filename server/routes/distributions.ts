@@ -141,4 +141,69 @@ router.delete('/:id', requireAuth, async (req, res) => {
   }
 });
 
+// Get distributions for a fund
+router.get('/fund/:fundId', requireAuth, async (req, res) => {
+  try {
+    const { fundId } = req.params;
+    const fundDistributions = await db
+      .select({
+        id: distributions.id,
+        allocationId: distributions.allocationId,
+        distributionDate: distributions.distributionDate,
+        amount: distributions.amount,
+        distributionType: distributions.distributionType,
+        notes: distributions.notes,
+        createdAt: distributions.createdAt,
+        allocation: {
+          dealName: fundAllocations.dealName,
+          amount: fundAllocations.amount,
+        }
+      })
+      .from(distributions)
+      .innerJoin(fundAllocations, eq(distributions.allocationId, fundAllocations.id))
+      .where(eq(fundAllocations.fundId, parseInt(fundId)))
+      .orderBy(distributions.distributionDate);
+    res.json(fundDistributions);
+  } catch (error) {
+    console.error('Error fetching fund distributions:', error);
+    res.status(500).json({ message: 'Failed to fetch fund distributions' });
+  }
+});
+
+// Get distribution summary for a fund
+router.get('/summary/fund/:fundId', requireAuth, async (req, res) => {
+  try {
+    const fundId = parseInt(req.params.fundId);
+    const summary = await storage.getDistributionSummaryForFund(fundId);
+    res.json(summary);
+  } catch (error) {
+    console.error('Error fetching distribution summary for fund:', error);
+    res.status(500).json({ error: 'Failed to fetch distribution summary' });
+  }
+});
+
+// Get distribution summary for an allocation
+router.get('/summary/allocation/:allocationId', requireAuth, async (req, res) => {
+  try {
+    const allocationId = parseInt(req.params.allocationId);
+    const summary = await storage.getDistributionSummaryForAllocation(allocationId);
+    res.json(summary);
+  } catch (error) {
+    console.error('Error fetching distribution summary for allocation:', error);
+    res.status(500).json({ error: 'Failed to fetch distribution summary' });
+  }
+});
+
+// Get distribution summary for a deal
+router.get('/summary/deal/:dealId', requireAuth, async (req, res) => {
+  try {
+    const dealId = parseInt(req.params.dealId);
+    const summary = await storage.getDistributionSummaryForDeal(dealId);
+    res.json(summary);
+  } catch (error) {
+    console.error('Error fetching distribution summary for deal:', error);
+    res.status(500).json({ error: 'Failed to fetch distribution summary' });
+  }
+});
+
 export default router;

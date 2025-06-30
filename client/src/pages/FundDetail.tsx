@@ -91,6 +91,7 @@ import {
   validateFinancialDataIntegrity 
 } from '@/lib/services/dataIntegration';
 import { TABLE_CONFIGS } from "@/lib/services/tableConfig";
+import { DistributionsManagementHub } from '@/components/distributions/DistributionsManagementHub';
 // Import local types instead of schema types to ensure consistency
 import { Fund, FundAllocation, Deal } from "@/lib/types";
 
