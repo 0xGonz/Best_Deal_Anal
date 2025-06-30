@@ -14,6 +14,7 @@ import documentsRoutes from './routes/documents';
 // Removed legacy allocations route - using production-allocations only
 import productionAllocationsRouter from './routes/production-allocations';
 import capitalCallsRoutes from './routes/capital-calls';
+import capitalCallManagementRoutes from './routes/capital-call-management';
 import closingSchedulesRoutes from './routes/closing-schedules';
 import meetingsRoutes from './routes/meetings';
 import calendarRoutes from './routes/calendar.routes'; // New unified calendar API
@@ -67,6 +68,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/production/allocations', productionAllocationsRouter);
   app.use('/api/allocations', productionAllocationsRouter); // Updated to use production allocations after cleanup
   app.use('/api/capital-calls', capitalCallsRoutes);
+  app.use('/api/capital-call-management', capitalCallManagementRoutes);
   app.use('/api/closing-schedules', closingSchedulesRoutes);
   app.use('/api/meetings', meetingsRoutes);
   app.use('/api/calendar', calendarRoutes); // New unified calendar API endpoint
