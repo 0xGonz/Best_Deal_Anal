@@ -1000,6 +1000,8 @@ export default function FundDetail() {
                           const weight = calculateDynamicWeight(allocation, allocations, capitalView);
                           const dynamicWeight = isNaN(weight) ? 0 : weight;
                           
+
+                          
                           // Use modular status service for scalable status management
                           const statusBadgeProps = generateStatusBadgeProps(allocation);
                           

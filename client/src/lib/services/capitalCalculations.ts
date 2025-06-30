@@ -11,8 +11,9 @@ export interface CapitalMetrics {
  * Implements correct business logic: committed → partially_paid → funded
  */
 export function calculateAllocationCapitalMetrics(allocation: FundAllocation): CapitalMetrics {
-  const committedAmount = allocation.amount;
-  const paidAmount = allocation.paidAmount || 0;
+  // Ensure numeric conversion - API returns string values
+  const committedAmount = parseFloat(String(allocation.amount)) || 0;
+  const paidAmount = parseFloat(String(allocation.paidAmount)) || 0;
   
   // CORRECT BUSINESS LOGIC:
   // - calledAmount = what has been called (equals paidAmount for now, will integrate with capital calls later)
