@@ -17,6 +17,7 @@ import { eq } from 'drizzle-orm';
 const router = Router();
 
 // Initialize services
+const allocationService = new AllocationService();
 const allocationDeletionService = new AllocationDeletionService();
 
 // Validation schemas
@@ -76,7 +77,7 @@ router.post('/', requireAuth, requirePermission('create', 'allocation'), async (
     const request = validationResult.data;
 
     // Create allocation
-    const result = await productionAllocationService.createAllocation(request, userId);
+    const result = await allocationService.createAllocation(request, userId);
     
     // Auto-trigger system updates disabled due to status corruption
     // TODO: Fix before re-enabling
@@ -145,7 +146,7 @@ router.put('/:id', requireAuth, requirePermission('edit', 'allocation'), async (
     const updates = validationResult.data;
 
     // Update allocation
-    const result = await productionAllocationService.updateAllocation(allocationId, updates, userId);
+    const result = await allocationService.updateAllocation(allocationId, updates, userId);
 
     if (!result.success) {
       if (result.validationErrors) {
@@ -209,7 +210,7 @@ router.patch('/:id', requireAuth, requirePermission('edit', 'allocation'), async
     const updates = validationResult.data;
 
     // Update allocation
-    const result = await productionAllocationService.updateAllocation(allocationId, updates, userId);
+    const result = await allocationService.updateAllocation(allocationId, updates, userId);
 
     if (!result.success) {
       if (result.validationErrors) {
@@ -358,7 +359,7 @@ router.post('/batch', requireAuth, requirePermission('create', 'allocation'), as
     const requests = validationResult.data;
 
     // Process batch
-    const results = await productionAllocationService.batchCreateAllocations(requests, userId);
+    const results = await allocationService.batchCreateAllocations(requests, userId);
 
     // Separate successful and failed results
     const successful = results.filter(r => r.success);

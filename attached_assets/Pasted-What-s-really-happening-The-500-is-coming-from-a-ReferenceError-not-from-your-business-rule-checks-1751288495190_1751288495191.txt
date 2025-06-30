@@ -1,0 +1,81 @@
+What’s really happening
+
+The 500 is coming from a ReferenceError, not from your business-rule checks.
+In server/routes/production-allocations.ts every route calls productionAllocationService.*, but that variable is never defined or imported. The code still compiles because the file was compiled earlier, but when the first request reaches the handler Node tries to execute
+
+ts
+Copy
+Edit
+await productionAllocationService.createAllocation(...)
+and throws ReferenceError: productionAllocationService is not defined. Express bubbles that up as 500 Internal Server Error, which is exactly what the front-end is showing.
+
+Even after you fix the missing service, the request will still fail if you send status:"invested".
+
+shared/schema.ts declares the fund_allocations.status enum as<br>
+["committed","funded","unfunded","partially_paid","written_off"].
+
+createAllocationSchema in the same router and AllocationValidator in
+services/validators/allocation.validator.ts list the same values.
+An “invested” string therefore violates both validation and the Postgres enum
+constraint. A correct status for a fully-funded investment is probably
+"funded"; if you truly need a distinct “invested” state you must add it in all three places (schema, validator, Zod schema) and run a DB migration.
+
+Immediate fix (to make the route work again)
+
+ts
+Copy
+Edit
+// server/routes/production-allocations.ts  (top of file, after imports)
+import { AllocationService } from '../services/allocation.service';
+const allocationService = new AllocationService();   // <— add this
+
+// …then replace every occurrence of `productionAllocationService`
+await allocationService.createAllocation(request, userId);
+await allocationService.updateAllocation(allocationId, updates, userId);
+await allocationService.batchCreateAllocations(requests, userId);
+(Or simply rename the variable to productionAllocationService if you
+prefer, but keep one instance only.)
+
+Optional clean-up while you’re here
+
+Delete the stray import { CapitalCallService … } line if you no longer use it; your linter already flags it as unused.
+
+Remove legacy backup copies (scripts/scripts/backups/phase2/production-allocation.service.ts, storage/service-cleanup-backups/…) or move them outside of src so editors don’t offer autocompletions from the wrong file.
+
+Run tsc --noEmit or enable “references” in your ts-config to surface undefined symbols at compile time and avoid this class of runtime error.
+
+If you do want a real “invested” status
+
+Database migration
+
+sql
+Copy
+Edit
+ALTER TYPE fund_allocation_status
+  ADD VALUE 'invested' AFTER 'funded';
+Schema update
+
+ts
+Copy
+Edit
+status: text('status', { enum: [..., 'invested'] })
+Validator & Zod schema – add 'invested' to allowedStatuses and to the z.enum([...]).
+
+Front-end – ensure the Allocation modal’s drop-down lists the new option and that any totals / filter logic treat “invested” the same as “funded”.
+
+After the service reference is fixed you should see the correct 4xx validation message if you send an unsupported status, instead of the opaque 500.
+
+Quick smoke-test
+
+bash
+Copy
+Edit
+# From repo root
+npm run dev          # or ts-node ./server/index.ts
+curl -X POST http://localhost:3000/api/production/allocations \
+     -H "Content-Type:application/json" \
+     --cookie "session=…" \
+     -d '{"fundId":1,"dealId":12,"amount":50000,"securityType":"equity","allocationDate":"2025-06-30T00:00:00Z","status":"funded"}'
+You should now get 201 Created (or 400 with a clear validation payload if something else is wrong), not 500.
+
+That one-line instantiation will unblock allocations; then you can decide whether you really need the separate “invested” state or can map it to “funded”.
