@@ -475,38 +475,224 @@ export function DistributionsManagementHub({
             <CardHeader>
               <CardTitle>Historical Distributions</CardTitle>
               <CardDescription>
-                Manage and track historical distribution data
+                All distributions for this {mode} sorted by date
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-6">
-                <History className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-2 text-sm font-semibold">Historical Tracking</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Use the "Add Distribution" button to backdate historical distributions.
-                  The system automatically tracks and syncs all data.
-                </p>
-              </div>
+              {distributionsLoading ? (
+                <div className="flex items-center space-x-2 py-6">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                  <span>Loading distributions...</span>
+                </div>
+              ) : distributionsError ? (
+                <div className="text-red-600 py-6">
+                  <h4 className="font-semibold">Error Loading Distributions</h4>
+                  <p className="text-sm mt-1">
+                    Failed to load distributions data. Please try again.
+                  </p>
+                  <details className="mt-2 text-xs">
+                    <summary className="cursor-pointer">Technical Details</summary>
+                    <pre className="mt-1 bg-gray-100 p-2 rounded overflow-auto">
+                      {JSON.stringify(distributionsError, null, 2)}
+                    </pre>
+                  </details>
+                </div>
+              ) : distributions.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground">
+                  <History className="mx-auto h-12 w-12 mb-4" />
+                  <h3 className="text-sm font-semibold">No Historical Distributions</h3>
+                  <p className="text-sm mt-1">
+                    Use the "Add Distribution" button to record historical distributions.
+                  </p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Type</TableHead>
+                      {mode !== 'allocation' && <TableHead>Allocation</TableHead>}
+                      <TableHead>Notes</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {distributions
+                      .sort((a, b) => new Date(b.distributionDate).getTime() - new Date(a.distributionDate).getTime())
+                      .map((distribution: any) => (
+                      <TableRow key={distribution.id}>
+                        <TableCell>
+                          {format(new Date(distribution.distributionDate), 'MMM d, yyyy')}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {formatCurrency(distribution.amount)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {distribution.distributionType.replace('_', ' ')}
+                          </Badge>
+                        </TableCell>
+                        {mode !== 'allocation' && (
+                          <TableCell>{distribution.dealName || 'Unknown'}</TableCell>
+                        )}
+                        <TableCell className="max-w-xs truncate">
+                          {distribution.notes || '-'}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteDistribution(distribution.id)}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Distribution Breakdown</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {distributions.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No distributions to analyze</p>
+                ) : (
+                  <div className="space-y-2">
+                    {Object.entries(
+                      distributions.reduce((acc: any, dist: any) => {
+                        const type = dist.distributionType.replace('_', ' ');
+                        acc[type] = (acc[type] || 0) + parseFloat(dist.amount);
+                        return acc;
+                      }, {})
+                    ).map(([type, amount]) => (
+                      <div key={type} className="flex justify-between">
+                        <span className="text-sm capitalize">{type}</span>
+                        <span className="text-sm font-medium">{formatCurrency(amount)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Monthly Trends</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {distributions.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No data for trends</p>
+                ) : (
+                  <div className="space-y-2">
+                    {Object.entries(
+                      distributions.reduce((acc: any, dist: any) => {
+                        const month = format(new Date(dist.distributionDate), 'MMM yyyy');
+                        acc[month] = (acc[month] || 0) + parseFloat(dist.amount);
+                        return acc;
+                      }, {})
+                    )
+                    .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
+                    .map(([month, amount]) => (
+                      <div key={month} className="flex justify-between">
+                        <span className="text-sm">{month}</span>
+                        <span className="text-sm font-medium">{formatCurrency(amount)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
           <Card>
             <CardHeader>
-              <CardTitle>Distribution Analytics</CardTitle>
+              <CardTitle>All Distributions</CardTitle>
               <CardDescription>
-                Insights and trends for your distributions
+                Detailed view with analytics insights
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-6">
-                <TrendingUp className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-2 text-sm font-semibold">Analytics Coming Soon</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Distribution trends, yield analysis, and performance metrics.
-                </p>
-              </div>
+              {distributionsLoading ? (
+                <div className="flex items-center space-x-2 py-6">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                  <span>Loading distributions...</span>
+                </div>
+              ) : distributionsError ? (
+                <div className="text-red-600 py-6">
+                  <h4 className="font-semibold">Error Loading Distributions</h4>
+                  <p className="text-sm mt-1">
+                    Failed to load distributions data. Please try again.
+                  </p>
+                </div>
+              ) : distributions.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground">
+                  <TrendingUp className="mx-auto h-12 w-12 mb-4" />
+                  <h3 className="text-sm font-semibold">No Analytics Data</h3>
+                  <p className="text-sm mt-1">
+                    Add distributions to see analytics insights.
+                  </p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Type</TableHead>
+                      {mode !== 'allocation' && <TableHead>Allocation</TableHead>}
+                      <TableHead>% of Total</TableHead>
+                      <TableHead>Notes</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {distributions
+                      .sort((a, b) => new Date(b.distributionDate).getTime() - new Date(a.distributionDate).getTime())
+                      .map((distribution: any) => {
+                        const totalDistributions = distributions.reduce((sum: number, d: any) => 
+                          sum + parseFloat(d.amount), 0
+                        );
+                        const percentage = ((parseFloat(distribution.amount) / totalDistributions) * 100).toFixed(1);
+                        
+                        return (
+                          <TableRow key={distribution.id}>
+                            <TableCell>
+                              {format(new Date(distribution.distributionDate), 'MMM d, yyyy')}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {formatCurrency(distribution.amount)}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">
+                                {distribution.distributionType.replace('_', ' ')}
+                              </Badge>
+                            </TableCell>
+                            {mode !== 'allocation' && (
+                              <TableCell>{distribution.dealName || 'Unknown'}</TableCell>
+                            )}
+                            <TableCell>
+                              <span className="text-sm font-medium">{percentage}%</span>
+                            </TableCell>
+                            <TableCell className="max-w-xs truncate">
+                              {distribution.notes || '-'}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
