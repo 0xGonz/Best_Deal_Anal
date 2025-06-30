@@ -203,7 +203,7 @@ export const InvestmentAllocationsTable: React.FC<InvestmentAllocationsTableProp
                     </TableCell>
                     <TableCell className="text-right">
                       <span className={`text-sm ${getCapitalViewColorClass(capitalView)}`}>
-                        {allocation.portfolioWeight ? `${allocation.portfolioWeight.toFixed(1)}%` : 'N/A'}
+                        {allocation.portfolioWeight && !isNaN(allocation.portfolioWeight) ? `${Number(allocation.portfolioWeight).toFixed(1)}%` : '0.0%'}
                       </span>
                     </TableCell>
                     <TableCell className="text-right">

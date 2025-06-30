@@ -140,6 +140,15 @@ Preferred communication style: Simple, everyday language.
   - **Future-Proof**: All fund metrics now calculated once at database level and served consistently across all UI components
   - **Architecture Pattern**: Established pattern of database views as single source of truth for complex calculations
 
+- **June 30, 2025**: NaN Value Prevention and Data Type Safety Implementation  
+  - **Weight Column NaN FIXED**: Enhanced calculateDynamicWeight function with safe numeric conversion and division guards
+  - **Frontend Protection**: Added useMemo-wrapped weight calculation with NaN protection in FundDetail component
+  - **Table Formatter Safety**: Updated portfolioWeight formatter in tableConfig to handle null, undefined, and NaN values gracefully
+  - **Multiple Layer Guards**: Applied consistent numeric validation across InvestmentAllocationsTable and ModularTable components
+  - **Sector Chart Protection**: Verified FundSectorDistribution component has proper empty data handling and loading states
+  - **Type Safety**: Enforced Number() casting and isNaN() checks throughout weight calculation pipeline
+  - **User Experience**: Eliminated "NaN%" display in Weight columns, showing "0.00%" for invalid values instead
+
 ## Changelog
 
 Changelog:

@@ -997,10 +997,8 @@ export default function FundDetail() {
                           const displayAmount = getDisplayAmount(capitalMetrics, capitalView);
                           
                           // Calculate dynamic weight based on capital view with NaN protection
-                          const dynamicWeight = useMemo(() => {
-                            const weight = calculateDynamicWeight(allocation, allocations, capitalView);
-                            return isNaN(weight) ? 0 : weight;
-                          }, [allocation.amount, allocations, capitalView]);
+                          const weight = calculateDynamicWeight(allocation, allocations, capitalView);
+                          const dynamicWeight = isNaN(weight) ? 0 : weight;
                           
                           // Use modular status service for scalable status management
                           const statusBadgeProps = generateStatusBadgeProps(allocation);
