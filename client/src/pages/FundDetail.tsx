@@ -108,6 +108,7 @@ export default function FundDetail() {
   
   // Distributions management state
   const [isDistributionsDialogOpen, setIsDistributionsDialogOpen] = useState(false);
+  const [isDistributionsHubOpen, setIsDistributionsHubOpen] = useState(false);
   const [currentAllocationId, setCurrentAllocationId] = useState<number | null>(null);
   
   // Define types for editing allocation with dealName added
@@ -541,6 +542,21 @@ export default function FundDetail() {
           </div>
           
           <div className="flex gap-2">
+            <Dialog open={isDistributionsHubOpen} onOpenChange={setIsDistributionsHubOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="border-green-200 text-green-700 hover:bg-green-50">
+                  <DollarSign className="h-4 w-4 mr-2" />
+                  Manage Distributions
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-6xl h-[90vh] overflow-y-auto">
+                <DistributionsManagementHub 
+                  fundId={fundId || undefined}
+                  mode="fund"
+                />
+              </DialogContent>
+            </Dialog>
+            
             <Dialog open={isNewAllocationDialogOpen} onOpenChange={setIsNewAllocationDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-primary hover:bg-primary-dark text-white">
