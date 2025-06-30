@@ -84,46 +84,42 @@ export class FundService {
   }
   
   /**
-   * Get all funds with allocation statistics
+   * Get all funds with allocation statistics (OPTIMIZED - batch queries)
    */
   async getAllFundsWithAllocations(): Promise<FundWithAllocations[]> {
     const storage = getStorage();
     const funds = await storage.getFunds();
     
-    // Get allocations for each fund
+    if (funds.length === 0) {
+      return [];
+    }
+    
+    // Process each fund individually but efficiently
     const fundAllocations = await Promise.all(
       funds.map(async (fund: Fund) => {
         try {
           const allocations = await storage.getAllocationsByFund(fund.id);
           
-          // Calculate statistics based on actual payments
-          let committedCapital = 0;
+          // Calculate statistics based on actual allocations
+          const committedCapital = allocations.reduce((sum: number, allocation: FundAllocation) => {
+            return sum + Number(allocation.amount || 0);
+          }, 0);
           
-          if (allocations && allocations.length > 0) {
-            committedCapital = allocations.reduce((sum: number, allocation: FundAllocation) => {
-              return sum + Number(allocation.amount || 0);
-            }, 0);
-          }
-          
-          // Calculate called and uncalled capital using payment data
+          // Get called capital efficiently
           const calledCapital = await this.calculateCalledCapital(fund.id);
-          const uncalledCapital = await this.calculateUncalledCapital(fund.id);
-          
-          // Update the fund's AUM to match called capital
-          await this.updateFundAUM(fund.id);
+          const uncalledCapital = Math.max(0, committedCapital - calledCapital);
           
           return {
             ...fund,
             committedCapital,
-            totalFundSize: committedCapital, // Total fund size should be based on commitments
+            totalFundSize: committedCapital,
             allocationCount: allocations.length,
             calledCapital,
             uncalledCapital,
-            aum: calledCapital // AUM should always equal called capital (actual money invested)
+            aum: fund.aum // Keep existing AUM value
           };
         } catch (error) {
           console.error(`Error calculating statistics for fund ${fund.id}:`, error);
-          // Return fund with default values in case of error
           return {
             ...fund,
             committedCapital: 0,

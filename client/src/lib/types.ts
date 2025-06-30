@@ -111,6 +111,15 @@ export interface Fund {
   allocationCount?: number;
 }
 
+// Extended Fund type for API responses with computed values
+export interface FundWithAllocations extends Fund {
+  committedCapital: number;
+  calledCapital: number;
+  uncalledCapital: number;
+  totalFundSize: number;
+  allocationCount: number;
+}
+
 // Fund allocation types
 export interface FundAllocation {
   id: number;
@@ -134,7 +143,7 @@ export interface FundAllocation {
   deal?: Deal; // Related deal object
   dealName?: string; // Deal name for display
   dealSector?: string; // Deal sector for display
-  weight?: number; // Legacy field for compatibility
+  weight?: number; // Legacy field for compatibility - same as portfolioWeight
 }
 
 // Capital Call types
