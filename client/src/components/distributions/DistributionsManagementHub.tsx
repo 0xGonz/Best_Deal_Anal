@@ -30,6 +30,24 @@ import { CalendarIcon, Plus, TrendingUp, DollarSign, Target, History, Eye, Trash
 import { formatCurrency } from '@/lib/utils';
 import { apiRequest } from '@/lib/queryClient';
 
+// Robust currency formatting utility for distributions
+const formatDistributionCurrency = (value: any): string => {
+  if (value === null || value === undefined) return '$0';
+  
+  let numValue: number;
+  if (typeof value === 'string') {
+    numValue = parseFloat(value);
+  } else if (typeof value === 'number') {
+    numValue = value;
+  } else {
+    return '$0';
+  }
+  
+  if (isNaN(numValue)) return '$0';
+  
+  return formatCurrency(numValue, { showCents: false });
+};
+
 interface DistributionsManagementHubProps {
   fundId?: number;
   allocationId?: number;
@@ -160,17 +178,32 @@ export function DistributionsManagementHub({
     }
   };
 
-  // Calculate summary from distributions
+  // Safe number conversion utility
+  const safeNumber = (value: any): number => {
+    if (typeof value === 'number') return isNaN(value) ? 0 : value;
+    if (typeof value === 'string') {
+      const parsed = parseFloat(value);
+      return isNaN(parsed) ? 0 : parsed;
+    }
+    return 0;
+  };
+
+  // Calculate summary from distributions with proper type safety
   const summary: DistributionSummary = {
-    totalDistributions: distributions.reduce((sum: number, dist: any) => sum + (dist.amount || 0), 0),
+    totalDistributions: distributions.reduce((sum: number, dist: any) => {
+      return sum + safeNumber(dist.amount);
+    }, 0),
     distributionCount: distributions.length,
     averageDistribution: distributions.length > 0 
-      ? distributions.reduce((sum: number, dist: any) => sum + (dist.amount || 0), 0) / distributions.length 
+      ? distributions.reduce((sum: number, dist: any) => sum + safeNumber(dist.amount), 0) / distributions.length 
       : 0,
     lastDistributionDate: distributions.length > 0 
       ? distributions.sort((a: any, b: any) => new Date(b.distributionDate).getTime() - new Date(a.distributionDate).getTime())[0]?.distributionDate
       : undefined,
-    distributionYield: 0, // Would need allocation amount to calculate
+    distributionYield: distributions.length > 0 && allocations.length > 0
+      ? (distributions.reduce((sum: number, dist: any) => sum + safeNumber(dist.amount), 0) / 
+         allocations.reduce((sum: number, alloc: any) => sum + safeNumber(alloc.amount), 1)) * 100
+      : 0,
     monthlyDistributions: [],
   };
 
@@ -463,7 +496,7 @@ export function DistributionsManagementHub({
                           {format(new Date(distribution.distributionDate), 'MMM d, yyyy')}
                         </TableCell>
                         <TableCell className="font-medium">
-                          {formatCurrency(distribution.amount)}
+                          {formatDistributionCurrency(distribution.amount)}
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline">
