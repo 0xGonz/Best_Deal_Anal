@@ -77,6 +77,11 @@ router.post('/', requireAuth, requirePermission('create', 'allocation'), async (
 
     const request = validationResult.data;
 
+    // Convert date string to Date object for database
+    if (request.allocationDate && typeof request.allocationDate === 'string') {
+      request.allocationDate = new Date(request.allocationDate);
+    }
+
     // Create allocation
     const result = await allocationService.createAllocation(request, userId);
     
