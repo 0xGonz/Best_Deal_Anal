@@ -129,14 +129,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 30, 2025**: Complete Deal Data Integration and Validation System
+- **June 30, 2025**: Complete Deal Data Integration and Whole Number Formatting System
   - **Deal Data Integration COMPLETE**: All allocations now include dealName and dealSector fields directly from API
   - **Comprehensive Validation Service**: Created dataIntegration.ts with validateDataIntegration, validateSectorDataCompleteness, and validateFinancialDataIntegrity functions
   - **Real-time Integration Monitoring**: Added data integrity validation to FundDetail component with live status checking
   - **Visual Data Status Indicators**: Fund overview shows "Data Integration" status with green checkmark when all deal data is properly connected
   - **Intelligent Error Detection**: Alert system detects orphaned allocations, missing deal fields, and data consistency issues
   - **Unified Metrics Integration**: Both sector distribution and capital ratio charts use fully integrated deal data with real-time updates
-  - **Production Verified**: All 4 allocations in Doliver Private Opportunity Fund III show complete deal integration (dealName: "Urban Genesis", "Balerion Space Fund II", etc.)
+  - **Whole Number Formatting**: All currency amounts and percentages now display as whole numbers throughout the app (no decimals)
+  - **Consistent Number Display**: Math.round() applied to all percentage calculations, formatCurrency defaults to showCents: false
+  - **Production Verified**: All 4 allocations in Doliver Private Opportunity Fund III show complete deal integration with clean whole number formatting
   - **Future-Proof Architecture**: Data integration validation runs automatically and scales with fund growth
 
 - **June 30, 2025**: Complete Single Source of Truth Architecture Implementation

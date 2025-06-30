@@ -97,7 +97,7 @@ export function useFundMetrics(
         sector,
         amount: data.amount,
         count: data.count,
-        percentage: totalFundAmount > 0 ? (data.amount / totalFundAmount) * 100 : 0
+        percentage: totalFundAmount > 0 ? Math.round((data.amount / totalFundAmount) * 100) : 0
       }))
       .sort((a, b) => b.amount - a.amount);
     
@@ -108,10 +108,10 @@ export function useFundMetrics(
       calledAmount: fundMetrics.calledAmount,
       uncalledAmount: fundMetrics.uncalledAmount,
       calledPercentage: fundMetrics.committedAmount > 0 
-        ? (fundMetrics.calledAmount / fundMetrics.committedAmount) * 100 
+        ? Math.round((fundMetrics.calledAmount / fundMetrics.committedAmount) * 100)
         : 0,
       uncalledPercentage: fundMetrics.committedAmount > 0 
-        ? (fundMetrics.uncalledAmount / fundMetrics.committedAmount) * 100 
+        ? Math.round((fundMetrics.uncalledAmount / fundMetrics.committedAmount) * 100)
         : 0
     };
     
@@ -123,7 +123,7 @@ export function useFundMetrics(
       const fundDisplayAmount = getDisplayAmount(fundMetrics, capitalView);
       
       const dynamicWeight = fundDisplayAmount > 0 
-        ? (allocationDisplayAmount / fundDisplayAmount) * 100 
+        ? Math.round((allocationDisplayAmount / fundDisplayAmount) * 100)
         : 0;
       
       allocationMetrics.set(allocation.id, {

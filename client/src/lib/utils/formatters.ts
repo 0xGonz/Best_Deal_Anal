@@ -11,7 +11,7 @@ export const formatMoney = (
     prefix?: string;
   } = {}
 ): string => {
-  const { showCents = true, compact = false, prefix = '' } = options;
+  const { showCents = false, compact = false, prefix = '' } = options;
   
   if (amount === null || amount === undefined || isNaN(amount)) {
     return `${prefix}$0${showCents ? '.00' : ''}`;
@@ -42,7 +42,7 @@ export const formatPercentage = (
     showSign?: boolean;
   } = {}
 ): string => {
-  const { decimals = 1, showSign = false } = options;
+  const { decimals = 0, showSign = false } = options;
   
   if (value === null || value === undefined || isNaN(value)) {
     return '0%';
