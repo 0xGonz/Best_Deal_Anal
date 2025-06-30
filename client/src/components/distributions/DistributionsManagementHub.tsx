@@ -26,7 +26,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { CalendarIcon, Plus, TrendingUp, DollarSign, Target, History, Eye, Trash2 } from 'lucide-react';
+import { CalendarIcon, Plus, TrendingUp, DollarSign, Target, History, Eye, Trash2, Edit } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -147,6 +147,11 @@ export function DistributionsManagementHub({
 
   const onSubmit = (data: DistributionFormData) => {
     createDistributionMutation.mutate(data);
+  };
+
+  const handleEditDistribution = (distribution: any) => {
+    setEditingDistribution(distribution);
+    setIsEditDialogOpen(true);
   };
 
   const handleDeleteDistribution = (id: number) => {
