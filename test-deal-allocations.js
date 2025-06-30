@@ -1,14 +1,14 @@
 // Test script to verify deal allocations endpoint
 // This script helps verify if the new /api/allocations/deal/:dealId endpoint is working
 
-const fs = require('fs');
+import { readFileSync } from 'fs';
 
 function testEndpointStructure() {
   console.log('=== Deal Allocations Endpoint Test ===');
   
   // Verify the endpoint was added to the routes
   try {
-    const routeFile = fs.readFileSync('server/routes/production-allocations.ts', 'utf8');
+    const routeFile = readFileSync('server/routes/production-allocations.ts', 'utf8');
     
     const hasEndpoint = routeFile.includes("router.get('/deal/:dealId'");
     const hasProperQuery = routeFile.includes('WHERE vw.deal_id = ${dealId}');
