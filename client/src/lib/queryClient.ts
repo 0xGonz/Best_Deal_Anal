@@ -124,6 +124,19 @@ export const queryClient = new QueryClient({
     mutations: {
       retry: 1,
       retryDelay: 1000,
+      onError: (error, variables, context) => {
+        console.error('Mutation error:', { error, variables, context });
+      },
     },
   },
+});
+
+// Add global error handlers to prevent unhandled promise rejections
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled promise rejection:', event.reason);
+  event.preventDefault(); // Prevent the default browser error handling
+});
+
+window.addEventListener('error', (event) => {
+  console.error('Global error:', event.error);
 });
