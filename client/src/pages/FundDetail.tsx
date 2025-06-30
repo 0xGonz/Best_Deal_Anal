@@ -84,6 +84,11 @@ import {
   findStatusInconsistencies,
   getInconsistencySummary 
 } from "@/lib/services/allocationStatusService";
+import { 
+  validateDataIntegration, 
+  validateSectorDataCompleteness, 
+  validateFinancialDataIntegrity 
+} from '@/lib/services/dataIntegration';
 import { TABLE_CONFIGS } from "@/lib/services/tableConfig";
 // Import local types instead of schema types to ensure consistency
 import { Fund, FundAllocation, Deal } from "@/lib/types";
@@ -192,6 +197,27 @@ export default function FundDetail() {
         sector: deal.sector || null
       })) as Deal[]
   });
+
+  // Comprehensive Data Integration Validation
+  const dataIntegrityReport = useMemo(() => {
+    if (!allocations || !deals) return null;
+    
+    // Validate complete data integration
+    const integrationReport = validateDataIntegration(allocations, deals);
+    
+    // Validate sector data completeness
+    const sectorReport = validateSectorDataCompleteness(allocations);
+    
+    // Validate financial data integrity
+    const financialReport = validateFinancialDataIntegrity(allocations);
+    
+    return {
+      integration: integrationReport,
+      sectors: sectorReport,
+      financial: financialReport,
+      overallValid: integrationReport.isValid && sectorReport.complete && financialReport.valid
+    };
+  }, [allocations, deals]);
 
   // Create allocation mutation
   const createAllocation = useMutation({
@@ -864,6 +890,27 @@ export default function FundDetail() {
           <div className="text-center py-12">Loading fund details...</div>
         ) : (
           <>
+            {/* Data Integration Status Alert */}
+            {dataIntegrityReport && !dataIntegrityReport.overallValid && (
+              <div className="mb-6">
+                <Alert className="border-amber-200 bg-amber-50">
+                  <AlertCircle className="h-4 w-4 text-amber-600" />
+                  <AlertTitle className="text-amber-800">Data Integration Issues Detected</AlertTitle>
+                  <AlertDescription className="text-amber-700">
+                    <div className="mt-2 space-y-1">
+                      <p className="font-medium">{dataIntegrityReport.integration.summary}</p>
+                      {!dataIntegrityReport.sectors.complete && (
+                        <p>• {dataIntegrityReport.sectors.missingSectorCount} allocations missing sector data</p>
+                      )}
+                      {!dataIntegrityReport.financial.valid && (
+                        <p>• {dataIntegrityReport.financial.issues.length} financial data inconsistencies found</p>
+                      )}
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              </div>
+            )}
+
             {/* Fund Overview & Key Metrics - Top Section */}
             <div className="mb-8">
               <Card>
@@ -898,10 +945,22 @@ export default function FundDetail() {
                     </div>
                     
                     <div className="bg-primary/5 p-3 sm:p-4 rounded-lg">
-                      <p className="text-xs sm:text-sm text-neutral-600 mb-1">Created Date</p>
-                      <p className="text-base sm:text-lg font-medium">
-                        {fund?.createdAt ? format(new Date(fund.createdAt), "PPP") : "Unknown"}
-                      </p>
+                      <p className="text-xs sm:text-sm text-neutral-600 mb-1">Data Integration</p>
+                      <div className="flex items-center gap-2">
+                        {dataIntegrityReport?.overallValid ? (
+                          <>
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <span className="text-base font-medium text-green-700">Complete</span>
+                          </>
+                        ) : dataIntegrityReport ? (
+                          <>
+                            <AlertCircle className="h-4 w-4 text-amber-600" />
+                            <span className="text-base font-medium text-amber-700">Issues Found</span>
+                          </>
+                        ) : (
+                          <span className="text-base font-medium text-gray-500">Checking...</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </CardContent>
