@@ -221,8 +221,8 @@ export const insertFundAllocationSchema = createInsertSchema(fundAllocations)
     allocationDate: z.string().transform(val => new Date(val)),
     // Handle firstCallDate if it exists in any capital call data
     firstCallDate: z.string().optional().transform(val => val ? new Date(val) : undefined),
-    // Override the amount validation to allow much larger numbers
-    amount: z.number().positive().max(1000000000), // Allow up to 1 billion
+    // Override the amount validation to allow zero for committed allocations
+    amount: z.number().min(0).max(1000000000), // Allow zero and up to 1 billion
   });
 
 // User assignments to deals

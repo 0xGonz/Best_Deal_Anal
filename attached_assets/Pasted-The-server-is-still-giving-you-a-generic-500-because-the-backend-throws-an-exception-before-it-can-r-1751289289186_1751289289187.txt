@@ -1,0 +1,113 @@
+The server is still giving you a generic 500 because the backend throws an exception before it can return the real message, so the client never sees why it failed.
+
+What almost always causes this on the “commitment-only” path
+Symptom on wire	Real failure inside the server
+POST /api/production/allocations → 500	Zod / Drizzle validation error “amount must be greater than 0” (or similar)
+
+Here’s why:
+
+amount is required to be positive
+shared/schema.ts (Drizzle)
+
+ts
+Copy
+Edit
+amount: numeric('amount').notNull()            // DB level
+shared/dto/allocation.ts (Zod)
+
+ts
+Copy
+Edit
+amount: z.number().positive()                  // API level
+So 0 or "" is rejected.
+
+The route does not wrap Zod errors
+When the validator throws, Express’ default error handler catches it, logs a stack trace, but responds with a bare 500 Internal Server Error – no JSON body – which is exactly what the front-end prints as {}.
+
+“Commitment only” = you’re sending amount:0 (or an empty string)
+That’s what you do when no dollars have actually moved yet → boom → 500.
+
+Quick ways to prove it
+Look at the browser dev-tools → Network → Response
+You’ll see the body is literally empty.
+
+Open your Replit console (or npm run dev terminal):
+You’ll see something like
+
+css
+Copy
+Edit
+ZodError: [
+  {
+    "code": "too_small",
+    "minimum": 1,
+    "type": "number",
+    "inclusive": false,
+    "message": "Number must be greater than 0",
+    "path": ["amount"]
+  }
+]
+Two fixes (choose one)
+� fix A – always send a non-zero amount
+Treat “commitment” as the dollar amount the LP promised, even if nothing’s called yet.
+
+json
+Copy
+Edit
+{
+  "fundId": 2,
+  "dealId": 42,
+  "amount": 125000,          // committed capital
+  "allocationDate": "2025-06-30T00:00:00Z",
+  "status": "committed"
+}
+Pros: zero schema changes.
+Cons: “committed but un-called” lives in the same field as “actually funded.”
+
+� fix B – let amount be zero when status:"committed"
+API validator
+
+ts
+Copy
+Edit
+amount: z.number()
+         .refine(n => n >= 0, { message: 'amount must be ≥ 0' })
+DB
+
+sql
+Copy
+Edit
+ALTER TABLE fund_allocations
+  ALTER COLUMN amount SET DEFAULT 0,
+  ALTER COLUMN amount DROP NOT NULL;
+Cash-flow math – wherever you sum amount to know “money in,” filter on status in ('funded','partially_paid') (or capital_called > 0) instead of amount > 0.
+
+Pros: true separation between “promised” and “paid.”
+Cons: migration + a couple of downstream queries to update.
+
+While you’re in there – return useful errors!
+Add one tiny wrapper around every controller body:
+
+ts
+Copy
+Edit
+try {
+  const dto = createAllocationSchema.parse(req.body);
+  const result = await allocationService.createAllocation(dto, userId);
+  res.status(201).json(result);
+} catch (err) {
+  console.error(err);                            // keep the stack
+  if (err instanceof ZodError)
+    return res.status(400).json({ message: err.errors });
+  res.status(500).json({ message: err.message }); // last resort
+}
+Now the front-end will show a 400 with the real message instead of that opaque 500.
+
+TL;DR
+Your commit-only request is sending amount:0 → validator explodes → Express returns plain 500.
+
+Either send a positive commitment amount (quickest) or loosen the schema to allow 0 when status:"committed".
+
+Wrap your controller in a try/catch that converts Zod errors to 400 so you never have to guess again.
+
+Patch one of those paths, redeploy, and allocations with “committed / no capital call” will save cleanly. Let me know if you hit a different error message after that!

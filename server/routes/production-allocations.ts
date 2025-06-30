@@ -9,7 +9,7 @@ import { CapitalCallService } from '../services/capital-call.service';
 import { AllocationDeletionService } from '../services/allocation-deletion.service.js';
 import { requireAuth } from '../utils/auth';
 import { requirePermission } from '../utils/permissions';
-import { z } from 'zod';
+import { z, ZodError } from 'zod';
 import { db } from '../db';
 import { fundAllocations, deals } from '../../shared/schema';
 import { eq } from 'drizzle-orm';
@@ -118,6 +118,15 @@ router.post('/', requireAuth, requirePermission('create', 'allocation'), async (
 
   } catch (error) {
     console.error('Error in allocation creation:', error);
+    
+    // Handle Zod validation errors specifically
+    if (error instanceof ZodError) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: error.errors
+      });
+    }
+    
     res.status(500).json({
       error: 'Internal server error',
       message: error instanceof Error ? error.message : 'Unknown error'
