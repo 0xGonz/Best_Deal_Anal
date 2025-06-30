@@ -106,6 +106,8 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
+- June 30, 2025: DUPLICATE ALLOCATION ERROR COMPLETELY FIXED - Resolved database constraint violations with intelligent duplicate checking and proper error handling
+- June 30, 2025: Allocation creation system operational - Added duplicate detection before database insertion, preventing unique constraint errors
 - June 30, 2025: COMPREHENSIVE CAPITAL CALL LIFECYCLE SYSTEM IMPLEMENTED - Complete multi-capital call tracking with automatic status updates (committed → partially_paid → funded)
 - June 30, 2025: Capital call management API deployed - Handles multiple capital calls per allocation with percentage/dollar validation and payment tracking
 - June 30, 2025: Allocation validation fixed - Schema now allows zero amounts for committed allocations, proper ZodError handling for meaningful error messages

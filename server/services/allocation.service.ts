@@ -129,11 +129,23 @@ export class AllocationService {
   }
 
   /**
-   * Creates a new allocation with proper integration
+   * Creates a new allocation with proper integration and duplicate handling
    * Ensures all downstream calculations are triggered
    */
-  async createAllocation(allocationData: any): Promise<any> {
+  async createAllocation(allocationData: any, userId?: number): Promise<any> {
     try {
+      // Check for existing allocation first to prevent duplicate key errors
+      const existingAllocations = await this.storage.getAllocationsByDeal(allocationData.dealId);
+      const duplicate = existingAllocations.find(a => a.fundId === allocationData.fundId);
+      
+      if (duplicate) {
+        return {
+          success: false,
+          error: `Allocation already exists between this deal and fund (ID: ${duplicate.id})`,
+          existingAllocation: duplicate
+        };
+      }
+      
       // Create the allocation
       const allocation = await this.storage.createFundAllocation(allocationData);
       
@@ -143,10 +155,25 @@ export class AllocationService {
       // Update fund AUM
       await fundService.updateFundAUM(allocation.fundId);
       
-      return allocation;
+      return {
+        success: true,
+        allocation
+      };
     } catch (error) {
       console.error('Error creating allocation:', error);
-      throw error;
+      
+      // Check if it's a database duplicate key error
+      if (error instanceof Error && error.message.includes('unique constraint')) {
+        return {
+          success: false,
+          error: 'Allocation already exists for this deal and fund combination'
+        };
+      }
+      
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to create allocation'
+      };
     }
   }
 

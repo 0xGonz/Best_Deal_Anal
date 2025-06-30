@@ -82,7 +82,7 @@ router.post('/', requireAuth, requirePermission('create', 'allocation'), async (
       request.allocationDate = new Date(request.allocationDate);
     }
 
-    // Create allocation
+    // Create allocation with proper error handling
     const result = await allocationService.createAllocation(request, userId);
     
     // Auto-trigger system updates disabled due to status corruption
