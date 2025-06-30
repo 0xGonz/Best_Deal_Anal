@@ -65,6 +65,8 @@ export function DistributionsManagementHub({
 }: DistributionsManagementHubProps) {
   const [activeTab, setActiveTab] = useState('overview');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingDistribution, setEditingDistribution] = useState<any>(null);
   const queryClient = useQueryClient();
 
   // Query for distributions based on mode
@@ -112,15 +114,34 @@ export function DistributionsManagementHub({
     },
   });
 
-  // Delete distribution mutation
-  const deleteDistributionMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/distributions/${id}`, {
-      method: 'DELETE',
-    }),
+  // Update distribution mutation
+  const updateDistributionMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Partial<DistributionFormData> }) => 
+      apiRequest('PUT', `/api/distributions/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/distributions'] });
       queryClient.invalidateQueries({ queryKey: ['/api/allocations'] });
       queryClient.invalidateQueries({ queryKey: ['/api/fund-overview'] });
+      setIsEditDialogOpen(false);
+      setEditingDistribution(null);
+      toast({
+        title: "Distribution updated",
+        description: "The distribution has been updated successfully.",
+      });
+    },
+  });
+
+  // Delete distribution mutation
+  const deleteDistributionMutation = useMutation({
+    mutationFn: (id: number) => apiRequest('DELETE', `/api/distributions/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/distributions'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/allocations'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/fund-overview'] });
+      toast({
+        title: "Distribution deleted",
+        description: "The distribution has been removed successfully.",
+      });
     },
   });
 
