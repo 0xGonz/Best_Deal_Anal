@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Cell, CartesianGrid, Tooltip, LabelList } from 'recharts';
 import { FundAllocation } from "@/lib/types";
-import { formatCurrency } from "@/lib/utils/format";
+import { formatCurrency } from "@/lib/utils/formatters";
 
 // Reusable type for capital data visualization
 export type CapitalDataItem = {
