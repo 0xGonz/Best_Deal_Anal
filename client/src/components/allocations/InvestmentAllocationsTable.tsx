@@ -167,7 +167,12 @@ export const InvestmentAllocationsTable: React.FC<InvestmentAllocationsTableProp
                 >
                   {capitalView === 'called' ? 'Called' : capitalView === 'paid' ? 'Paid' : 'Committed'}
                 </TableHead>
-                <TableHead className="text-right">Distributions</TableHead>
+                <TableHead className="text-right">
+                  <span className="flex items-center justify-end gap-1" title="Click amounts to manage distributions">
+                    Distributions
+                    <TrendingDown className="h-3 w-3 text-blue-600" />
+                  </span>
+                </TableHead>
                 <TableHead className="text-right">Returns</TableHead>
                 {showCapitalCallColumn && (
                   <TableHead className="text-center">Capital Calls</TableHead>
@@ -214,9 +219,15 @@ export const InvestmentAllocationsTable: React.FC<InvestmentAllocationsTableProp
                       </span>
                     </TableCell>
                     <TableCell className="text-right">
-                      <span className="text-sm">
+                      <button
+                        onClick={() => onManageDistributions?.(allocation)}
+                        className={`text-sm hover:text-blue-600 hover:underline cursor-pointer transition-colors ${
+                          (allocation.distributionPaid || 0) > 0 ? 'text-green-600 font-medium' : 'text-gray-600'
+                        }`}
+                        title={`${(allocation.distributionPaid || 0) > 0 ? 'Distributions paid' : 'No distributions yet'} - Click to manage`}
+                      >
                         {formatCurrency(allocation.distributionPaid || 0)}
-                      </span>
+                      </button>
                     </TableCell>
                     <TableCell className="text-right">
                       <span className="text-sm">

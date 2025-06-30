@@ -1136,7 +1136,12 @@ export default function FundDetail() {
                                 {capitalView === 'called' && 'Called'}
                                 {capitalView === 'uncalled' && 'Remaining'}
                               </TableHead>
-                              <TableHead className="font-semibold text-[10px] xs:text-xs sm:text-sm text-right">Distributions</TableHead>
+                              <TableHead className="font-semibold text-[10px] xs:text-xs sm:text-sm text-right">
+                                <span className="flex items-center justify-end gap-1" title="Click amounts to manage distributions">
+                                  Distributions
+                                  <TrendingDown className="h-3 w-3 text-blue-600" />
+                                </span>
+                              </TableHead>
                               <TableHead className="font-semibold text-[10px] xs:text-xs sm:text-sm text-right">Value</TableHead>
                               <TableHead className="font-semibold text-[10px] xs:text-xs sm:text-sm text-right">MOIC</TableHead>
                               <TableHead className="font-semibold text-[10px] xs:text-xs sm:text-sm text-right">IRR</TableHead>
@@ -1215,9 +1220,15 @@ export default function FundDetail() {
                                 </span>
                               </TableCell>
                               <TableCell className="py-1.5 sm:py-2.5 px-2 sm:px-4 text-right">
-                                <span className="text-2xs xs:text-xs sm:text-sm">
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); handleManageDistributions(allocation); }}
+                                  className={`text-2xs xs:text-xs sm:text-sm hover:text-blue-600 hover:underline cursor-pointer transition-colors ${
+                                    (allocation.distributionPaid || 0) > 0 ? 'text-green-600 font-medium' : 'text-gray-600'
+                                  }`}
+                                  title={`${(allocation.distributionPaid || 0) > 0 ? 'Distributions paid' : 'No distributions yet'} - Click to manage`}
+                                >
                                   {formatCurrency(allocation.distributionPaid || 0)}
-                                </span>
+                                </button>
                               </TableCell>
                               <TableCell className="py-1.5 sm:py-2.5 px-2 sm:px-4 text-right">
                                 <span className="text-2xs xs:text-xs sm:text-sm">
