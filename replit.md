@@ -106,6 +106,10 @@ This repository contains a full-stack investment lifecycle management platform b
 
 ## Recent Changes
 ```
+- June 30, 2025: COMPREHENSIVE CAPITAL CALL LIFECYCLE SYSTEM IMPLEMENTED - Complete multi-capital call tracking with automatic status updates (committed → partially_paid → funded)
+- June 30, 2025: Capital call management API deployed - Handles multiple capital calls per allocation with percentage/dollar validation and payment tracking
+- June 30, 2025: Allocation validation fixed - Schema now allows zero amounts for committed allocations, proper ZodError handling for meaningful error messages
+- June 30, 2025: Investment lifecycle automation - Status automatically updates based on capital called vs committed amount with real-time progress tracking
 - June 30, 2025: CRITICAL ALLOCATION API CRASH FIXED - Resolved ReferenceError causing 500 errors when creating allocations due to undefined productionAllocationService and productionCapitalCallsService variables
 - June 30, 2025: Production allocation routes operational - Fixed service instantiation in production-allocations.ts, now properly creates AllocationService and CapitalCallService instances
 - June 30, 2025: Server stability restored - API endpoints now respond with proper HTTP status codes instead of crashing with undefined service references
