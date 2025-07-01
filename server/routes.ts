@@ -84,6 +84,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/distributions', distributionsRoutes);
   app.use('/api/enums', enumsRoutes); // Centralized enum values for dropdowns
   app.use('/api/fund-overview', fundOverviewRoutes); // Single source of truth for fund metrics
+  app.use('/api/database-export', databaseExportRoutes); // Database export for app cloning
   app.use('/api/system', systemRouter);
   app.use('/api/v1', v1Router); // V1 API routes including AI analysis
   app.use('/api/ai-analysis', aiAnalysisRoutes); // Direct access to AI analysis

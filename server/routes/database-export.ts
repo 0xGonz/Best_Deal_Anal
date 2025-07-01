@@ -79,7 +79,7 @@ router.get('/data', requireAuth, async (req, res) => {
     const exportData: Record<string, any[]> = {};
 
     for (const table of tables.rows) {
-      const tableName = table.table_name;
+      const tableName = (table as any).table_name;
       try {
         const data = await db.execute(sql.raw(`SELECT * FROM "${tableName}" ORDER BY id`));
         exportData[tableName] = data.rows;
@@ -91,7 +91,7 @@ router.get('/data', requireAuth, async (req, res) => {
 
     res.json({
       data: exportData,
-      tables: tables.rows.map(t => t.table_name),
+      tables: tables.rows.map((t: any) => t.table_name),
       timestamp: new Date().toISOString(),
       recordCounts: Object.keys(exportData).reduce((acc, table) => {
         acc[table] = exportData[table].length;
