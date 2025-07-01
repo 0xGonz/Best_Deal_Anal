@@ -24,7 +24,6 @@ import v1Router from './routes/v1/index'; // V1 API routes including AI analysis
 import aiAnalysisRoutes from './routes/ai-analysis';
 import enumsRoutes from './routes/enums';
 import fundOverviewRoutes from './routes/fund-overview';
-import databaseExportRoutes from './routes/database-export';
 
 // Utils
 import { errorHandler, notFoundHandler } from './utils/error-handler';
@@ -84,7 +83,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/distributions', distributionsRoutes);
   app.use('/api/enums', enumsRoutes); // Centralized enum values for dropdowns
   app.use('/api/fund-overview', fundOverviewRoutes); // Single source of truth for fund metrics
-  app.use('/api/database-export', databaseExportRoutes); // Database export for app cloning
   app.use('/api/system', systemRouter);
   app.use('/api/v1', v1Router); // V1 API routes including AI analysis
   app.use('/api/ai-analysis', aiAnalysisRoutes); // Direct access to AI analysis
