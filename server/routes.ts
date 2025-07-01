@@ -24,6 +24,7 @@ import v1Router from './routes/v1/index'; // V1 API routes including AI analysis
 import aiAnalysisRoutes from './routes/ai-analysis';
 import enumsRoutes from './routes/enums';
 import fundOverviewRoutes from './routes/fund-overview';
+import databaseExportRoutes from './routes/database-export';
 
 // Utils
 import { errorHandler, notFoundHandler } from './utils/error-handler';
