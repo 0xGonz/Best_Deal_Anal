@@ -12,11 +12,21 @@ import { eq } from 'drizzle-orm';
 
 const router = express.Router();
 
-// Configure multer for memory storage (no temp files needed)
+// Configure multer with disk storage to avoid memory issues
 const upload = multer({
-  storage: multer.memoryStorage(),
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'temp/uploads/');
+    },
+    filename: function (req, file, cb) {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, uniqueSuffix + '-' + file.originalname);
+    }
+  }),
   limits: {
     fileSize: 50 * 1024 * 1024, // 50MB limit
+    fieldSize: 50 * 1024 * 1024, // 50MB for fields
+    parts: 100, // limit parts
   },
   fileFilter: (req, file, cb) => {
     const allowedTypes = [
@@ -37,8 +47,8 @@ const upload = multer({
   }
 });
 
-// Upload document with file system storage (with rate limiting for security)
-router.post('/upload', apiRateLimiter, requireAuth, upload.single('file'), async (req, res) => {
+// Upload document with file system storage (simplified middleware stack)
+router.post('/upload', requireAuth, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -81,8 +91,9 @@ router.post('/upload', apiRateLimiter, requireAuth, upload.single('file'), async
     const uniqueFileName = `${timestamp}_${sanitizedFileName}`;
     const filePath = join(storageDir, uniqueFileName);
 
-    // Save file to disk
-    await fs.writeFile(filePath, req.file.buffer);
+    // Move the temporary file to the storage directory (multer already saved it)
+    const tempFilePath = req.file.path;
+    await fs.rename(tempFilePath, filePath);
     
     // Store metadata in database (file system storage mode)
     const [newDocument] = await db
@@ -115,7 +126,23 @@ router.post('/upload', apiRateLimiter, requireAuth, upload.single('file'), async
 
   } catch (error) {
     console.error('Error uploading document:', error);
-    res.status(500).json({ error: 'Internal server error during upload' });
+    
+    // Provide more specific error details for debugging
+    let errorMessage = 'Internal server error during upload';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      console.error('Full error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+    }
+    
+    res.status(500).json({ 
+      success: false,
+      error: errorMessage,
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 });
 

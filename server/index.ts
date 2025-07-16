@@ -41,8 +41,21 @@ import { jobQueue } from "./services/queue-processor.service";
 // Main async function to allow using await
 async function initialize() {
   const app = express();
-  app.use(express.json({ limit: "50mb" }));
-  app.use(express.urlencoded({ extended: false, limit: "50mb" }));
+  // Skip express.json for multipart/form-data to avoid consuming the stream
+  app.use((req, res, next) => {
+    if (req.headers['content-type'] && req.headers['content-type'].startsWith('multipart/form-data')) {
+      return next();
+    }
+    express.json({ limit: "50mb" })(req, res, next);
+  });
+  
+  app.use((req, res, next) => {
+    // Skip express.urlencoded for multipart/form-data to avoid conflicts with multer
+    if (req.headers['content-type'] && req.headers['content-type'].startsWith('multipart/form-data')) {
+      return next();
+    }
+    express.urlencoded({ extended: false, limit: "50mb" })(req, res, next);
+  });
 
   // Create temp directory for file uploads if it doesn't exist
   if (!fs.existsSync('temp')) {
@@ -158,12 +171,7 @@ async function initialize() {
   app.use(tenantIsolationMiddleware);
   app.use(idempotencyMiddleware());
 
-  // Upload security middleware (applied globally, but only affects upload routes)
-  app.use('/api/documents/upload', uploadRateLimit);
-  app.use('/api/documents/upload', validateContentLength);
-  app.use('/api/documents/upload', uploadLimiter.single('file'));
-  app.use('/api/documents/upload', handleUploadErrors);
-  app.use('/api/documents/upload', cleanupTempFiles);
+  // Upload security middleware moved to route-specific handling to avoid conflicts
 
   // Configure CORS to allow cross-origin requests for development/embedding
   app.use((req, res, next) => {

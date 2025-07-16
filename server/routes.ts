@@ -11,6 +11,7 @@ import leaderboardRoutes from './routes/leaderboard';
 import activityRoutes from './routes/activity';
 import notificationsRoutes from './routes/notifications';
 import documentsRoutes from './routes/documents';
+import testUploadRouter from './routes/test-upload';
 import distributionsRoutes from './routes/distributions';
 // Removed legacy allocations route - using production-allocations only
 import productionAllocationsRouter from './routes/production-allocations';
@@ -49,11 +50,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Test upload endpoint without auth (before ALL middleware)
+  app.use('/test', testUploadRouter); // Test upload endpoint without auth
+  
   // Authentication middleware for all API routes except auth endpoints and system endpoints
   app.use('/api', (req: Request, res: Response, next: NextFunction) => {
     // Skip auth check for auth/system endpoints and OPTIONS requests
     if (req.path.startsWith('/auth') || 
         req.path.startsWith('/system') || 
+        req.path.startsWith('/test-upload') ||
         req.method === 'OPTIONS') {
       return next();
     }
