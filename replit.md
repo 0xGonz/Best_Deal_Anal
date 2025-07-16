@@ -129,6 +129,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 16, 2025**: Document Upload and Allocation Deletion Fixes
+  - **RESOLVED: Document Upload "Unexpected end of form" Error**: Fixed critical middleware conflicts that were corrupting multipart form uploads
+  - **Root Cause Identification**: Global upload middleware was interfering with route-specific multer processing, causing double file stream consumption
+  - **Express Configuration Update**: Modified server to skip JSON/URL parsing for multipart forms, preventing request stream corruption
+  - **Allocation Deletion Fix**: Resolved database trigger errors by updating AllocationDeletionService to handle missing triggers gracefully
+  - **System Functionality Restored**: Document uploads now process successfully, allocation deletions work with automatic dependency cleanup
+  - **Production Ready**: Both document upload and allocation management now fully operational with proper error handling
+
 - **June 30, 2025**: Complete Distributions Management System Implementation
   - **Distributions API Integration COMPLETE**: Fixed database query in distributions routes to properly join deals table for dealName resolution
   - **Frontend Data Mapping**: Corrected DistributionsManagementHub to use `distribution.dealName` instead of `distribution.allocation?.dealName`

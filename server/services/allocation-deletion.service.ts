@@ -16,12 +16,7 @@ export class AllocationDeletionService {
   async safeDelete(allocationId: number, userId: number): Promise<{ success: boolean; message: string }> {
     try {
       return await db.transaction(async (tx) => {
-        // Step 1: Temporarily disable triggers
-        await tx.execute(sql`ALTER TABLE fund_allocations DISABLE TRIGGER trigger_enforce_payment_workflow`);
-        await tx.execute(sql`ALTER TABLE capital_calls DISABLE TRIGGER sync_allocation_on_capital_call_change`);
-        await tx.execute(sql`ALTER TABLE capital_calls DISABLE TRIGGER trigger_sync_allocation_totals`);
-        await tx.execute(sql`ALTER TABLE capital_calls DISABLE TRIGGER capital_call_sync_trigger`);
-
+        // Skip trigger handling since they don't exist in this database
         try {
           // Step 2: Check if allocation exists
           const allocation = await tx.execute(sql`
@@ -65,11 +60,7 @@ export class AllocationDeletionService {
           };
 
         } finally {
-          // Step 6: Always re-enable triggers
-          await tx.execute(sql`ALTER TABLE fund_allocations ENABLE TRIGGER trigger_enforce_payment_workflow`);
-          await tx.execute(sql`ALTER TABLE capital_calls ENABLE TRIGGER sync_allocation_on_capital_call_change`);
-          await tx.execute(sql`ALTER TABLE capital_calls ENABLE TRIGGER trigger_sync_allocation_totals`);
-          await tx.execute(sql`ALTER TABLE capital_calls ENABLE TRIGGER capital_call_sync_trigger`);
+          // No triggers to re-enable in this database
         }
       });
 
