@@ -127,15 +127,13 @@ export default function AuthPage() {
               <TabsContent value="login">
                 <LoginForm onSubmit={async (username, password) => {
                   try {
-                    console.log('Starting login process for username:', username);
+
                     setIsAuthenticating(true);
                     
                     // Print out login hook info to diagnose issues
-                    console.log('Login mutation state:', login);
-                    
+
                     const result = await login.mutateAsync({ username, password });
-                    console.log('Login successful result:', result);
-                    
+
                     // Add a slight delay before redirect to show the animation
                     setTimeout(() => {
                       // Use navigate from wouter instead of window.location
@@ -143,7 +141,7 @@ export default function AuthPage() {
                     }, 1500);
                   } catch (error) {
                     setIsAuthenticating(false);
-                    console.error('Login error in auth-page.tsx:', error);
+
                     toast({
                       title: "Login Error",
                       description: error instanceof Error ? error.message : "Unknown login error",
@@ -167,9 +165,7 @@ export default function AuthPage() {
                       // Default role for self-registration is analyst
                       role: 'analyst'
                     });
-                    
-                    console.log('Registration successful, showing animation');
-                    
+
                     // Add a slight delay before redirect to show the animation
                     setTimeout(() => {
                       // Use navigate from wouter instead of window.location
@@ -177,7 +173,7 @@ export default function AuthPage() {
                     }, 1500);
                   } catch (error) {
                     setIsAuthenticating(false);
-                    console.error('Registration error:', error);
+
                     // Error handling is already in the auth context
                   }
                 }} isLoading={isLoading} />
@@ -212,11 +208,11 @@ function LoginForm({ onSubmit, isLoading }: { onSubmit: (username: string, passw
       }
       
       const { username, password } = data;
-      console.log('Submitting login with credentials:', { username, password: '******' });
+
       await onSubmit(username, password);
     } catch (error) {
       // Error is handled in the auth context
-      console.error('Login error in form:', error);
+
       setFormIsSubmitting(false);
       
       // Remove loading animation
@@ -312,7 +308,7 @@ function RegisterForm({ onSubmit, isLoading }: { onSubmit: (data: RegisterFormVa
       await onSubmit(data);
     } catch (error) {
       // Error is handled in the auth context
-      console.error('Registration error:', error);
+
       setFormIsSubmitting(false);
       
       // Remove loading animation

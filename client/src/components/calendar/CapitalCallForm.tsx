@@ -114,7 +114,7 @@ const CapitalCallForm: React.FC<CapitalCallFormProps> = ({ isOpen, onClose, sele
       onClose();
     },
     onError: (error: Error) => {
-      console.error('Error creating capital call:', error);
+
       setErrorMessage(error.message);
       toast({
         title: 'Error',

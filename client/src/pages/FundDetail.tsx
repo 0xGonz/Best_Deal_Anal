@@ -168,7 +168,7 @@ export default function FundDetail() {
     enabled: !!fundId,
     // Transform the data to ensure proper type compatibility
     select: (data: any) => {
-      console.log('Allocations API response:', data);
+
       // The API now returns allocations directly as an array
       if (Array.isArray(data)) {
         return data.map((allocation: any) => ({
@@ -402,8 +402,6 @@ export default function FundDetail() {
     }
   };
 
-
-  
   // Mark allocation status mutation
   const updateAllocationStatusMutation = useMutation({
     mutationFn: async ({ allocationId, status }: { allocationId: number; status: "funded" | "unfunded" | "committed" | "partially_paid" }) => {
@@ -1176,9 +1174,7 @@ export default function FundDetail() {
                           // Calculate dynamic weight based on capital view with NaN protection
                           const weight = calculateDynamicWeight(allocation, allocations, capitalView);
                           const dynamicWeight = isNaN(weight) ? 0 : weight;
-                          
 
-                          
                           // Use modular status service for scalable status management
                           const statusBadgeProps = generateStatusBadgeProps(allocation);
                           

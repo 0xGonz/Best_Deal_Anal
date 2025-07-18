@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -70,7 +71,7 @@ export default function AIAnalysisTab({ dealId, dealName }: AIAnalysisTabProps) 
     try {
       await sendMessage(analysisQuery);
     } catch (error) {
-      console.error('Document analysis error:', error);
+
     } finally {
       setLoadingDocumentId(null);
     }

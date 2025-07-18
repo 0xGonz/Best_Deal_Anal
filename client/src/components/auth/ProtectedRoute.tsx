@@ -32,7 +32,7 @@ export default function ProtectedRoute({ children, requiredRoles }: ProtectedRou
   
   // Redirect to auth page if not authenticated - use /auth consistently
   if (!user) {
-    console.log('ProtectedRoute: User not authenticated, redirecting to /auth');
+
     return <Redirect to="/auth" />;
   }
   

@@ -87,8 +87,7 @@ export default function Pipeline() {
     },
     onSuccess: async (data: any) => {
       // Log the data response
-      console.log('Deal update response:', data);
-      
+
       // Get the stage label
       const stageLabel = data.stage ? DealStageLabels[data.stage as keyof typeof DealStageLabels] : 'a new stage';
       
@@ -107,7 +106,7 @@ export default function Pipeline() {
         queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
         queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
       } catch (err) {
-        console.error('Failed to create notification:', err);
+
       }
       
       // Refresh deals data

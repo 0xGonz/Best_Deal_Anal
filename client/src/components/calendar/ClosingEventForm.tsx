@@ -114,7 +114,7 @@ const ClosingEventForm: React.FC<ClosingEventFormProps> = ({ isOpen, onClose, se
       onClose();
     },
     onError: (error) => {
-      console.error('Error creating closing event:', error);
+
       toast({
         title: 'Error',
         description: 'Failed to create closing event',

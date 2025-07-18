@@ -17,7 +17,7 @@ export function formatDate(date: string | Date | null | undefined, formatStr = '
     const parsedDate = typeof date === 'string' ? parseISO(date) : date;
     return format(parsedDate, formatStr);
   } catch (error) {
-    console.error('Error formatting date:', error);
+
     return '';
   }
 }
@@ -35,7 +35,7 @@ export function formatDateForInput(date: string | Date | null | undefined): stri
     const parsedDate = typeof date === 'string' ? parseISO(date) : date;
     return format(parsedDate, 'yyyy-MM-dd');
   } catch (error) {
-    console.error('Error formatting date for input:', error);
+
     return '';
   }
 }
@@ -82,7 +82,7 @@ export function formatDateForAPI(date: string | Date | null | undefined): string
     
     return noonUTC.toISOString();
   } catch (error) {
-    console.error('Error formatting date for API:', error);
+
     return new Date().toISOString();
   }
 }

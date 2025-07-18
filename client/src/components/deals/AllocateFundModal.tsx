@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -8,7 +8,6 @@ import { formatDateForAPI } from '@/lib/dateUtils';
 import { ALLOCATION_STATUS, ALLOCATION_DEFAULTS } from '@/lib/constants/allocation-constants';
 import { DEFAULT_SECURITY_TYPE, SECURITY_TYPES, SECURITY_TYPE_LABELS } from '@/lib/constants/security-types';
 import { PAYMENT_DEFAULTS } from '@shared/constants';
-
 import {
   Dialog,
   DialogContent,
@@ -112,24 +111,16 @@ export default function AllocateFundModal({ isOpen, onClose, dealId, dealName }:
           notes: `Immediate payment at commitment - ${data.paymentOption === 'pay_immediately' ? 'Full funding' : 'Partial funding'}`
         };
 
-        console.log('Creating capital call with payload:', capitalCallPayload);
-        
         const response = await apiRequest('POST', '/api/capital-calls', capitalCallPayload);
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-          console.error('Capital call creation failed:', {
-            status: response.status,
-            statusText: response.statusText,
-            errorData
-          });
           throw new Error(`Failed to create immediate payment: ${response.statusText}`);
         }
 
         const result = await response.json();
-        console.log('Capital call created successfully:', result);
+        return result;
       }
     } catch (error) {
-      console.error('Error creating immediate payment:', error);
       throw error;
     }
   };
@@ -204,8 +195,7 @@ export default function AllocateFundModal({ isOpen, onClose, dealId, dealName }:
       queryClient.invalidateQueries({ queryKey: [`/api/funds/${allocationData.fundId}`] });
     },
     onError: (error: any) => {
-      console.error('Allocation creation error:', error);
-      
+
       let errorMessage = "Failed to create allocation.";
       let errorTitle = "Error";
       

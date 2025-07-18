@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+
 import { Button } from "@/components/ui/button";
 import { Download, FileText, FileSpreadsheet, Eye, ZoomIn, ZoomOut, RotateCw, Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -120,10 +120,10 @@ const SimpleDocumentViewer = ({ documentId, documentName, fileType }: SimpleDocu
               }}
               onLoad={() => {
                 setLoading(false);
-                console.log('PDF loaded successfully');
+
               }}
               onError={() => {
-                console.error('PDF failed to load');
+
                 setError('Failed to load PDF document. Please try downloading the file.');
                 setLoading(false);
               }}

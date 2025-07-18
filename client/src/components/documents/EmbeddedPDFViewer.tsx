@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+
 import { Document, Page } from 'react-pdf';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -51,12 +51,12 @@ const EmbeddedPDFViewer = ({ documentId, documentName, fileType }: EmbeddedPDFVi
             const header = new TextDecoder().decode(buffer.slice(0, 5));
             
             if (!header.startsWith('%PDF-')) {
-              console.warn('Document header validation failed - not a valid PDF structure:', header);
+
               return false;
             }
           }
         } catch (headerError) {
-          console.warn('PDF header validation failed:', headerError);
+
           // Continue anyway - might be a range request issue with legacy storage
         }
       }
@@ -71,7 +71,7 @@ const EmbeddedPDFViewer = ({ documentId, documentName, fileType }: EmbeddedPDFVi
   useEffect(() => {
     if (documentId) {
       const url = `/api/documents/${documentId}/download`;
-      console.log('📤 Loading PDF document:', { documentId, documentName, url });
+
       setPdfUrl(url);
       
       // Check if file exists before attempting to render
@@ -86,7 +86,7 @@ const EmbeddedPDFViewer = ({ documentId, documentName, fileType }: EmbeddedPDFVi
   }, [documentId, documentName, checkFileExists]);
 
   const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
-    console.log('✅ PDF loaded successfully:', { numPages, documentName });
+
     setNumPages(numPages);
     setPageNumber(1);
     setLoading(false);
@@ -94,8 +94,7 @@ const EmbeddedPDFViewer = ({ documentId, documentName, fileType }: EmbeddedPDFVi
   }, [documentName]);
 
   const onDocumentLoadError = useCallback((error: Error) => {
-    console.error('❌ PDF load error:', error);
-    
+
     // Check for specific "Invalid PDF structure" error
     if (error.message.includes('Invalid PDF structure') || 
         error.message.includes('PDF header not found') ||

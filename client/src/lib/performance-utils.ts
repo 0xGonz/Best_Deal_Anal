@@ -72,7 +72,7 @@ class PerformanceManager {
         
         if (attempt < retryOptions.retries) {
           const delay = retryOptions.retryDelay * Math.pow(retryOptions.backoffMultiplier, attempt);
-          console.log(`Request failed, retrying in ${delay}ms (attempt ${attempt + 1}/${retryOptions.retries + 1})`);
+
           await this.delay(delay);
         }
       }

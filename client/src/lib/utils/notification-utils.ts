@@ -30,7 +30,7 @@ export async function createNotification({
       isRead: false
     });
   } catch (error) {
-    console.error('Failed to create notification:', error);
+
   }
 }
 

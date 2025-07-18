@@ -73,7 +73,7 @@ export default function StageProgression({ deal, onStageUpdated }: StageProgress
         queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
         queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
       } catch (err) {
-        console.error('Failed to create notification:', err);
+
       }
       
       // Call onStageUpdated callback if provided

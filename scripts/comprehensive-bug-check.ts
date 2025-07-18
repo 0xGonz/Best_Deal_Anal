@@ -1,255 +1,284 @@
 #!/usr/bin/env tsx
 /**
- * Comprehensive Bug Detection and Fix Script
- * 
- * This script identifies and fixes critical bugs in the investment platform:
- * 1. Data integrity issues (missing allocations despite existing deals/funds)
- * 2. Schema inconsistencies between database and TypeScript types
- * 3. Type mismatches in frontend components
- * 4. Performance issues with N+1 queries
- * 5. Error handling gaps
+ * Comprehensive Bug Check and Cleanup Script
  */
 
-import { DatabaseStorage } from '../server/database-storage';
-import { db } from '../server/db';
-import { eq, sql } from 'drizzle-orm';
-import { fundAllocations, funds, deals, capitalCalls } from '@shared/schema';
+import { readFileSync, writeFileSync, readdirSync, statSync } from 'fs';
+import { join, extname } from 'path';
 
 interface BugReport {
-  category: string;
-  severity: 'critical' | 'high' | 'medium' | 'low';
+  file: string;
+  line: number;
+  type: 'syntax' | 'logic' | 'type' | 'unused';
   description: string;
-  impact: string;
-  suggestedFix: string;
-  detected: boolean;
-  fixed?: boolean;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  autoFixable: boolean;
 }
 
 class ComprehensiveBugChecker {
-  private storage = new DatabaseStorage();
   private bugs: BugReport[] = [];
 
-  async runFullAudit(): Promise<void> {
-    console.log('🔍 Starting comprehensive bug audit...\n');
-
-    await this.checkDataIntegrity();
-    await this.checkSchemaConsistency();
-    await this.checkTypeDefinitions();
-    await this.checkPerformanceIssues();
-    await this.checkErrorHandling();
-
-    this.generateReport();
-  }
-
-  private async checkDataIntegrity(): Promise<void> {
-    console.log('1️⃣ Checking data integrity...');
-
-    // Check for empty allocations despite having deals and funds
-    const dealsCount = await db.select({ count: sql<number>`count(*)` }).from(deals);
-    const fundsCount = await db.select({ count: sql<number>`count(*)` }).from(funds);
-    const allocationsCount = await db.select({ count: sql<number>`count(*)` }).from(fundAllocations);
-
-    const dealCount = Number(dealsCount[0]?.count || 0);
-    const fundCount = Number(fundsCount[0]?.count || 0);
-    const allocationCount = Number(allocationsCount[0]?.count || 0);
-
-    console.log(`   - Deals: ${dealCount}`);
-    console.log(`   - Funds: ${fundCount}`);
-    console.log(`   - Allocations: ${allocationCount}`);
-
-    if (dealCount > 0 && fundCount > 0 && allocationCount === 0) {
-      this.bugs.push({
-        category: 'Data Integrity',
-        severity: 'critical',
-        description: `Found ${dealCount} deals and ${fundCount} funds but 0 allocations`,
-        impact: 'Users cannot track investments, fund metrics show zero, portfolio analysis broken',
-        suggestedFix: 'Check allocation creation workflow, verify API endpoints for fund allocation creation',
-        detected: true
-      });
-    }
-
-    // Check for status inconsistencies
-    const statusInconsistencies = await db.execute(sql`
-      SELECT 
-        id,
-        amount,
-        paid_amount,
-        status,
-        CASE 
-          WHEN amount = 0 THEN 'unfunded'
-          WHEN paid_amount >= amount THEN 'funded'
-          WHEN paid_amount > 0 THEN 'partially_paid'
-          ELSE 'committed'
-        END as calculated_status
-      FROM fund_allocations
-      WHERE status != CASE 
-          WHEN amount = 0 THEN 'unfunded'
-          WHEN paid_amount >= amount THEN 'funded'
-          WHEN paid_amount > 0 THEN 'partially_paid'
-          ELSE 'committed'
-        END
-      LIMIT 5
-    `);
-
-    if (statusInconsistencies.rows.length > 0) {
-      this.bugs.push({
-        category: 'Data Integrity',
-        severity: 'high',
-        description: `Found ${statusInconsistencies.rows.length} allocations with inconsistent status values`,
-        impact: 'Incorrect portfolio calculations, misleading investment metrics',
-        suggestedFix: 'Run allocation status recalculation service to fix inconsistencies',
-        detected: true
-      });
-    }
-  }
-
-  private async checkSchemaConsistency(): Promise<void> {
-    console.log('2️⃣ Checking schema consistency...');
-
-    // Check for schema/database type mismatches
-    const schemaCheck = await db.execute(sql`
-      SELECT 
-        column_name,
-        data_type,
-        is_nullable
-      FROM information_schema.columns 
-      WHERE table_name = 'capital_calls' 
-        AND column_name = 'outstanding_amount'
-    `);
-
-    const outstandingAmountColumn = schemaCheck.rows[0];
-    if (outstandingAmountColumn && outstandingAmountColumn.data_type === 'real') {
-      this.bugs.push({
-        category: 'Schema Consistency',
-        severity: 'medium',
-        description: 'Database has outstanding_amount as real but schema defines it as numeric',
-        impact: 'Type conversion errors, potential data precision loss',
-        suggestedFix: 'Update schema.ts to match database type or migrate database column',
-        detected: true
-      });
-    }
-  }
-
-  private async checkTypeDefinitions(): Promise<void> {
-    console.log('3️⃣ Checking TypeScript type definitions...');
-
-    // This would normally involve static analysis, but we can check for common issues
-    // Based on the LSP errors we saw earlier
+  async runComprehensiveCheck(): Promise<void> {
+    console.log('🔍 Starting comprehensive bug check...\n');
     
-    this.bugs.push({
-      category: 'Type Definitions',
-      severity: 'high',
-      description: 'Frontend expects calledCapital and uncalledCapital properties on Fund type',
-      impact: 'TypeScript compilation errors, runtime property access issues',
-      suggestedFix: 'Extend Fund type to include missing computed properties',
-      detected: true
-    });
-
-    this.bugs.push({
-      category: 'Type Definitions',
-      severity: 'medium',
-      description: 'FundAllocation type missing weight property expected by frontend',
-      impact: 'Portfolio weight calculations may fail',
-      suggestedFix: 'Add weight property to FundAllocation extended type',
-      detected: true
-    });
-  }
-
-  private async checkPerformanceIssues(): Promise<void> {
-    console.log('4️⃣ Checking performance issues...');
-
-    // Check for N+1 query patterns by examining allocation loading
-    const fundsWithAllocations = await this.storage.getFunds();
+    await this.checkTypeScriptErrors();
+    await this.checkSyntaxErrors();
+    await this.checkLogicErrors();
+    await this.checkUnusedCode();
     
-    if (fundsWithAllocations.length > 1) {
-      this.bugs.push({
-        category: 'Performance',
-        severity: 'medium',
-        description: 'Allocation routes make sequential queries per fund instead of batch queries',
-        impact: 'Slow API responses as data scales, potential timeouts',
-        suggestedFix: 'Implement batch query service for loading allocations across all funds',
-        detected: true
-      });
-    }
+    this.generateBugReport();
   }
 
-  private async checkErrorHandling(): Promise<void> {
-    console.log('5️⃣ Checking error handling...');
-
-    // Check if API endpoints handle empty data gracefully
+  private async checkTypeScriptErrors(): Promise<void> {
+    console.log('1️⃣ Checking TypeScript compilation...');
+    
     try {
-      const emptyAllocations = await this.storage.getAllocationsByFund(999999); // Non-existent fund
-      if (emptyAllocations.length === 0) {
-        // This is expected, but check if frontend handles it
-        this.bugs.push({
-          category: 'Error Handling',
-          severity: 'low',
-          description: 'APIs return empty arrays for non-existent resources without explicit error messages',
-          impact: 'Users may not understand why data is missing',
-          suggestedFix: 'Add explicit error responses for missing resources',
-          detected: true
+      const { execSync } = await import('child_process');
+      const output = execSync('cd client && npx tsc --noEmit 2>&1', { encoding: 'utf8' });
+      console.log('✅ TypeScript compilation successful');
+    } catch (error: any) {
+      const output = error.stdout || error.message;
+      const lines = output.split('\n');
+      
+      lines.forEach(line => {
+        const match = line.match(/(.+?)\((\d+),\d+\):\s*(error|warning)\s*TS\d+:\s*(.+)/);
+        if (match) {
+          const [, file, lineNum, type, message] = match;
+          
+          this.bugs.push({
+            file: file.replace(process.cwd() + '/', ''),
+            line: parseInt(lineNum),
+            type: 'type',
+            description: `TypeScript ${type}: ${message}`,
+            severity: type === 'error' ? 'critical' : 'medium',
+            autoFixable: message.includes('missing semicolon') || message.includes('expected')
+          });
+        }
+      });
+    }
+  }
+
+  private async checkSyntaxErrors(): Promise<void> {
+    console.log('2️⃣ Checking syntax patterns...');
+    
+    const files = this.getAllTSFiles();
+    
+    for (const file of files) {
+      try {
+        const content = readFileSync(file, 'utf8');
+        const lines = content.split('\n');
+        
+        lines.forEach((line, index) => {
+          // Check for broken console log cleanup
+          if (line.trim().match(/^\s*(fileName|dealId|documentType|description|endpoint|name|message|stack):\s*/)) {
+            this.bugs.push({
+              file,
+              line: index + 1,
+              type: 'syntax',
+              description: 'Orphaned object property from console log cleanup',
+              severity: 'critical',
+              autoFixable: true
+            });
+          }
+          
+          // Check for missing semicolons
+          if (line.trim().match(/^[^\/\*]*[a-zA-Z0-9\]\)]\s*$/) && !line.includes('//') && !line.includes('{') && !line.includes('}')) {
+            this.bugs.push({
+              file,
+              line: index + 1,
+              type: 'syntax',
+              description: 'Missing semicolon',
+              severity: 'medium',
+              autoFixable: true
+            });
+          }
+          
+          // Check for broken object literals
+          if (line.trim().match(/^[a-zA-Z_][a-zA-Z0-9_]*:\s*/) && !content.includes('interface') && !content.includes('type ')) {
+            const prevLine = lines[index - 1]?.trim() || '';
+            const nextLine = lines[index + 1]?.trim() || '';
+            
+            if (!prevLine.includes('{') && !nextLine.includes('}')) {
+              this.bugs.push({
+                file,
+                line: index + 1,
+                type: 'syntax',
+                description: 'Orphaned object property',
+                severity: 'critical',
+                autoFixable: true
+              });
+            }
+          }
         });
+      } catch (error) {
+        console.warn(`⚠️  Could not analyze ${file}`);
       }
-    } catch (error) {
-      // This is actually good - means errors are being thrown
     }
   }
 
-  private generateReport(): void {
-    console.log('\n📋 COMPREHENSIVE BUG REPORT');
-    console.log('='.repeat(60));
+  private async checkLogicErrors(): Promise<void> {
+    console.log('3️⃣ Checking logic patterns...');
+    
+    const files = this.getAllTSFiles();
+    
+    for (const file of files) {
+      try {
+        const content = readFileSync(file, 'utf8');
+        const lines = content.split('\n');
+        
+        lines.forEach((line, index) => {
+          // Check for potential null/undefined access
+          if (line.match(/\.\w+/) && !line.includes('?.') && !line.includes('||') && !line.includes('&&')) {
+            const beforeDot = line.split('.')[0].trim();
+            if (beforeDot.includes('data') || beforeDot.includes('user') || beforeDot.includes('response')) {
+              this.bugs.push({
+                file,
+                line: index + 1,
+                type: 'logic',
+                description: 'Potential null/undefined access without safety check',
+                severity: 'medium',
+                autoFixable: false
+              });
+            }
+          }
+          
+          // Check for missing error handling
+          if (line.includes('await fetch') && !content.includes('try') && !content.includes('catch')) {
+            this.bugs.push({
+              file,
+              line: index + 1,
+              type: 'logic',
+              description: 'Async operation without error handling',
+              severity: 'high',
+              autoFixable: false
+            });
+          }
+        });
+      } catch (error) {
+        console.warn(`⚠️  Could not analyze ${file}`);
+      }
+    }
+  }
 
-    const criticalBugs = this.bugs.filter(b => b.severity === 'critical');
-    const highBugs = this.bugs.filter(b => b.severity === 'high');
-    const mediumBugs = this.bugs.filter(b => b.severity === 'medium');
-    const lowBugs = this.bugs.filter(b => b.severity === 'low');
+  private async checkUnusedCode(): Promise<void> {
+    console.log('4️⃣ Checking unused code...');
+    
+    const files = this.getAllTSFiles();
+    
+    for (const file of files) {
+      try {
+        const content = readFileSync(file, 'utf8');
+        const lines = content.split('\n');
+        
+        // Check for unused imports
+        const imports: string[] = [];
+        const usages = new Set<string>();
+        
+        lines.forEach(line => {
+          const importMatch = line.match(/import\s+.*{([^}]+)}.*from/);
+          if (importMatch) {
+            importMatch[1].split(',').forEach(imp => {
+              const cleanImport = imp.trim().replace(/\s+as\s+\w+/, '');
+              imports.push(cleanImport);
+            });
+          }
+          
+          imports.forEach(imp => {
+            if (line.includes(imp) && !line.trim().startsWith('import')) {
+              usages.add(imp);
+            }
+          });
+        });
+        
+        imports.forEach(imp => {
+          if (!usages.has(imp)) {
+            this.bugs.push({
+              file,
+              line: 1,
+              type: 'unused',
+              description: `Unused import: ${imp}`,
+              severity: 'low',
+              autoFixable: true
+            });
+          }
+        });
+      } catch (error) {
+        console.warn(`⚠️  Could not analyze ${file}`);
+      }
+    }
+  }
 
-    console.log(`\n🚨 CRITICAL (${criticalBugs.length}):`);
-    criticalBugs.forEach((bug, i) => {
-      console.log(`\n${i + 1}. ${bug.description}`);
-      console.log(`   Impact: ${bug.impact}`);
-      console.log(`   Fix: ${bug.suggestedFix}`);
+  private getAllTSFiles(): string[] {
+    const files: string[] = [];
+    const excludedDirs = ['node_modules', '.git', 'dist', 'build', 'coverage'];
+    
+    const scanDirectory = (dir: string): void => {
+      try {
+        const items = readdirSync(dir);
+        
+        for (const item of items) {
+          const fullPath = join(dir, item);
+          
+          if (excludedDirs.some(excluded => fullPath.includes(excluded))) {
+            continue;
+          }
+          
+          const stat = statSync(fullPath);
+          
+          if (stat.isDirectory()) {
+            scanDirectory(fullPath);
+          } else if (['.ts', '.tsx'].includes(extname(fullPath))) {
+            files.push(fullPath);
+          }
+        }
+      } catch (error) {
+        // Skip directories we can't read
+      }
+    };
+    
+    scanDirectory('client/src');
+    return files;
+  }
+
+  private generateBugReport(): void {
+    console.log('\n📊 COMPREHENSIVE BUG REPORT\n');
+    
+    const critical = this.bugs.filter(b => b.severity === 'critical');
+    const high = this.bugs.filter(b => b.severity === 'high');
+    const medium = this.bugs.filter(b => b.severity === 'medium');
+    const low = this.bugs.filter(b => b.severity === 'low');
+    
+    console.log(`🔴 CRITICAL ISSUES (${critical.length})`);
+    critical.slice(0, 10).forEach(bug => {
+      console.log(`  • ${bug.file}:${bug.line} - ${bug.description}`);
     });
-
-    console.log(`\n⚠️  HIGH (${highBugs.length}):`);
-    highBugs.forEach((bug, i) => {
-      console.log(`\n${i + 1}. ${bug.description}`);
-      console.log(`   Impact: ${bug.impact}`);
-      console.log(`   Fix: ${bug.suggestedFix}`);
+    
+    console.log(`\n🟠 HIGH PRIORITY (${high.length})`);
+    high.slice(0, 5).forEach(bug => {
+      console.log(`  • ${bug.file}:${bug.line} - ${bug.description}`);
     });
-
-    console.log(`\n🔶 MEDIUM (${mediumBugs.length}):`);
-    mediumBugs.forEach((bug, i) => {
-      console.log(`\n${i + 1}. ${bug.description}`);
-      console.log(`   Impact: ${bug.impact}`);
-      console.log(`   Fix: ${bug.suggestedFix}`);
+    
+    console.log(`\n🟡 MEDIUM PRIORITY (${medium.length})`);
+    medium.slice(0, 5).forEach(bug => {
+      console.log(`  • ${bug.file}:${bug.line} - ${bug.description}`);
     });
-
-    console.log(`\n💡 LOW (${lowBugs.length}):`);
-    lowBugs.forEach((bug, i) => {
-      console.log(`\n${i + 1}. ${bug.description}`);
-      console.log(`   Impact: ${bug.impact}`);
-      console.log(`   Fix: ${bug.suggestedFix}`);
+    
+    console.log(`\n🟢 LOW PRIORITY (${low.length})`);
+    low.slice(0, 3).forEach(bug => {
+      console.log(`  • ${bug.file}:${bug.line} - ${bug.description}`);
     });
-
-    console.log('\n' + '='.repeat(60));
-    console.log(`📊 SUMMARY: ${this.bugs.length} total issues found`);
-    console.log(`   Critical: ${criticalBugs.length} | High: ${highBugs.length} | Medium: ${mediumBugs.length} | Low: ${lowBugs.length}`);
-
-    if (criticalBugs.length > 0) {
-      console.log('\n🚨 ACTION REQUIRED: Critical bugs found that may prevent core functionality');
+    
+    const autoFixable = this.bugs.filter(b => b.autoFixable).length;
+    console.log(`\n🔧 AUTO-FIXABLE: ${autoFixable}/${this.bugs.length} issues can be automatically resolved`);
+    
+    if (critical.length === 0) {
+      console.log('\n✅ No critical issues found! Application should be stable.');
+    } else {
+      console.log('\n⚠️  Critical issues require immediate attention to prevent runtime failures.');
     }
   }
 }
 
-async function main() {
-  try {
-    const checker = new ComprehensiveBugChecker();
-    await checker.runFullAudit();
-  } catch (error) {
-    console.error('❌ Bug check failed:', error);
-    process.exit(1);
-  }
-}
-
-main();
+// Run the comprehensive check
+const checker = new ComprehensiveBugChecker();
+checker.runComprehensiveCheck().catch(console.error);

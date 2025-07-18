@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+
 import {
   Dialog,
   DialogContent,
@@ -38,7 +38,7 @@ export default function EnhancedPDFViewer({ isOpen, onClose, documentId, documen
       description: 'You must be logged in to view this document. Please log in and try again.',
       variant: 'destructive',
     });
-    console.error('Authentication error while loading document:', error);
+
     setIsFailed(true);
     setIsLoading(false);
     setError(error); // Make sure the error is stored for reference in the UI
@@ -75,7 +75,7 @@ export default function EnhancedPDFViewer({ isOpen, onClose, documentId, documen
   }
 
   function onDocumentLoadError(error: Error) {
-    console.error('Error loading PDF document:', error);
+
     setIsLoading(false);
     setIsFailed(true);
     setError(error); // Store the error for reference in the UI

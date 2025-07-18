@@ -31,7 +31,7 @@ export function useDealDocuments(dealId: number | undefined) {
   
   // Safe fallback if DocumentsContext not mounted
   if (!documentsContext) {
-    console.warn('useDealDocuments: DocumentsContext not available');
+
     return {
       isLoading: false,
       error: new Error('DocumentsContext not available'),
@@ -51,7 +51,7 @@ export function useDealDocuments(dealId: number | undefined) {
   
   // Update docs state when data changes
   useEffect(() => {
-    console.log(`🔍 useDealDocuments: Processing data for deal ${dealId}:`, data);
+
     if (data && Array.isArray(data)) {
       // Filter out corrupt documents and convert to DocMeta format
       const validDocs = data.filter(doc => doc && doc.id && doc.fileName);
@@ -63,9 +63,7 @@ export function useDealDocuments(dealId: number | undefined) {
         downloadUrl: `/api/documents/${doc.id}/download`,
         documentType: doc.documentType,
       }));
-      
-      console.log(`📝 useDealDocuments: Setting ${docMetas.length} documents in context:`, docMetas);
-      
+
       // Update docs state
       setDocs(docMetas);
       
@@ -73,15 +71,15 @@ export function useDealDocuments(dealId: number | undefined) {
       if (docMetas.length > 0) {
         const currentStillValid = current && docMetas.some(doc => doc.id === current.id);
         if (!current || !currentStillValid) {
-          console.log(`🎯 useDealDocuments: Auto-selecting first document:`, docMetas[0]);
+
           setCurrent(docMetas[0]);
         }
       } else {
-        console.log(`❌ useDealDocuments: No documents found, clearing selection`);
+
         setCurrent(null);
       }
     } else {
-      console.log(`⚠️ useDealDocuments: No data received or data is not an array:`, data);
+
       setDocs([]);
       setCurrent(null);
     }

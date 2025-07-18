@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { formatDateForAPI } from '@/lib/dateUtils';
 import { ALLOCATION_STATUS } from '@/lib/constants/allocation-constants';
-
 import {
   Dialog,
   DialogContent,
@@ -84,7 +83,7 @@ export default function AllocateFundModal({ isOpen, onClose, dealId, dealName }:
         }
       }
     } catch (error) {
-      console.error('Error creating immediate payment:', error);
+
       throw error;
     }
   };
@@ -157,8 +156,7 @@ export default function AllocateFundModal({ isOpen, onClose, dealId, dealName }:
       queryClient.invalidateQueries({ queryKey: ['/api/deals'] });
     },
     onError: (error: any) => {
-      console.error('Allocation creation error:', error);
-      
+
       let errorMessage = "Failed to create allocation.";
       let errorTitle = "Error";
       

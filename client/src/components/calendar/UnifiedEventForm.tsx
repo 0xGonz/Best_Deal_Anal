@@ -349,9 +349,7 @@ const UnifiedEventForm: React.FC<UnifiedEventFormProps> = ({ isOpen, onClose, se
       let endpoint = '';
       let payload: any = { ...data };
       let method = isEditMode ? 'PATCH' : 'POST';
-      
-      console.log(`Preparing ${isEditMode ? 'edit' : 'create'} request for ${data.eventType}`);
-      
+
       // Prepare the data based on event type
       if (data.eventType === EventType.CAPITAL_CALL) {
         endpoint = '/api/capital-calls';
@@ -375,7 +373,7 @@ const UnifiedEventForm: React.FC<UnifiedEventFormProps> = ({ isOpen, onClose, se
         if (data.capitalCallStatus) capitalCallPayload.status = data.capitalCallStatus;
         
         payload = capitalCallPayload;
-        console.log('Capital call payload:', payload);
+
       } else if (data.eventType === EventType.CLOSING_EVENT) {
         endpoint = '/api/closing-schedules';
         if (isEditMode && eventToEdit?.id) {
@@ -399,7 +397,7 @@ const UnifiedEventForm: React.FC<UnifiedEventFormProps> = ({ isOpen, onClose, se
         if (data.actualAmount) closingEventPayload.actualAmount = data.actualAmount;
         
         payload = closingEventPayload;
-        console.log('Closing event payload:', payload);
+
       } else if (data.eventType === EventType.MEETING) {
         endpoint = '/api/meetings';
         if (isEditMode && eventToEdit?.id) {
@@ -414,11 +412,9 @@ const UnifiedEventForm: React.FC<UnifiedEventFormProps> = ({ isOpen, onClose, se
           notes: data.notes,
           createdBy: data.createdBy || user?.id,
         };
-        console.log('Meeting payload:', payload);
+
       }
-      
-      console.log(`${method} request to ${endpoint}:`, payload);
-      
+
       const response = await apiRequest(method, endpoint, payload);
       if (!response.ok) {
         const errorData = await response.json();
@@ -443,7 +439,7 @@ const UnifiedEventForm: React.FC<UnifiedEventFormProps> = ({ isOpen, onClose, se
       onClose();
     },
     onError: (error: Error) => {
-      console.error(`Error ${isEditMode ? 'updating' : 'creating'} event:`, error);
+
       setErrorMessage(error.message);
       toast({
         title: 'Error',
@@ -474,9 +470,7 @@ const UnifiedEventForm: React.FC<UnifiedEventFormProps> = ({ isOpen, onClose, se
         endpoint = `/api/meetings/${eventToEdit.id}`;
         eventTypeName = 'meeting';
       }
-      
-      console.log(`Sending DELETE request to ${endpoint}`);
-      
+
       try {
         const response = await apiRequest('DELETE', endpoint);
         
@@ -518,7 +512,7 @@ const UnifiedEventForm: React.FC<UnifiedEventFormProps> = ({ isOpen, onClose, se
         
         return result;
       } catch (error) {
-        console.error(`Error during DELETE request to ${endpoint}:`, error);
+
         throw error;
       }
     },
@@ -538,7 +532,7 @@ const UnifiedEventForm: React.FC<UnifiedEventFormProps> = ({ isOpen, onClose, se
       onClose();
     },
     onError: (error: Error) => {
-      console.error('Error deleting event:', error);
+
       toast({
         variant: 'destructive',
         title: "Failed to delete event",

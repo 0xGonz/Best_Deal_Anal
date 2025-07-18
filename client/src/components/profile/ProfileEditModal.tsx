@@ -61,7 +61,7 @@ export default function ProfileEditModal({
   
   // Debug logs to track state changes
   useEffect(() => {
-    console.log('Avatar color changed to:', avatarColor);
+
   }, [avatarColor]);
 
   const handleSubmit = async () => {
@@ -96,9 +96,7 @@ export default function ProfileEditModal({
       if (role !== currentRole && currentUser?.role === 'admin') {
         updatePayload.role = role;
       }
-      
-      console.log('Updating profile with payload:', updatePayload);
-      
+
       // Update the user
       await apiRequest("PATCH", `/api/users/${userId}`, updatePayload);
       
@@ -126,8 +124,7 @@ export default function ProfileEditModal({
       // Close the modal
       onClose();
     } catch (error) {
-      console.error("Error updating profile:", error);
-      
+
       // Provide more detailed error message based on response
       let errorMessage = "Failed to update profile";
       
@@ -247,7 +244,7 @@ export default function ProfileEditModal({
                       key={colorName}
                       className={`cursor-pointer flex flex-col items-center`}
                       onClick={() => {
-                        console.log(`Setting color to ${colorName}: ${colorValue}`);
+
                         setAvatarColor(colorValue);
                       }}
                     >

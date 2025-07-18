@@ -488,9 +488,7 @@ class DeepCodeAuditor {
 }
 
 // Run the audit
-if (require.main === module) {
-  const auditor = new DeepCodeAuditor();
-  auditor.runDeepAudit().catch(console.error);
-}
+const auditor = new DeepCodeAuditor();
+auditor.runDeepAudit().catch(console.error);
 
 export { DeepCodeAuditor };
