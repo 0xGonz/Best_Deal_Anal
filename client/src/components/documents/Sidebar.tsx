@@ -51,6 +51,7 @@ export const Sidebar = ({ dealId }: { dealId: number }) => {
       const response = await fetch(`/api/documents/upload`, {
         method: 'POST',
         body: formData,
+        credentials: 'include', // Include session cookies for authentication
       });
       
       if (!response.ok) {
@@ -105,6 +106,7 @@ export const Sidebar = ({ dealId }: { dealId: number }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ documentType }),
+        credentials: 'include', // Include session cookies for authentication
       });
       
       if (!response.ok) {
@@ -146,7 +148,8 @@ export const Sidebar = ({ dealId }: { dealId: number }) => {
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
       const response = await fetch(`/api/documents/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        credentials: 'include', // Include session cookies for authentication
       });
       
       if (!response.ok) {
