@@ -48,11 +48,27 @@ export const Sidebar = ({ dealId }: { dealId: number }) => {
       formData.append('dealId', dealId.toString());
       formData.append('documentType', 'other'); // Default document type
       
-      const response = await fetch(`/api/documents/upload`, {
-        method: 'POST',
-        body: formData,
-        credentials: 'include', // Include session cookies for authentication
-      });
+      // Create an AbortController for timeout handling
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+      
+      let response;
+      try {
+        response = await fetch(`/api/documents/upload`, {
+          method: 'POST',
+          body: formData,
+          credentials: 'include', // Include session cookies for authentication
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeoutId);
+      } catch (error) {
+        clearTimeout(timeoutId);
+        if (error instanceof Error && error.name === 'AbortError') {
+          throw new Error('Upload timed out. Please try again with a smaller file or check your connection.');
+        }
+        throw error;
+      }
       
       if (!response.ok) {
         // Try to get more specific error message from the server
