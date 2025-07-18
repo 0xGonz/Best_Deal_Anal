@@ -47,9 +47,29 @@ const upload = multer({
   }
 });
 
+// Handle multer errors
+const handleUpload = (req: any, res: any, next: any) => {
+  upload.single('file')(req, res, (err) => {
+    if (err) {
+      console.error('❌ Multer upload error:', err);
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ error: 'File too large. Maximum size is 50MB.' });
+      }
+      return res.status(400).json({ error: err.message });
+    }
+    next();
+  });
+};
+
 // Upload document with file system storage (simplified middleware stack)
-router.post('/upload', requireAuth, upload.single('file'), async (req, res) => {
+router.post('/upload', requireAuth, handleUpload, async (req, res) => {
   try {
+    console.log('📤 Document upload request received', {
+      hasFile: !!req.file,
+      dealId: req.body.dealId,
+      documentType: req.body.documentType,
+      userId: req.session?.userId
+    });
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
