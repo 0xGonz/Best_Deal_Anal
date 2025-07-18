@@ -50,13 +50,13 @@ export const DealDistributionsTab: React.FC<DealDistributionsTabProps> = ({ deal
   const queryClient = useQueryClient();
 
   // Fetch distributions for this deal
-  const { data: distributions = [], isLoading, refetch } = useQuery({
+  const { data: distributions = [], isLoading, refetch } = useQuery<DealDistribution[]>({
     queryKey: [`/api/distributions/deal/${dealId}`],
     enabled: !!dealId,
   });
 
   // Fetch allocations for this deal to populate dropdown
-  const { data: allocations = [] } = useQuery({
+  const { data: allocations = [] } = useQuery<any[]>({
     queryKey: [`/api/allocations/deal/${dealId}`],
     enabled: !!dealId,
   });
@@ -203,7 +203,7 @@ export const DealDistributionsTab: React.FC<DealDistributionsTabProps> = ({ deal
     }
   };
 
-  const totalDistributions = distributions.reduce((sum, dist) => sum + parseFloat(dist.amount || '0'), 0);
+  const totalDistributions = distributions.reduce((sum: number, dist: any) => sum + parseFloat(dist.amount || '0'), 0);
 
   if (isLoading) {
     return (

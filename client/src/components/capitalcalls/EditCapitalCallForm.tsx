@@ -62,7 +62,7 @@ type CapitalCall = {
   dueDate: string;
   paidAmount?: number;
   paidDate?: string | null;
-  status: 'scheduled' | 'called' | 'partial' | 'paid' | 'defaulted';
+  status: 'scheduled' | 'called' | 'partially_paid' | 'paid' | 'defaulted';
   notes?: string;
 };
 

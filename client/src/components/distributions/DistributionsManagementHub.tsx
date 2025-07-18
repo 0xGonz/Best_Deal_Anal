@@ -28,6 +28,7 @@ import { z } from 'zod';
 import { format } from 'date-fns';
 import { CalendarIcon, Plus, TrendingUp, DollarSign, Target, History, Eye, Trash2, Edit } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
 // Robust currency formatting utility for distributions
@@ -85,6 +86,7 @@ export function DistributionsManagementHub({
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingDistribution, setEditingDistribution] = useState<any>(null);
+  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Query for distributions based on mode
@@ -119,16 +121,17 @@ export function DistributionsManagementHub({
 
   // Create distribution mutation
   const createDistributionMutation = useMutation({
-    mutationFn: (data: DistributionFormData) => apiRequest('/api/distributions', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
+    mutationFn: (data: DistributionFormData) => apiRequest('POST', '/api/distributions', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/distributions'] });
       queryClient.invalidateQueries({ queryKey: ['/api/allocations'] });
       queryClient.invalidateQueries({ queryKey: ['/api/fund-overview'] });
       setIsAddDialogOpen(false);
       form.reset();
+      toast({
+        title: "Distribution created",
+        description: "The distribution has been created successfully.",
+      });
     },
   });
 

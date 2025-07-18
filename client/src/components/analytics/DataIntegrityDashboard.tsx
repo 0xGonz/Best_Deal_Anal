@@ -19,15 +19,15 @@ import { AlertTriangle, CheckCircle, TrendingUp, Database, Zap } from "lucide-re
 
 export default function DataIntegrityDashboard() {
   // Load all data for integrity checking
-  const { data: allocations = [] } = useQuery({
+  const { data: allocations = [] } = useQuery<any[]>({
     queryKey: ['/api/production/allocations'],
   });
   
-  const { data: deals = [] } = useQuery({
+  const { data: deals = [] } = useQuery<any[]>({
     queryKey: ['/api/deals'],
   });
   
-  const { data: funds = [] } = useQuery({
+  const { data: funds = [] } = useQuery<any[]>({
     queryKey: ['/api/funds'],
   });
 

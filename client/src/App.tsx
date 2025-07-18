@@ -47,12 +47,7 @@ function Router() {
 
 function App() {
   return (
-    <ErrorBoundary
-      onError={(error, info) => {
-        console.error("Global error caught by ErrorBoundary:", error, info);
-        // Here we could send to an error reporting service like Sentry
-      }}
-    >
+    <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <TooltipProvider>

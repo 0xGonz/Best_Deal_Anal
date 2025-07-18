@@ -11,7 +11,7 @@ import {
   FileUp
 } from "lucide-react";
 import NewDealModal from "../../components/deals/NewDealModal";
-import MiniMemoForm from "../../components/memos/MiniMemoForm";
+import { MiniMemoForm } from "../../components/memos/MiniMemoForm";
 import BulkImportModal from "../../components/deals/BulkImportModal";
 import EmailForwardModal from "../../components/deals/EmailForwardModal";
 import ReportModal from "../../components/reports/ReportModal";
@@ -143,7 +143,7 @@ export default function QuickActions() {
 
       <MiniMemoForm
         isOpen={isMiniMemoFormOpen}
-        onClose={() => setIsMiniMemoFormOpen(false)}
+        onOpenChange={setIsMiniMemoFormOpen}
       />
 
       {/* Additional modals */}

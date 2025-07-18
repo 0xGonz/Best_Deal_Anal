@@ -138,14 +138,14 @@ export function DocumentAnalysisPanel({ dealId, dealName }: DocumentAnalysisPane
           </p>
         </CardHeader>
         <CardContent>
-          {documents.length === 0 ? (
+          {Array.isArray(documents) && documents.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No documents uploaded for this deal yet.</p>
             </div>
           ) : (
             <div className="grid gap-3">
-              {documents.map((document: Document) => (
+              {Array.isArray(documents) && documents.map((document: any) => (
                 <div
                   key={document.id}
                   className={`border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md ${
