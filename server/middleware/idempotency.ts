@@ -78,8 +78,8 @@ export const idempotencyMiddleware = (options: {
       return next();
     }
 
-    // Skip for non-business logic endpoints
-    const skipPaths = ['/auth/', '/system/', '/health'];
+    // Skip for non-business logic endpoints and file uploads
+    const skipPaths = ['/auth/', '/system/', '/health', '/documents/upload'];
     if (skipPaths.some(path => req.path.includes(path))) {
       return next();
     }

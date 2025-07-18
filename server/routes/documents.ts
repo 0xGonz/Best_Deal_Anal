@@ -133,7 +133,8 @@ router.post('/upload', requireAuth, handleUpload, async (req, res) => {
       .returning();
 
     console.log(`✓ Document uploaded successfully: ID ${newDocument.id}, saved to ${filePath}`);
-    res.json({
+    
+    const responseData = {
       id: newDocument.id,
       fileName: newDocument.fileName,
       fileType: newDocument.fileType,
@@ -142,7 +143,10 @@ router.post('/upload', requireAuth, handleUpload, async (req, res) => {
       description: newDocument.description,
       uploadedAt: newDocument.uploadedAt,
       message: 'Document uploaded and stored successfully'
-    });
+    };
+    
+    console.log('📤 Sending upload response:', responseData);
+    res.status(200).json(responseData);
 
   } catch (error) {
     console.error('Error uploading document:', error);

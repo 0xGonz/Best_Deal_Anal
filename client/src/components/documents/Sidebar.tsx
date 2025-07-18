@@ -48,25 +48,45 @@ export const Sidebar = ({ dealId }: { dealId: number }) => {
       formData.append('dealId', dealId.toString());
       formData.append('documentType', 'other'); // Default document type
       
+      console.log('📤 Starting document upload for deal:', dealId);
+      console.log('📤 File details:', { name: file.name, size: file.size, type: file.type });
+      
       // Create an AbortController for timeout handling
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+      const timeoutId = setTimeout(() => {
+        console.log('📤 Upload timeout triggered');
+        controller.abort();
+      }, 120000); // 2 minute timeout - increased for larger files
       
       let response;
       try {
+        console.log('📤 Making fetch request to /api/documents/upload...');
         response = await fetch(`/api/documents/upload`, {
           method: 'POST',
           body: formData,
-          credentials: 'include', // Include session cookies for authentication
+          credentials: 'include',
           signal: controller.signal,
         });
         
+        console.log('📤 Fetch completed, response status:', response.status);
         clearTimeout(timeoutId);
       } catch (error) {
         clearTimeout(timeoutId);
+        console.error('📤 Upload fetch error:', error);
+        console.error('📤 Error details:', {
+          name: error instanceof Error ? error.name : 'Unknown',
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : 'No stack'
+        });
+        
         if (error instanceof Error && error.name === 'AbortError') {
           throw new Error('Upload timed out. Please try again with a smaller file or check your connection.');
         }
+        
+        if (error instanceof Error && error.message === 'Failed to fetch') {
+          throw new Error('Network error: Unable to connect to server. Please check your internet connection and try again.');
+        }
+        
         throw error;
       }
       
