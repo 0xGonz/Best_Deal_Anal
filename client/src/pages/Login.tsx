@@ -32,7 +32,7 @@ export default function Login() {
       setLocation('/');
     } catch (error) {
       // Error is already handled in auth-context
-
+      console.error('Login error:', error);
     } finally {
       setIsSubmitting(false);
     }

@@ -1,4 +1,4 @@
-
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -88,7 +88,9 @@ export default function EditUserDialog({ isOpen, onClose, user }: EditUserDialog
       if (newPassword && newPassword.trim()) {
         payload.password = newPassword;
       }
-
+      
+      console.log(`Sending update request for user ${id}:`, payload);
+      
       const res = await apiRequest("PATCH", `/api/users/${id}`, payload);
       
       if (!res.ok) {
@@ -99,7 +101,7 @@ export default function EditUserDialog({ isOpen, onClose, user }: EditUserDialog
       return await res.json();
     },
     onSuccess: (data) => {
-
+      console.log('User update successful:', data);
       toast({
         title: "User updated successfully",
         description: `${data.fullName || 'User'} information has been updated`,
@@ -114,7 +116,7 @@ export default function EditUserDialog({ isOpen, onClose, user }: EditUserDialog
       queryClient.refetchQueries({ queryKey: ["/api/users"] });
     },
     onError: (error: Error) => {
-
+      console.error('User update failed:', error);
       toast({
         title: "Failed to update user",
         description: error.message,

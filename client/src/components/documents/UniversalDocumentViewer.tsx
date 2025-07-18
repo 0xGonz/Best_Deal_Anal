@@ -1,4 +1,4 @@
-
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Download, FileText, FileSpreadsheet, FileImage, Eye } from 'lucide-react';
 import { Card } from "@/components/ui/card";
@@ -142,7 +142,7 @@ export default function UniversalDocumentViewer({ documentId, documentName, file
         const data = rows.slice(1).map(row => row.split(','));
         setPreviewData({ headers, data, totalRows: text.split('\n').length });
       } catch (error) {
-
+        console.error('Failed to load CSV preview:', error);
       }
     }
   };

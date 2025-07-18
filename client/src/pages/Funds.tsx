@@ -122,7 +122,7 @@ export default function Funds() {
         description: "Failed to update fund",
         variant: "destructive",
       });
-
+      console.error("Update error:", error);
     },
   });
   
@@ -145,7 +145,7 @@ export default function Funds() {
         description: "Failed to delete fund. There might be allocations linked to this fund.",
         variant: "destructive",
       });
-
+      console.error("Delete error:", error);
     },
   });
 

@@ -131,7 +131,7 @@ export function MiniMemoForm({
           setLoading(false);
         })
         .catch(err => {
-
+          console.error("Failed to fetch deals", err);
           setLoading(false);
         });
     }
@@ -273,7 +273,7 @@ export function MiniMemoForm({
         navigate(`/deals/${finalDealId}?tab=memos`);
       }
     } catch (error) {
-
+      console.error(`Failed to ${isEdit ? 'update' : 'create'} mini memo`, error);
       toast({
         title: "Error",
         description: `Failed to ${isEdit ? 'update' : 'create'} mini memo. ${isEdit ? 'You can only edit memos you created.' : ''}`,

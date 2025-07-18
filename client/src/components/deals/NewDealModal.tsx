@@ -136,13 +136,15 @@ export default function NewDealModal({ isOpen, onClose }: NewDealModalProps) {
 
   const uploadDocumentMutation = useMutation({
     mutationFn: async (params: { formData: FormData, type: string, dealId?: number }) => {
-
+      console.log(`Uploading document of type: ${params.type}${params.dealId ? ` for deal ${params.dealId}` : ''}`);
+      
       // Log the formData contents for debugging (except the file itself)
       const formDataEntries = Array.from(params.formData.entries());
       const formDataLog = formDataEntries
         .filter(([key]) => key !== 'file')
         .map(([key, value]) => `${key}: ${value}`);
-
+      console.log('FormData contents:', formDataLog);
+      
       // Using standard fetch for FormData upload
       const response = await fetch('/api/documents/upload', {
         method: 'POST',
@@ -152,21 +154,23 @@ export default function NewDealModal({ isOpen, onClose }: NewDealModalProps) {
       
       if (!response.ok) {
         const errorText = await response.text();
-
+        console.error('Document upload response error:', errorText);
         throw new Error(`Failed to upload document: ${errorText}`);
       }
       
       return response.json();
     },
     onSuccess: (result, variables) => {
-
+      console.log(`Successfully uploaded document of type: ${variables.type}`, result);
+      
       toast({
         title: 'Document uploaded',
         description: `The ${DOCUMENT_TYPES[variables.type as keyof typeof DOCUMENT_TYPES]} was successfully uploaded.`,
       });
     },
     onError: (error, variables) => {
-
+      console.error(`Error uploading ${variables.type} document:`, error);
+      
       toast({
         title: 'Upload failed',
         description: `There was an error uploading the ${DOCUMENT_TYPES[variables.type as keyof typeof DOCUMENT_TYPES]}. Please try again.`,
@@ -185,10 +189,10 @@ export default function NewDealModal({ isOpen, onClose }: NewDealModalProps) {
       // Parse the response JSON to get the deal data with ID
       try {
         const dealData = await response.json();
-
+        console.log('Deal created successfully with data:', dealData);
         return dealData;
       } catch (error) {
-
+        console.error('Error parsing deal creation response:', error);
         throw new Error('Failed to parse deal creation response');
       }
     },
@@ -198,7 +202,7 @@ export default function NewDealModal({ isOpen, onClose }: NewDealModalProps) {
       const dealName = form.getValues('name'); // Get the deal name from the form
       
       if (!dealId) {
-
+        console.error('Created deal has no ID!', dealData);
         toast({
           title: "Deal created",
           description: "New deal created but document upload failed - no deal ID returned.",
@@ -217,7 +221,8 @@ export default function NewDealModal({ isOpen, onClose }: NewDealModalProps) {
       
       // Upload all documents if available
       if (documentUploads.length > 0) {
-
+        console.log(`Uploading ${documentUploads.length} documents for new deal ${dealId}`);
+        
         // Keep track of successful uploads for toast notification summary
         let successCount = 0;
         let failCount = 0;
@@ -234,7 +239,7 @@ export default function NewDealModal({ isOpen, onClose }: NewDealModalProps) {
           }
           
           try {
-
+            console.log(`Starting upload for ${doc.file.name} (${doc.type}) to deal ${dealId}`);
             const result = await uploadDocumentMutation.mutateAsync({ 
               formData: formData,
               type: doc.type,
@@ -242,13 +247,13 @@ export default function NewDealModal({ isOpen, onClose }: NewDealModalProps) {
             });
             
             if (result && result.id) {
-
+              console.log(`Uploaded document ${result.id} successfully`);
               successCount++;
               return { success: true, doc };
             }
             return { success: false, doc, error: 'No document ID returned' };
           } catch (err) {
-
+            console.error(`Failed to upload ${doc.type}:`, err);
             failCount++;
             return { success: false, doc, error: err instanceof Error ? err.message : 'Unknown error' };
           }
@@ -280,7 +285,7 @@ export default function NewDealModal({ isOpen, onClose }: NewDealModalProps) {
         queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
         queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread-count'] });
       } catch (err) {
-
+        console.error('Failed to create notification:', err);
       }
       
       // Reset all form state

@@ -22,7 +22,7 @@ export function ProtectedRoute({
 
   // Add minimal debugging logs in production
   if (process.env.NODE_ENV !== 'production') {
-
+    console.log(`ProtectedRoute for ${path}: isLoading=${isLoading}, user=${user?.username}`);
   }
 
   // Show a loading state while checking authentication
@@ -42,7 +42,7 @@ export function ProtectedRoute({
   // If not authenticated, redirect to auth page
   if (!user) {
     if (process.env.NODE_ENV !== 'production') {
-
+      console.log(`ProtectedRoute ${path}: User not authenticated, redirecting to /auth`);
     }
     return (
       <Route path={path}>
@@ -57,7 +57,7 @@ export function ProtectedRoute({
     
     if (!user.role || !allowedRoles.includes(user.role)) {
       if (process.env.NODE_ENV !== 'production') {
-
+        console.log(`ProtectedRoute ${path}: User ${user.username} lacks required role (has: ${user.role}, required: ${allowedRoles.join(',')})`);
       }
       // Redirect to unauthorized page or dashboard
       return (
@@ -70,7 +70,7 @@ export function ProtectedRoute({
 
   // User is authenticated and authorized, render the component
   if (process.env.NODE_ENV !== 'production') {
-
+    console.log(`ProtectedRoute ${path}: Rendering component for user ${user.username}`);
   }
   return <Route path={path}>
     <Component />

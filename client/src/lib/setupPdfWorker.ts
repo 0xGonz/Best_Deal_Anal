@@ -11,6 +11,8 @@ import { pdfjs } from 'react-pdf';
 // Use static worker file from public directory
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
+console.log('✅ PDF.js worker configured with static worker file:', pdfjs.GlobalWorkerOptions.workerSrc);
+
 // Export simple status function for debugging
 export function getWorkerStatus() {
   return {

@@ -37,7 +37,7 @@ type RegisterData = {
 
 async function fetchCurrentUser(): Promise<User | null> {
   try {
-
+    console.log('Fetching current user data');
     const response = await fetch('/api/auth/me', {
       credentials: 'include',
       headers: {
@@ -48,24 +48,25 @@ async function fetchCurrentUser(): Promise<User | null> {
     });
     
     if (response.status === 401) {
-
+      console.log('User is not authenticated (401 response)');
       return null;
     }
     
     if (!response.ok) {
-
+      console.error('Error fetching user:', response.status, response.statusText);
       throw new Error(`Failed to fetch user: ${response.statusText}`);
     }
     
     const userData = await response.json();
     if (!userData || !userData.id) {
-
+      console.error('Invalid user data received:', userData);
       throw new Error('Invalid user data received from server');
     }
-
+    
+    console.log('Current user data fetched successfully:', userData);
     return userData;
   } catch (error) {
-
+    console.error('Exception in fetchCurrentUser:', error);
     return null;
   }
 }
@@ -91,34 +92,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Refresh auth method that can be called manually
   const refreshAuth = async (): Promise<User | null> => {
-
+    console.log('Manual auth refresh requested');
     const result = await refetch();
     return result.data ?? null;
   };
 
   const login = useMutation({
     mutationFn: async (credentials: LoginData) => {
-
+      console.log('Auth login mutation starting with credentials:', { username: credentials.username, password: '******' });
       try {
         const res = await apiRequest("POST", "/api/auth/login", credentials);
         if (!res.ok) {
           const errorText = await res.text().catch(() => 'Unknown error');
-
+          console.error('Login API error response:', res.status, errorText);
           throw new Error(errorText || `Login failed with status ${res.status}`);
         }
         
         const userData = await res.json();
         if (!userData || !userData.id) {
-
+          console.error('Invalid user data received from login:', userData);
           throw new Error('Invalid user data received from server');
         }
-
+        
+        console.log('Login API response successful:', userData);
         return userData;
       } catch (error) {
+        console.error('Login API request failed:', error);
         throw error;
       }
     },
     onSuccess: async (user: User) => {
+      console.log('Login mutation onSuccess handler, setting user data:', user);
       // Immediately update the local query cache
       localQueryClient.setQueryData(["/api/auth/me"], user);
       
@@ -148,12 +152,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         return response; // Return the response
       } catch (error) {
+        console.error('Logout API request failed:', error);
         throw error;
       }
     },
     onSuccess: () => {
       // Clear the auth data in the cache
-
+      console.log('Logout successful, clearing auth data');
       localQueryClient.setQueryData(["/api/auth/me"], null);
       
       // Invalidate all queries that depend on authentication
@@ -163,7 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.location.href = "/auth";
     },
     onError: (error: Error) => {
-
+      console.error('Logout mutation error handler:', error);
       toast({
         title: "Logout failed",
         description: error.message || "Unable to logout. Please try again.",
@@ -175,16 +180,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = useMutation({
     mutationFn: async (userData: RegisterData) => {
       try {
-
-          // Registration data validation
+        console.log('Starting registration with data:', { 
+          ...userData, 
+          password: '******', 
+          passwordConfirm: '******' 
+        });
         
         // Validate passwords match client-side as well
         if (userData.password !== userData.passwordConfirm) {
+          console.error('Client-side password validation failed: passwords do not match');
           throw new Error('Passwords do not match');
         }
         
         // Make the API request
-
+        console.log('Sending registration API request');
         const res = await apiRequest("POST", "/api/auth/register", userData);
         
         // Handle non-2xx responses
@@ -193,11 +202,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           try {
             // Try to get structured error JSON first
             const errorData = await res.json();
-
+            console.error('Registration API error JSON response:', res.status, errorData);
             errorText = errorData.message || JSON.stringify(errorData);
           } catch {
             // Fall back to plain text
             errorText = await res.text().catch(() => 'Unknown error');
+            console.error('Registration API error text response:', res.status, errorText);
           }
           throw new Error(errorText || `Registration failed with status ${res.status}`);
         }
@@ -205,15 +215,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Parse successful response
         const userResponse = await res.json();
         if (!userResponse || !userResponse.id) {
+          console.error('Invalid user data received from registration:', userResponse);
           throw new Error('Invalid user data received from server');
         }
-
+        
+        console.log('Registration API response successful:', userResponse);
         return userResponse;
       } catch (error) {
+        console.error('Registration API request failed:', error);
         throw error;
       }
     },
     onSuccess: async (user: User) => {
+      console.log('Registration mutation onSuccess handler, setting user data:', user);
       // Immediately update the local query cache
       localQueryClient.setQueryData(["/api/auth/me"], user);
       
@@ -235,6 +249,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Check for session on page load
   useEffect(() => {
+    console.log('Auth provider mounted - checking authentication status');
     refreshAuth();
   }, []);
 

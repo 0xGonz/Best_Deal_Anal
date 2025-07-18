@@ -37,7 +37,7 @@ export function formatCurrency(
       notation
     }).format(value);
   } catch (error) {
-
+    console.error('Error formatting currency:', error);
     return `$${value.toLocaleString()}`;
   }
 }
@@ -83,7 +83,7 @@ export function formatDate(
         return dateObj.toLocaleDateString();
     }
   } catch (error) {
-
+    console.error('Error formatting date:', error);
     return 'Invalid Date';
   }
 }
@@ -114,7 +114,7 @@ export function formatNumber(
       maximumFractionDigits
     }).format(value);
   } catch (error) {
-
+    console.error('Error formatting number:', error);
     return value.toString();
   }
 }

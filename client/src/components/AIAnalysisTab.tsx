@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -71,7 +70,7 @@ export default function AIAnalysisTab({ dealId, dealName }: AIAnalysisTabProps) 
     try {
       await sendMessage(analysisQuery);
     } catch (error) {
-
+      console.error('Document analysis error:', error);
     } finally {
       setLoadingDocumentId(null);
     }
@@ -84,7 +83,7 @@ export default function AIAnalysisTab({ dealId, dealName }: AIAnalysisTabProps) 
         <div className="flex items-center gap-2">
           <Brain className="h-5 w-5 text-blue-600" />
           <h3 className="font-semibold">AI Analysis</h3>
-          <Badge variant="secondary">{String(dealName || 'Deal')}</Badge>
+          <Badge variant="secondary">{dealName || 'Deal'}</Badge>
         </div>
         <div className="flex gap-2">
           <Button 

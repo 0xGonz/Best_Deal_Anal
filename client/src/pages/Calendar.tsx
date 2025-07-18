@@ -112,6 +112,10 @@ const CalendarPage = () => {
   const isLoading = isLoadingCalls || isLoadingEvents || isLoadingMeetings;
   
   // Debug authentication state
+  console.log('Calendar page auth state:', { 
+    isAuthenticated: !!currentUser, 
+    username: currentUser?.username
+  });
   
   // Filter events based on selected date, tab and status filters
   const filteredCalls = React.useMemo(() => {
@@ -484,6 +488,7 @@ const CalendarPage = () => {
               ) : (
                 <>
 
+                
                   {/* Capital Calls */}
                   {(activeTab === CALENDAR_EVENT_TYPES.ALL || activeTab === CALENDAR_EVENT_TYPES.CAPITAL_CALLS) && (
                     <>

@@ -31,11 +31,11 @@ export function UserAvatar({ user, size = 'md', className = '' }: UserAvatarProp
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const meData = await res.json();
         if (meData && meData.id === user?.id) {
-
+          console.log('Using /me endpoint data for avatar', meData);
           return meData;
         }
       } catch (e) {
-
+        console.error('Error fetching from /me endpoint', e);
       }
       
       // Otherwise try to get user by ID
@@ -43,10 +43,10 @@ export function UserAvatar({ user, size = 'md', className = '' }: UserAvatarProp
         try {
           const res = await fetch(`/api/users/${user.id}`);
           const userById = await res.json();
-
+          console.log(`Direct user fetch for avatar ID ${user.id}:`, userById);
           return userById;
         } catch (e) {
-
+          console.error(`Error fetching user ${user.id}`, e);
         }
       }
       
@@ -65,7 +65,7 @@ export function UserAvatar({ user, size = 'md', className = '' }: UserAvatarProp
   // Debug log for avatar color changes
   useEffect(() => {
     if (currentUserData?.avatarColor) {
-
+      console.log(`UserAvatar: User ${currentUserData.id} has color ${currentUserData.avatarColor}`);
     }
   }, [currentUserData?.avatarColor]);
   

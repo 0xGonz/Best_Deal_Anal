@@ -90,7 +90,7 @@ export function DistributionsManagementHub({
   const queryClient = useQueryClient();
 
   // Query for distributions based on mode
-  const { data: distributions = [], isLoading: distributionsLoading, error: distributionsError } = useQuery<any[]>({
+  const { data: distributions = [], isLoading: distributionsLoading, error: distributionsError } = useQuery({
     queryKey: mode === 'fund' 
       ? [`/api/distributions/fund/${fundId}`]
       : mode === 'allocation'
@@ -196,14 +196,14 @@ export function DistributionsManagementHub({
     totalDistributions: distributions.reduce((sum: number, dist: any) => {
       return sum + safeNumber(dist.amount);
     }, 0),
-    distributionCount: (distributions as any[]).length,
-    averageDistribution: (distributions as any[]).length > 0 
-      ? distributions.reduce((sum: number, dist: any) => sum + safeNumber(dist.amount), 0) / (distributions as any[]).length 
+    distributionCount: distributions.length,
+    averageDistribution: distributions.length > 0 
+      ? distributions.reduce((sum: number, dist: any) => sum + safeNumber(dist.amount), 0) / distributions.length 
       : 0,
-    lastDistributionDate: (distributions as any[]).length > 0 
+    lastDistributionDate: distributions.length > 0 
       ? distributions.sort((a: any, b: any) => new Date(b.distributionDate).getTime() - new Date(a.distributionDate).getTime())[0]?.distributionDate
       : undefined,
-    distributionYield: (distributions as any[]).length > 0 && allocations.length > 0
+    distributionYield: distributions.length > 0 && allocations.length > 0
       ? (distributions.reduce((sum: number, dist: any) => sum + safeNumber(dist.amount), 0) / 
          allocations.reduce((sum: number, alloc: any) => sum + safeNumber(alloc.amount), 1)) * 100
       : 0,
@@ -476,7 +476,7 @@ export function DistributionsManagementHub({
                     </pre>
                   </details>
                 </div>
-              ) : (distributions as any[]).length === 0 ? (
+              ) : distributions.length === 0 ? (
                 <div className="text-center py-6 text-muted-foreground">
                   No distributions found
                 </div>
@@ -493,7 +493,7 @@ export function DistributionsManagementHub({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {(distributions as any[]).map((distribution: any) => (
+                    {distributions.map((distribution: any) => (
                       <TableRow key={distribution.id}>
                         <TableCell>
                           {format(new Date(distribution.distributionDate), 'MMM d, yyyy')}
@@ -559,7 +559,7 @@ export function DistributionsManagementHub({
                     </pre>
                   </details>
                 </div>
-              ) : (distributions as any[]).length === 0 ? (
+              ) : distributions.length === 0 ? (
                 <div className="text-center py-6 text-muted-foreground">
                   <History className="mx-auto h-12 w-12 mb-4" />
                   <h3 className="text-sm font-semibold">No Historical Distributions</h3>
@@ -628,7 +628,7 @@ export function DistributionsManagementHub({
                 <CardTitle className="text-sm">Distribution Breakdown</CardTitle>
               </CardHeader>
               <CardContent>
-                {(distributions as any[]).length === 0 ? (
+                {distributions.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No distributions to analyze</p>
                 ) : (
                   <div className="space-y-2">
@@ -654,7 +654,7 @@ export function DistributionsManagementHub({
                 <CardTitle className="text-sm">Monthly Trends</CardTitle>
               </CardHeader>
               <CardContent>
-                {(distributions as any[]).length === 0 ? (
+                {distributions.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No data for trends</p>
                 ) : (
                   <div className="space-y-2">
@@ -698,7 +698,7 @@ export function DistributionsManagementHub({
                     Failed to load distributions data. Please try again.
                   </p>
                 </div>
-              ) : (distributions as any[]).length === 0 ? (
+              ) : distributions.length === 0 ? (
                 <div className="text-center py-6 text-muted-foreground">
                   <TrendingUp className="mx-auto h-12 w-12 mb-4" />
                   <h3 className="text-sm font-semibold">No Analytics Data</h3>

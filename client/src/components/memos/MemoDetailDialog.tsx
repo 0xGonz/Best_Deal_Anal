@@ -101,7 +101,7 @@ export function MemoDetailDialog({ isOpen, onOpenChange, memo, dealId, onDelete,
         setComments([]);
       }
     } catch (error) {
-
+      console.error('Error fetching comments:', error);
       setComments([]);
     } finally {
       setLoading(false);
@@ -150,7 +150,7 @@ export function MemoDetailDialog({ isOpen, onOpenChange, memo, dealId, onDelete,
         description: 'Your comment has been added to the memo',
       });
     } catch (error) {
-
+      console.error('Error adding comment:', error);
       toast({
         title: 'Error',
         description: 'Failed to add comment',
@@ -188,7 +188,7 @@ export function MemoDetailDialog({ isOpen, onOpenChange, memo, dealId, onDelete,
         throw new Error('Failed to delete memo');
       }
     } catch (error) {
-
+      console.error('Error deleting memo:', error);
       toast({
         title: 'Error',
         description: 'Failed to delete memo. You can only delete memos you created.',

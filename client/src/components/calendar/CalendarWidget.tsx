@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format, addDays, subDays, startOfWeek, endOfWeek, eachDayOfInterval, isToday, isPast } from 'date-fns';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, DollarSign, FileText, Users } from 'lucide-react';

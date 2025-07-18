@@ -146,7 +146,7 @@ export default function EditDealModal({ isOpen, onClose, dealId }: EditDealModal
         queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
         queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread-count'] });
       } catch (err) {
-
+        console.error('Failed to create notification:', err);
       }
       
       // Refresh deals data
@@ -248,6 +248,8 @@ export default function EditDealModal({ isOpen, onClose, dealId }: EditDealModal
                   </FormItem>
                 )}
               />
+
+
 
               <FormField
                 control={form.control}
