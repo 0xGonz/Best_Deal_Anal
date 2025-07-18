@@ -83,7 +83,7 @@ export default function AIAnalysisTab({ dealId, dealName }: AIAnalysisTabProps) 
         <div className="flex items-center gap-2">
           <Brain className="h-5 w-5 text-blue-600" />
           <h3 className="font-semibold">AI Analysis</h3>
-          <Badge variant="secondary">{dealName || 'Deal'}</Badge>
+          <Badge variant="secondary">{String(dealName || 'Deal')}</Badge>
         </div>
         <div className="flex gap-2">
           <Button 
