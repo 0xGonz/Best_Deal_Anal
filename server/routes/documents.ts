@@ -184,9 +184,21 @@ router.get('/:id/download', requireAuth, async (req, res) => {
     // 1) If there is nonzero fileData in the DB, send it:
     if (document.fileData && document.fileData.length > 0) {
       try {
-        console.log(`🔍 Base64 data info: length=${document.fileData.length}, starts with: ${document.fileData.substring(0, 20)}`);
+        // Handle both string and Buffer types for fileData
+        let fileDataString: string;
+        if (typeof document.fileData === 'string') {
+          fileDataString = document.fileData;
+        } else if (Buffer.isBuffer(document.fileData)) {
+          // If stored as binary, convert to base64 string
+          fileDataString = document.fileData.toString('base64');
+        } else {
+          console.error(`❌ Unexpected fileData type for document ${documentId}:`, typeof document.fileData);
+          return res.status(410).json({ error: 'Document content appears corrupted. Please try re-uploading this document.' });
+        }
         
-        const fileBuffer = Buffer.from(document.fileData, 'base64');
+        console.log(`🔍 Base64 data info: type=${typeof document.fileData}, length=${fileDataString.length}, starts with: ${fileDataString.substring(0, 20)}`);
+        
+        const fileBuffer = Buffer.from(fileDataString, 'base64');
         if (fileBuffer.length > 0) {
           // Validate PDF structure if it's a PDF file
           if (document.fileType === 'application/pdf') {
