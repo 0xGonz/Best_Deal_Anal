@@ -183,19 +183,24 @@ router.get('/:id/download', requireAuth, async (req, res) => {
 
     // 1) If there is nonzero fileData in the DB, send it:
     if (document.fileData && document.fileData.length > 0) {
-      const fileBuffer = Buffer.from(document.fileData, 'base64');
-      if (fileBuffer.length > 0) {
-        console.log(`📥 Serving document ${documentId} from database: ${document.fileName} (${fileBuffer.length} bytes)`);
-        
-        res.removeHeader('ETag');
-        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
-        res.setHeader('Pragma', 'no-cache');
-        res.setHeader('Expires', '0');
-        res.setHeader('Content-Type', document.fileType);
-        const disposition = document.fileType === 'application/pdf' ? 'inline' : 'attachment';
-        res.setHeader('Content-Disposition', `${disposition}; filename="${encodeURIComponent(document.fileName)}"`);
-        res.setHeader('Content-Length', fileBuffer.length.toString());
-        return res.send(fileBuffer);
+      try {
+        const fileBuffer = Buffer.from(document.fileData, 'base64');
+        if (fileBuffer.length > 0) {
+          console.log(`📥 Serving document ${documentId} from database: ${document.fileName} (${fileBuffer.length} bytes)`);
+          
+          res.removeHeader('ETag');
+          res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+          res.setHeader('Pragma', 'no-cache');
+          res.setHeader('Expires', '0');
+          res.setHeader('Content-Type', document.fileType);
+          const disposition = document.fileType === 'application/pdf' ? 'inline' : 'attachment';
+          res.setHeader('Content-Disposition', `${disposition}; filename="${encodeURIComponent(document.fileName)}"`);
+          res.setHeader('Content-Length', fileBuffer.length.toString());
+          return res.send(fileBuffer);
+        }
+      } catch (base64Error) {
+        console.error(`❌ Error decoding base64 data for document ${documentId}:`, base64Error);
+        // Fall through to filesystem fallback
       }
       // If fileBuffer.length is actually 0, skip to the filesystem fallback
     } 
