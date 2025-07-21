@@ -417,14 +417,22 @@ export const DevilsAdvocateTab: React.FC<DevilsAdvocateTabProps> = ({ dealId }) 
                     
                     <div className="flex items-center gap-2">
                       {comment.user && (
-                        <UserAvatar 
-                          user={comment.user}
-                          size="sm"
-                        />
+                        <>
+                          <span className="text-xs text-gray-500 uppercase tracking-wider">Raised by:</span>
+                          <UserAvatar 
+                            user={comment.user}
+                            size="sm"
+                          />
+                          <div className="text-right">
+                            <p className="text-sm font-medium text-gray-900">
+                              {comment.user.fullName}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(comment.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </>
                       )}
-                      <span className="text-sm text-gray-500">
-                        {new Date(comment.createdAt).toLocaleDateString()}
-                      </span>
                     </div>
                   </div>
                 </CardHeader>
@@ -443,9 +451,14 @@ export const DevilsAdvocateTab: React.FC<DevilsAdvocateTabProps> = ({ dealId }) 
                               user={comment.respondent}
                               size="xs"
                             />
-                            <span className="text-xs text-green-600">
-                              {comment.respondedAt && new Date(comment.respondedAt).toLocaleDateString()}
-                            </span>
+                            <div className="text-right">
+                              <p className="text-xs font-medium text-green-700">
+                                {comment.respondent.fullName}
+                              </p>
+                              <p className="text-xs text-green-600">
+                                {comment.respondedAt && new Date(comment.respondedAt).toLocaleDateString()}
+                              </p>
+                            </div>
                           </div>
                         )}
                       </div>
