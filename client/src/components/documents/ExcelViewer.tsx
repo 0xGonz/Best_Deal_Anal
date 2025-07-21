@@ -150,8 +150,8 @@ const ExcelViewer = ({ documentId, documentName, fileType }: ExcelViewerProps) =
   const currentSheet = sheets[activeSheet];
 
   return (
-    <Card className="w-full h-full">
-      <CardHeader className="flex flex-row items-center justify-between pb-2 border-b">
+    <Card className="w-full h-full flex flex-col">
+      <CardHeader className="flex-shrink-0 flex flex-row items-center justify-between p-3 border-b bg-card">
         <div className="flex items-center gap-3">
           <FileSpreadsheet className="h-5 w-5 text-green-600" />
           <div>
@@ -166,89 +166,112 @@ const ExcelViewer = ({ documentId, documentName, fileType }: ExcelViewerProps) =
           Download
         </Button>
       </CardHeader>
-      <CardContent className="p-0 h-[calc(100vh-300px)]">
+      <div className="flex-1 flex flex-col min-h-0">
         {sheets.length > 1 && (
-          <div className="flex gap-1 p-2 bg-muted/30 border-b overflow-x-auto">
-            {sheets.map((sheet, index) => (
-              <Button
-                key={index}
-                variant={index === activeSheet ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => setActiveSheet(index)}
-                className={cn(
-                  "h-7 px-3 text-xs font-medium whitespace-nowrap",
-                  index === activeSheet && "bg-background shadow-sm border"
-                )}
-              >
-                <TableIcon className="h-3 w-3 mr-1" />
-                {sheet.name}
-              </Button>
-            ))}
+          <div className="flex-shrink-0 bg-muted/20 border-b">
+            <div className="flex gap-1 p-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent">
+              {sheets.map((sheet, index) => (
+                <Button
+                  key={index}
+                  variant={index === activeSheet ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setActiveSheet(index)}
+                  className={cn(
+                    "h-8 px-4 text-sm font-medium whitespace-nowrap transition-colors",
+                    index === activeSheet 
+                      ? "bg-primary text-primary-foreground shadow-sm" 
+                      : "hover:bg-muted"
+                  )}
+                >
+                  <TableIcon className="h-3.5 w-3.5 mr-1.5" />
+                  {sheet.name}
+                </Button>
+              ))}
+            </div>
           </div>
         )}
         
-        <div className="relative h-full overflow-auto excel-table-container">
-          <table className="w-full text-sm excel-table">
-            <thead className="sticky top-0 z-20 bg-gray-50 dark:bg-gray-900 border-b-2">
-              <tr>
-                <th className="sticky left-0 z-30 bg-gray-100 dark:bg-gray-800 w-12 text-center text-xs font-medium text-gray-500 border-r-2 border-b">
-                  #
-                </th>
-                {currentSheet.headers.map((header, index) => (
-                  <th
-                    key={index}
-                    className="px-3 py-2 text-left font-semibold text-gray-700 dark:text-gray-300 border-r border-b bg-gray-50 dark:bg-gray-900 whitespace-nowrap min-w-[120px]"
-                  >
-                    <div className="flex items-center gap-1">
-                      <span className="text-[10px] text-gray-400 mr-1">{String.fromCharCode(65 + (index % 26))}</span>
-                      {header}
-                    </div>
+        <div className="flex-1 relative overflow-hidden">
+          <div className="absolute inset-0 overflow-auto excel-table-container">
+            <table className="excel-table">
+              <thead className="sticky top-0 z-20">
+                <tr>
+                  <th className="sticky left-0 z-30 bg-gray-100 dark:bg-gray-800 w-14 text-center text-xs font-medium text-gray-500 border-r-2 border-b">
+                    <div className="p-2">#</div>
                   </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {currentSheet.data.map((row, rowIndex) => (
-                <tr key={rowIndex} className="hover:bg-blue-50/50 dark:hover:bg-blue-900/10">
-                  <td className="sticky left-0 z-20 bg-gray-100 dark:bg-gray-800 w-12 text-center text-xs font-medium text-gray-500 border-r-2">
-                    {rowIndex + 1}
-                  </td>
-                  {currentSheet.headers.map((_, colIndex) => {
-                    const cellValue = row[colIndex]?.toString() || '';
-                    const isNumber = !isNaN(Number(cellValue)) && cellValue !== '';
-                    const isPercentage = cellValue.includes('%');
-                    const isCurrency = cellValue.includes('$');
+                  {currentSheet.headers.map((header, index) => {
+                    const colLetter = index < 26 
+                      ? String.fromCharCode(65 + index)
+                      : String.fromCharCode(65 + Math.floor(index / 26) - 1) + String.fromCharCode(65 + (index % 26));
                     
                     return (
-                      <td
-                        key={colIndex}
-                        className={cn(
-                          "px-3 py-1.5 border-r border-b whitespace-nowrap",
-                          "bg-white dark:bg-gray-950",
-                          isNumber && !isPercentage && !isCurrency && "text-right font-mono",
-                          isCurrency && "text-right font-medium text-green-700 dark:text-green-400",
-                          isPercentage && "text-right text-blue-700 dark:text-blue-400"
-                        )}
+                      <th
+                        key={index}
+                        className="relative group bg-gray-50 dark:bg-gray-900 border-r border-b"
+                        style={{ minWidth: '150px', maxWidth: '400px' }}
                       >
-                        {cellValue}
-                      </td>
+                        <div className="px-3 py-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] text-gray-400 font-normal">{colLetter}</span>
+                            <span className="font-semibold text-sm text-gray-700 dark:text-gray-300 truncate">
+                              {header}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </th>
                     );
                   })}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {currentSheet.data.map((row, rowIndex) => (
+                  <tr key={rowIndex} className="group">
+                    <td className="sticky left-0 z-10 bg-gray-100 dark:bg-gray-800 text-center text-xs font-medium text-gray-500 border-r-2 border-b">
+                      <div className="p-2">{rowIndex + 1}</div>
+                    </td>
+                    {currentSheet.headers.map((_, colIndex) => {
+                      const cellValue = row[colIndex]?.toString() || '';
+                      const isNumber = !isNaN(Number(cellValue)) && cellValue !== '';
+                      const isPercentage = cellValue.includes('%');
+                      const isCurrency = cellValue.includes('$');
+                      
+                      return (
+                        <td
+                          key={colIndex}
+                          className={cn(
+                            "relative border-r border-b transition-colors",
+                            "bg-white dark:bg-gray-950 group-hover:bg-gray-50 dark:group-hover:bg-gray-900/50",
+                            "hover:!bg-blue-50 dark:hover:!bg-blue-900/30",
+                            isNumber && !isPercentage && !isCurrency && "text-right",
+                            isCurrency && "text-right text-green-700 dark:text-green-400",
+                            isPercentage && "text-right text-blue-700 dark:text-blue-400"
+                          )}
+                        >
+                          <div className="px-3 py-1.5 text-sm truncate" title={cellValue}>
+                            {cellValue}
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
         
-        <div className="absolute bottom-0 left-0 right-0 bg-background border-t px-3 py-1.5 flex items-center justify-between text-xs text-muted-foreground">
-          <span>
-            Sheet: <strong>{currentSheet.name}</strong>
-          </span>
-          <span>
-            {currentSheet.data.length} rows × {currentSheet.headers.length} columns
-          </span>
+        <div className="flex-shrink-0 bg-card border-t px-4 py-2 flex items-center justify-between text-xs text-muted-foreground">
+          <div className="flex items-center gap-4">
+            <span>Sheet: <strong className="text-foreground">{currentSheet.name}</strong></span>
+            <span className="text-muted-foreground/70">•</span>
+            <span>{currentSheet.data.length} rows × {currentSheet.headers.length} columns</span>
+          </div>
+          <div className="text-right text-muted-foreground/50">
+            Scroll horizontally to see more columns →
+          </div>
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
 };
