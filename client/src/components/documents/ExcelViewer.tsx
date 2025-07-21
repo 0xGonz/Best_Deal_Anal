@@ -46,11 +46,55 @@ const ExcelViewer = ({ documentId, documentName, fileType }: ExcelViewerProps) =
         
         workbook.SheetNames.forEach(sheetName => {
           const worksheet = workbook.Sheets[sheetName];
-          const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
+          
+          // Parse with different options to ensure we get all data
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
+            header: 1,
+            defval: '', // Default value for empty cells
+            raw: false, // Get formatted strings instead of raw values
+            blankrows: false // Skip blank rows
+          }) as any[][];
+          
+          console.log(`Sheet ${sheetName}: Found ${jsonData.length} rows`);
           
           if (jsonData.length > 0) {
-            const headers = jsonData[0].map((h: any, i: number) => h?.toString() || `Column ${i + 1}`);
-            const data = jsonData.slice(1);
+            // Find the first row with data to use as headers
+            let headerRowIndex = 0;
+            let headers: string[] = [];
+            
+            // Look for a row that has multiple non-empty cells
+            for (let i = 0; i < Math.min(jsonData.length, 10); i++) {
+              const row = jsonData[i];
+              if (Array.isArray(row) && row.filter(cell => cell !== null && cell !== undefined && cell !== '').length > 1) {
+                headerRowIndex = i;
+                headers = row.map((h: any, idx: number) => {
+                  const val = h?.toString().trim();
+                  return val || `Column ${idx + 1}`;
+                });
+                break;
+              }
+            }
+            
+            // If no good header row found, create headers based on the widest row
+            if (headers.length === 0) {
+              const maxCols = Math.max(...jsonData.map(row => Array.isArray(row) ? row.length : 0));
+              headers = Array(maxCols).fill(0).map((_, i) => `Column ${i + 1}`);
+              headerRowIndex = -1; // No header row, start data from row 0
+            }
+            
+            console.log(`Headers found: ${headers.length} columns`);
+            
+            // Get data rows (skip header row if found)
+            const dataStartIndex = headerRowIndex >= 0 ? headerRowIndex + 1 : 0;
+            const data = jsonData.slice(dataStartIndex).map(row => {
+              // Ensure each row has the same number of columns as headers
+              if (!Array.isArray(row)) return Array(headers.length).fill('');
+              const paddedRow = [...row];
+              while (paddedRow.length < headers.length) {
+                paddedRow.push('');
+              }
+              return paddedRow;
+            });
             
             sheetsData.push({
               name: sheetName,
