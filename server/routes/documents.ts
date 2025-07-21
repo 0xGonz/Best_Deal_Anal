@@ -185,20 +185,24 @@ router.get('/:id/download', requireAuth, async (req, res) => {
     if (document.fileData && document.fileData.length > 0) {
       try {
         // Handle both string and Buffer types for fileData
-        let fileDataString: string;
+        let fileBuffer: Buffer;
+        
         if (typeof document.fileData === 'string') {
-          fileDataString = document.fileData;
+          // If stored as text/string, decode from base64
+          console.log(`🔍 Processing string data: length=${document.fileData.length}`);
+          fileBuffer = Buffer.from(document.fileData, 'base64');
         } else if (Buffer.isBuffer(document.fileData)) {
-          // If stored as binary, convert to base64 string
-          fileDataString = document.fileData.toString('base64');
+          // If stored as bytea/Buffer, it's already binary data
+          // The data is base64 encoded within the bytea, so we need to:
+          // 1. Convert Buffer to string (which gives us the base64)
+          // 2. Then decode the base64 to get actual PDF bytes
+          const base64String = document.fileData.toString('utf-8');
+          console.log(`🔍 Processing bytea data: buffer length=${document.fileData.length}, base64 length=${base64String.length}, starts with: ${base64String.substring(0, 20)}`);
+          fileBuffer = Buffer.from(base64String, 'base64');
         } else {
           console.error(`❌ Unexpected fileData type for document ${documentId}:`, typeof document.fileData);
           return res.status(410).json({ error: 'Document content appears corrupted. Please try re-uploading this document.' });
         }
-        
-        console.log(`🔍 Base64 data info: type=${typeof document.fileData}, length=${fileDataString.length}, starts with: ${fileDataString.substring(0, 20)}`);
-        
-        const fileBuffer = Buffer.from(fileDataString, 'base64');
         if (fileBuffer.length > 0) {
           // Validate PDF structure if it's a PDF file
           if (document.fileType === 'application/pdf') {
