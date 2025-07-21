@@ -25,6 +25,7 @@ import v1Router from './routes/v1/index'; // V1 API routes including AI analysis
 import aiAnalysisRoutes from './routes/ai-analysis';
 import enumsRoutes from './routes/enums';
 import fundOverviewRoutes from './routes/fund-overview';
+import devilsAdvocateRoutes from './routes/devils-advocate';
 
 // Utils
 import { errorHandler, notFoundHandler } from './utils/error-handler';
@@ -69,6 +70,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register route modules
   app.use('/api/deals', dealsRoutes);
+  app.use('/api/deals', devilsAdvocateRoutes); // Devil's advocate routes for deals
   app.use('/api/funds', fundsRoutes);
   app.use('/api/users', usersRoutes);
   app.use('/api/auth', authRoutes);

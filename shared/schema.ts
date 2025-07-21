@@ -520,3 +520,31 @@ export const insertDistributionSchema = createInsertSchema(distributions).omit({
 
 export type Distribution = typeof distributions.$inferSelect;
 export type InsertDistribution = z.infer<typeof insertDistributionSchema>;
+
+// Devil's Advocate Comments - For team members to highlight concerns and risks
+export const devilsAdvocateComments = pgTable("devils_advocate_comments", {
+  id: serial("id").primaryKey(),
+  dealId: integer("deal_id").notNull().references(() => deals.id, { onDelete: "cascade" }),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  category: text("category", { 
+    enum: ["market_risk", "execution_risk", "financial_risk", "competitive_risk", "regulatory_risk", "team_risk", "technology_risk", "timing_risk", "other"] 
+  }).notNull().default("other"),
+  severity: text("severity", { enum: ["low", "medium", "high", "critical"] }).notNull().default("medium"),
+  status: text("status", { enum: ["open", "addressed", "dismissed"] }).notNull().default("open"),
+  response: text("response"), // Team's response to the concern
+  respondedBy: integer("responded_by").references(() => users.id),
+  respondedAt: timestamp("responded_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertDevilsAdvocateCommentSchema = createInsertSchema(devilsAdvocateComments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type DevilsAdvocateComment = typeof devilsAdvocateComments.$inferSelect;
+export type InsertDevilsAdvocateComment = z.infer<typeof insertDevilsAdvocateCommentSchema>;

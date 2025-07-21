@@ -23,6 +23,7 @@ import AIAnalysisTab from "@/components/AIAnalysisTab";
 import { DocumentAnalysisPanel } from "@/components/DocumentAnalysisPanel";
 import InvestmentTrackingTab from "@/components/deals/InvestmentTrackingTab";
 import { DealDistributionsTab } from "@/components/deals/DealDistributionsTab";
+import { DevilsAdvocateTab } from "@/components/deals/DevilsAdvocateTab";
 import { 
   Card, 
   CardHeader, 
@@ -625,6 +626,9 @@ export default function DealDetail() {
               <TabsTrigger value="distributions" className="text-xs sm:text-sm h-8 sm:h-10 px-2 sm:px-4 flex-1">
                 Distributions
               </TabsTrigger>
+              <TabsTrigger value="devils-advocate" className="text-xs sm:text-sm h-8 sm:h-10 px-2 sm:px-4 flex-1">
+                Devil's Advocate
+              </TabsTrigger>
 
             </TabsList>
           </div>
@@ -762,6 +766,12 @@ export default function DealDetail() {
 
           <TabsContent value="distributions">
             <DealDistributionsTab dealId={Number(dealId)} />
+          </TabsContent>
+
+          <TabsContent value="devils-advocate">
+            <div className="mt-4">
+              {deal && <DevilsAdvocateTab dealId={deal.id} />}
+            </div>
           </TabsContent>
 
         </Tabs>
