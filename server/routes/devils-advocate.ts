@@ -112,7 +112,7 @@ router.get('/:dealId/devils-advocate', requireAuth, async (req, res) => {
 router.post('/:dealId/devils-advocate', requireAuth, async (req, res) => {
   try {
     const dealId = parseInt(req.params.dealId);
-    const userId = req.user!.id;
+    const userId = req.session.userId!;
     
     if (isNaN(dealId)) {
       return res.status(400).json({ error: 'Invalid deal ID' });
@@ -179,7 +179,7 @@ router.patch('/:dealId/devils-advocate/:commentId/respond', requireAuth, async (
   try {
     const dealId = parseInt(req.params.dealId);
     const commentId = parseInt(req.params.commentId);
-    const userId = req.user!.id;
+    const userId = req.session.userId!;
     
     if (isNaN(dealId) || isNaN(commentId)) {
       return res.status(400).json({ error: 'Invalid deal ID or comment ID' });
@@ -263,7 +263,7 @@ router.delete('/:dealId/devils-advocate/:commentId', requireAuth, async (req, re
   try {
     const dealId = parseInt(req.params.dealId);
     const commentId = parseInt(req.params.commentId);
-    const userId = req.user!.id;
+    const userId = req.session.userId!;
     
     if (isNaN(dealId) || isNaN(commentId)) {
       return res.status(400).json({ error: 'Invalid deal ID or comment ID' });
@@ -284,7 +284,7 @@ router.delete('/:dealId/devils-advocate/:commentId', requireAuth, async (req, re
       return res.status(404).json({ error: 'Comment not found' });
     }
 
-    if (comment.userId !== userId && req.user!.role !== 'admin') {
+    if (comment.userId !== userId && req.session.role !== 'admin') {
       return res.status(403).json({ error: 'Not authorized to delete this comment' });
     }
 

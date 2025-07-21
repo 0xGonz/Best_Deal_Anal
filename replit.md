@@ -129,6 +129,12 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 21, 2025**: Devil's Advocate Feature Database Fix
+  - **RESOLVED: Devils Advocate Comments Table Missing**: Created missing `devils_advocate_comments` table in database
+  - **Database Schema Update**: Added table with proper foreign key relationships to deals and users tables
+  - **Feature Functionality Restored**: Devil's Advocate tab now loads without errors and can store/retrieve risk comments
+  - **API Validation**: Confirmed all endpoints working correctly with proper authentication and data retrieval
+
 - **July 16, 2025**: Document Upload and Allocation Deletion Fixes
   - **RESOLVED: Document Upload "Unexpected end of form" Error**: Fixed critical middleware conflicts that were corrupting multipart form uploads
   - **Root Cause Identification**: Global upload middleware was interfering with route-specific multer processing, causing double file stream consumption
