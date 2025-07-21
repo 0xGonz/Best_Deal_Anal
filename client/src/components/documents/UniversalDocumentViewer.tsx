@@ -5,6 +5,8 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import SimpleDocumentViewer from './SimpleDocumentViewer';
 import EmbeddedPDFViewer from './EmbeddedPDFViewer';
+import ExcelViewer from './ExcelViewer';
+import CSVViewer from './CSVViewer';
 
 interface UniversalDocumentViewerProps {
   documentId: number;
@@ -21,12 +23,12 @@ const getDocumentConfig = (fileName: string, fileType?: string) => {
   
   // Investment document categories for AI analysis
   const configs = {
-    // Spreadsheets - Critical for financial analysis (Download only due to external service limitations)
+    // Spreadsheets - Critical for financial analysis (Now with preview!)
     excel: {
       extensions: ['xlsx', 'xls', 'xlsm'],
       icon: FileSpreadsheet,
-      canPreview: false,
-      viewerType: 'download',
+      canPreview: true,
+      viewerType: 'excel',
       color: 'text-green-600',
       aiCategory: 'financial-model',
       description: 'Financial Model/Spreadsheet'
@@ -95,6 +97,19 @@ export default function UniversalDocumentViewer({ documentId, documentName, file
   const documentUrl = `/api/documents/${documentId}/download`;
   const docConfig = getDocumentConfig(documentName, fileType);
   const IconComponent = docConfig.icon;
+  
+  // Choose the appropriate viewer based on document type
+  if (docConfig.canPreview) {
+    switch (docConfig.viewerType) {
+      case 'pdf':
+        return <EmbeddedPDFViewer documentId={documentId} documentName={documentName} fileType={fileType} />;
+      case 'excel':
+        return <ExcelViewer documentId={documentId} documentName={documentName} fileType={fileType} />;
+      case 'csv':
+        return <CSVViewer documentId={documentId} documentName={documentName} fileType={fileType} />;
+      // Add more viewer types as needed
+    }
+  }
 
   const handleDownload = async () => {
     setIsLoading(true);
