@@ -1,0 +1,57 @@
+Query Response from /api/deals/139/stars: Object
+index-BxM9kHlb.js:48 Query data received from /api/deals/139/stars: Array(0)
+index-BxM9kHlb.js:48 Query Response from /api/notifications: Object
+index-BxM9kHlb.js:48 Query data received from /api/notifications: Array(3)
+index-BxM9kHlb.js:48 Query Response from /api/funds: Object
+index-BxM9kHlb.js:48 Query data received from /api/funds: Array(2)
+index-BxM9kHlb.js:497 Using /me endpoint data for avatar Object
+index-BxM9kHlb.js:48 Query Response from /api/deals: Object
+index-BxM9kHlb.js:48 Query data received from /api/deals: Array(124)
+index-BxM9kHlb.js:48 Query Response from /api/deals/139: Object
+index-BxM9kHlb.js:48 Query data received from /api/deals/139: Object
+index-BxM9kHlb.js:497 UserAvatar: User 4 has color #0E4DA4
+index-BxM9kHlb.js:48 Query fetch request: /api/documents/deal/139 Object
+index-BxM9kHlb.js:595 🔍 useDealDocuments: Processing data for deal 139: undefined
+index-BxM9kHlb.js:595 ⚠️ useDealDocuments: No data received or data is not an array: undefined
+index-BxM9kHlb.js:48 Query Response from /api/auth/me: Object
+index-BxM9kHlb.js:48 Query data received from /api/auth/me: Object
+index-BxM9kHlb.js:497 Using /me endpoint data for avatar Object
+index-BxM9kHlb.js:48 Query Response from /api/documents/deal/139: Object
+index-BxM9kHlb.js:48 Query data received from /api/documents/deal/139: Array(0)
+index-BxM9kHlb.js:595 🔍 useDealDocuments: Processing data for deal 139: Array(0)
+index-BxM9kHlb.js:595 📝 useDealDocuments: Setting 0 documents in context: Array(0)
+index-BxM9kHlb.js:595 ❌ useDealDocuments: No documents found, clearing selection
+index-BxM9kHlb.js:582 📤 Starting document upload for deal: 139
+index-BxM9kHlb.js:582 📤 File details: Object
+index-BxM9kHlb.js:582 📤 Making fetch request to /api/documents/upload...
+index-BxM9kHlb.js:582 📤 Fetch completed, response status: 200
+index-BxM9kHlb.js:48 Query fetch request: /api/documents/deal/139 Object
+index-BxM9kHlb.js:497 Using /me endpoint data for avatar Object
+index-BxM9kHlb.js:48 Query Response from /api/documents/deal/139: Object
+index-BxM9kHlb.js:48 Query data received from /api/documents/deal/139: Array(1)
+index-BxM9kHlb.js:595 🔍 useDealDocuments: Processing data for deal 139: Array(1)
+index-BxM9kHlb.js:595 📝 useDealDocuments: Setting 1 documents in context: Array(1)
+index-BxM9kHlb.js:595 🎯 useDealDocuments: Auto-selecting first document: Object
+index-BxM9kHlb.js:593 📤 Loading PDF document: Object
+index-BxM9kHlb.js:595 🔍 useDealDocuments: Processing data for deal 139: Array(1)
+index-BxM9kHlb.js:595 📝 useDealDocuments: Setting 1 documents in context: Array(1)
+index-BxM9kHlb.js:48 Query fetch request: /api/documents/deal/139 Object
+index-BxM9kHlb.js:595 🔍 useDealDocuments: Processing data for deal 139: Array(1)
+index-BxM9kHlb.js:595 📝 useDealDocuments: Setting 1 documents in context: Array(1)
+ Warning: Indexing all PDF objects
+index-BxM9kHlb.js:593  ❌ PDF load error: Mnemessage: "Invalid PDF structure."name: "InvalidPDFException"stack: "Error\n    at https://deal-flow-lifecyclev-1-bgonzalez9.replit.app/assets/index-BxM9kHlb.js:582:20889\n    at https://deal-flow-lifecyclev-1-bgonzalez9.replit.app/assets/index-BxM9kHlb.js:582:20917"[[Prototype]]: Error
+(anonymous) @ index-BxM9kHlb.js:593
+index-BxM9kHlb.js:48 Query Response from /api/documents/deal/139: Object
+index-BxM9kHlb.js:48 Query data received from /api/documents/deal/139: Array(1)
+index-BxM9kHlb.js:595 🔍 useDealDocuments: Processing data for deal 139: Array(1)
+index-BxM9kHlb.js:595 📝 useDealDocuments: Setting 1 documents in context: Array(1)
+index-BxM9kHlb.js:593  Document header validation failed - not a valid PDF structure: JVBER
+(anonymous) @ index-BxM9kHlb.js:593
+index-BxM9kHlb.js:497 Using /me endpoint data for avatar Object
+index-BxM9kHlb.js:48 Query fetch request: /api/system/health {queryKey: Array(1), unauthorizedBehavior: 'returnNull'}
+index-BxM9kHlb.js:48 Query Response from /api/system/health: {status: 200, statusText: '', ok: true}
+index-BxM9kHlb.js:48 Query data received from /api/system/health: {status: 'ok', timestamp: '2025-07-21T20:10:56.250Z', storage: 'pg', databaseConnected: true, environment: 'production', …}
+index-BxM9kHlb.js:48 Query fetch request: /api/auth/me {queryKey: Array(1), unauthorizedBehavior: 'returnNull'}
+index-BxM9kHlb.js:48 Query Response from /api/auth/me: {status: 200, statusText: '', ok: true}
+index-BxM9kHlb.js:48 Query data received from /api/auth/me: {id: 4, username: 'Gonz', fullName: 'Brett Gonzalez', initials: 'BG', email: 'bgonzalez@doliveradvisors.com', …}
+index-BxM9kHlb.js:497 Using /me endpoint data for avatar {id: 4, username: 'Gonz', fullName: 'Brett Gonzalez', initials: 'BG', email: 'bgonzalez@doliveradvisors.com', …}

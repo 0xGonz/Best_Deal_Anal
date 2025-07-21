@@ -54,10 +54,25 @@ export class DatabaseDocumentStorage {
       console.log(`📄 Creating document: ${documentData.fileName} for deal ${documentData.dealId}`);
       console.log(`📊 Original buffer size: ${documentData.fileBuffer.length} bytes`);
       
+      // Validate file format before storage
+      if (documentData.fileType === 'application/pdf') {
+        const pdfHeader = documentData.fileBuffer.subarray(0, 4).toString();
+        if (!pdfHeader.startsWith('%PDF')) {
+          throw new Error(`Invalid PDF format: expected %PDF header, got ${pdfHeader}`);
+        }
+        console.log(`✅ Valid PDF header detected: ${pdfHeader}`);
+      }
+      
       // Convert buffer to base64 for storage
       const fileDataBase64 = documentData.fileBuffer.toString('base64');
       console.log(`📝 Base64 string length: ${fileDataBase64.length} characters`);
       console.log(`🔍 First 50 chars of base64: ${fileDataBase64.substring(0, 50)}...`);
+      
+      // Validate base64 can be decoded back correctly
+      const testBuffer = Buffer.from(fileDataBase64, 'base64');
+      if (testBuffer.length !== documentData.fileBuffer.length) {
+        throw new Error(`Base64 encoding/decoding mismatch: original=${documentData.fileBuffer.length}, decoded=${testBuffer.length}`);
+      }
       
       const [newDocument] = await db
         .insert(documents)

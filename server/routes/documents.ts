@@ -184,8 +184,21 @@ router.get('/:id/download', requireAuth, async (req, res) => {
     // 1) If there is nonzero fileData in the DB, send it:
     if (document.fileData && document.fileData.length > 0) {
       try {
+        console.log(`🔍 Base64 data info: length=${document.fileData.length}, starts with: ${document.fileData.substring(0, 20)}`);
+        
         const fileBuffer = Buffer.from(document.fileData, 'base64');
         if (fileBuffer.length > 0) {
+          // Validate PDF structure if it's a PDF file
+          if (document.fileType === 'application/pdf') {
+            const pdfHeader = fileBuffer.subarray(0, 4).toString();
+            if (!pdfHeader.startsWith('%PDF')) {
+              console.error(`❌ Invalid PDF structure for document ${documentId}: expected %PDF, got ${pdfHeader}`);
+              return res.status(410).json({ error: 'Document appears corrupted or incomplete. Please try re-uploading this document.' });
+            } else {
+              console.log(`✅ Valid PDF header detected: ${pdfHeader}`);
+            }
+          }
+          
           console.log(`📥 Serving document ${documentId} from database: ${document.fileName} (${fileBuffer.length} bytes)`);
           
           res.removeHeader('ETag');
@@ -200,7 +213,7 @@ router.get('/:id/download', requireAuth, async (req, res) => {
         }
       } catch (base64Error) {
         console.error(`❌ Error decoding base64 data for document ${documentId}:`, base64Error);
-        // Fall through to filesystem fallback
+        return res.status(410).json({ error: 'Document content appears corrupted. Please try re-uploading this document.' });
       }
       // If fileBuffer.length is actually 0, skip to the filesystem fallback
     } 
