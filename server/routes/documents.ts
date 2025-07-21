@@ -101,38 +101,33 @@ router.post('/upload', requireAuth, handleUpload, async (req, res) => {
     
     console.log(`Processing document upload: ${sanitizedFileName} for deal ${dealId}`);
 
-    // Create storage directory
-    const storageDir = join(process.cwd(), 'storage', 'documents');
-    await fs.mkdir(storageDir, { recursive: true });
-
-    // Generate unique filename to prevent conflicts
-    const timestamp = Date.now();
-    const fileExtension = sanitizedFileName.substring(sanitizedFileName.lastIndexOf('.'));
-    const uniqueFileName = `${timestamp}_${sanitizedFileName}`;
-    const filePath = join(storageDir, uniqueFileName);
-
-    // Move the temporary file to the storage directory (multer already saved it)
+    // Read the temporary file uploaded by multer
     const tempFilePath = req.file.path;
-    await fs.rename(tempFilePath, filePath);
+    const fileBuffer = await fs.readFile(tempFilePath);
     
-    // Store metadata in database (file system storage mode)
-    const [newDocument] = await db
-      .insert(documents)
-      .values({
-        dealId: parseInt(dealId),
-        fileName: sanitizedFileName,
-        fileType: req.file.mimetype,
-        fileSize: req.file.size,
-        filePath: filePath,
-        fileData: null, // No database storage
-        uploadedBy: userId,
-        description: description || null,
-        documentType: (documentType as any) || 'other',
-        uploadedAt: new Date()
-      })
-      .returning();
+    console.log(`📁 Reading temporary file: ${tempFilePath} (${fileBuffer.length} bytes)`);
+    
+    // Use the database storage service to store the document
+    const newDocument = await databaseDocumentStorage.createDocument({
+      dealId: parseInt(dealId),
+      fileName: sanitizedFileName,
+      fileType: req.file.mimetype,
+      fileSize: req.file.size,
+      fileBuffer: fileBuffer,
+      uploadedBy: userId,
+      description: description || null,
+      documentType: documentType || 'other'
+    });
+    
+    // Clean up the temporary file
+    try {
+      await fs.unlink(tempFilePath);
+      console.log(`🧹 Cleaned up temporary file: ${tempFilePath}`);
+    } catch (cleanupError) {
+      console.warn(`⚠️ Could not clean up temporary file: ${tempFilePath}`, cleanupError);
+    }
 
-    console.log(`✓ Document uploaded successfully: ID ${newDocument.id}, saved to ${filePath}`);
+    console.log(`✓ Document uploaded successfully: ID ${newDocument.id}, stored in database`);
     
     const responseData = {
       id: newDocument.id,
