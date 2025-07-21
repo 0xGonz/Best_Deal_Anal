@@ -26,12 +26,14 @@ import {
   Scale,
   Target,
   Calendar,
-  MoreHorizontal
+  MoreHorizontal,
+  Trash2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { UserAvatar } from '@/components/common/UserAvatar';
 import { useAuth } from '@/hooks/use-auth';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface DevilsAdvocateComment {
   id: number;
@@ -220,6 +222,33 @@ export const DevilsAdvocateTab: React.FC<DevilsAdvocateTabProps> = ({ dealId }) 
   const handleStatusUpdate = (commentId: number, status: string) => {
     updateStatusMutation.mutate({ commentId, status });
   };
+
+  // Delete comment mutation
+  const deleteCommentMutation = useMutation({
+    mutationFn: async ({ commentId }: { commentId: number }) => {
+      return await fetch(`/api/deals/${dealId}/devils-advocate/${commentId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to delete comment');
+        return res.json();
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/deals/${dealId}/devils-advocate`] });
+      toast({
+        title: 'Success',
+        description: 'Comment deleted successfully',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to delete comment',
+        variant: 'destructive',
+      });
+    },
+  });
 
   const openResponseDialog = (comment: DevilsAdvocateComment) => {
     setSelectedComment(comment);
@@ -511,6 +540,39 @@ export const DevilsAdvocateTab: React.FC<DevilsAdvocateTabProps> = ({ dealId }) 
                           <Clock className="h-4 w-4 mr-2" />
                           Reopen
                         </Button>
+                      )}
+                      
+                      {/* Delete button for admins */}
+                      {user?.role === 'admin' && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button 
+                              size="sm" 
+                              variant="destructive"
+                              className="ml-2"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Comment</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete this comment? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => deleteCommentMutation.mutate({ commentId: comment.id })}
+                                className="bg-red-600 hover:bg-red-700"
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       )}
                     </div>
                   </div>
