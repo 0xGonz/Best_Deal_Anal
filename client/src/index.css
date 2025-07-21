@@ -2,6 +2,87 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Excel-like table styles */
+.excel-table {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Arial', sans-serif;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.excel-table th,
+.excel-table td {
+  border: 1px solid #d1d5db;
+}
+
+.excel-table thead th {
+  background: linear-gradient(to bottom, #f9fafb, #f3f4f6);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  user-select: none;
+}
+
+.excel-table tbody td {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.excel-table tbody tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.dark .excel-table tbody tr:nth-child(even) {
+  background-color: rgba(30, 41, 59, 0.3);
+}
+
+.excel-table tbody tr:hover {
+  background-color: #e0f2fe !important;
+}
+
+.dark .excel-table tbody tr:hover {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+/* Cell highlighting on hover */
+.excel-table tbody td:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+  outline: 2px solid #3b82f6;
+  outline-offset: -2px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Sticky header and row numbers */
+.excel-table thead th.sticky,
+.excel-table tbody td.sticky {
+  position: sticky;
+  z-index: 10;
+}
+
+/* Excel-like scrollbar */
+.excel-table-container::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+.excel-table-container::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+}
+
+.excel-table-container::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 2px;
+}
+
+.excel-table-container::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+.excel-table-container::-webkit-scrollbar-corner {
+  background: #f1f5f9;
+}
+
 /* Custom loading animation styles */
 .loading-animation {
   position: relative;
