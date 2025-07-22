@@ -129,6 +129,12 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 22, 2025**: Sidebar Branding Update - COMPLETE
+  - **Doliver Logo Implementation**: Replaced "Deal Flow" text header with Doliver logo in sidebar
+  - **Visual Refinements**: Adjusted logo sizing based on user feedback (final size: 32px height)
+  - **Clean Design**: Removed redundant text, logo now stands alone with proper padding and spacing
+  - **Asset Management**: Used "doliver logo final.png" from project root, properly integrated into React assets
+
 - **July 22, 2025**: Interactive Sector Chart Navigation Feature - COMPLETE
   - **IMPLEMENTED: Clickable Pie Chart Sectors**: Both dashboard and pipeline sector distribution charts now have fully functional clickable pie sectors and legend items
   - **Pipeline Navigation**: Clicking on any sector navigates directly to pipeline page with that sector automatically filtered
