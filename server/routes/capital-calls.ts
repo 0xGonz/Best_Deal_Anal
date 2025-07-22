@@ -167,6 +167,29 @@ router.get('/allocation/:id', requireAuth, requirePermission('read', 'capital_ca
 });
 
 /**
+ * GET /api/capital-calls/deal/:id - Get all capital calls for deal
+ */
+router.get('/deal/:id', requireAuth, requirePermission('read', 'capital_call'), async (req: Request, res: Response) => {
+  try {
+    const dealId = parseInt(req.params.id);
+    if (isNaN(dealId)) {
+      return res.status(400).json({ error: 'Invalid deal ID' });
+    }
+
+    const capitalCalls = await capitalCallService.getCapitalCallsByDeal(dealId);
+    
+    res.status(200).json(capitalCalls);
+
+  } catch (error) {
+    console.error('Error getting deal capital calls:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
  * GET /api/capital-calls/fund/:id - Get all capital calls for fund
  */
 router.get('/fund/:id', requireAuth, requirePermission('read', 'capital_call'), async (req: Request, res: Response) => {

@@ -286,6 +286,43 @@ export class CapitalCallLifecycleService {
   }
 
   /**
+   * Gets all capital calls for a deal
+   */
+  async getCapitalCallsByDeal(dealId: number): Promise<any[]> {
+    try {
+      // Get all allocations for this deal
+      const allocations = await this.storage.getAllocationsByDeal(dealId);
+      
+      const allCapitalCalls: any[] = [];
+      
+      // Get capital calls for each allocation
+      for (const allocation of allocations) {
+        const capitalCalls = await this.storage.getCapitalCallsByAllocation(allocation.id);
+        
+        // Add allocation and fund info to each capital call
+        for (const call of capitalCalls) {
+          allCapitalCalls.push({
+            ...call,
+            allocation,
+            fundId: allocation.fundId,
+            fundName: allocation.fundName || '',
+            dealId: allocation.dealId,
+            dealName: allocation.dealName || ''
+          });
+        }
+      }
+      
+      // Sort by due date
+      return allCapitalCalls.sort((a, b) => 
+        new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+      );
+    } catch (error) {
+      console.error('Error getting capital calls by deal:', error);
+      return [];
+    }
+  }
+
+  /**
    * Gets all capital calls for a fund with aggregated data
    */
   async getCapitalCallsByFund(fundId: number): Promise<{

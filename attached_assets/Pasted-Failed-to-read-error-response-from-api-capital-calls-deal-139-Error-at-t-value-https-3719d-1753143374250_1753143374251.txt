@@ -1,0 +1,91 @@
+Failed to read error response from /api/capital-calls/deal/139: 
+Error {}
+
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Exception during query fetch to /api/capital-calls/deal/139: 
+Error {}
+
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Query Response from /api/meetings/deal/139: 
+Object {status: 200, statusText: "OK", ok: true}
+Query data received from /api/meetings/deal/139: 
+Array []
+Query Response from /api/closing-schedules/deal/139: 
+Object {status: 200, statusText: "OK", ok: true}
+Query data received from /api/closing-schedules/deal/139: 
+Array []
+ProtectedRoute for /deals/:id: isLoading=false, user=Gonz
+ProtectedRoute /deals/:id: Rendering component for user Gonz
+Query fetch request: /api/system/health 
+Object {queryKey: Array(1), unauthorizedBehavior: "returnNull"}
+Query Response from /api/system/health: 
+Object {status: 200, statusText: "OK", ok: true}
+Query data received from /api/system/health: 
+Object {status: "ok", timestamp: "2025-07-22T00:15:46.409Z", storage: "pg", databaseConnected: true, environment: "development", …}
+🔍 useDealDocuments: Processing data for deal 139: 
+Array [{…}]
+📝 useDealDocuments: Setting 1 documents in context: 
+Array [{…}]
+🎯 useDealDocuments: Auto-selecting first document: 
+Object {id: 64, name: "Kraken Deck (May 2025).pdf", fileName: "Kraken Deck (May 2025).pdf", fileType: "application/pdf", downloadUrl: "/api/documents/64/download", …}
+📤 Loading PDF document: 
+Object {documentId: 64, documentName: "Kraken Deck (May 2025).pdf", url: "/api/documents/64/download"}
+🔍 useDealDocuments: Processing data for deal 139: 
+Array [{…}]
+📝 useDealDocuments: Setting 1 documents in context: 
+Array [{…}]
+Query fetch request: /api/deals/139/timeline 
+Object {queryKey: Array(1), unauthorizedBehavior: "returnNull"}
+Query fetch request: /api/users 
+Object {queryKey: Array(1), unauthorizedBehavior: "returnNull"}
+Query Response from /api/users: 
+Object {status: 200, statusText: "OK", ok: true}
+Query data received from /api/users: 
+(9) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+Query Response from /api/deals/139/timeline: 
+Object {status: 200, statusText: "OK", ok: true}
+Query data received from /api/deals/139/timeline: 
+Array [{…}]
+Using /me endpoint data for avatar 
+Object {id: 4, username: "Gonz", fullName: "Brett Gonzalez", initials: "BG", email: "bgonzalez@doliveradvisors.com", …}
+Query fetch request: /api/capital-calls/deal/139 
+Object {queryKey: Array(1), unauthorizedBehavior: "returnNull"}
+Query Response from /api/capital-calls/deal/139: 
+Object {status: 404, statusText: "Not Found", ok: false}
+Error response from /api/capital-calls/deal/139: 
+Object {status: 404, text: "{"success":false,"error":"Not found - /api/capital-calls/deal/139"}"}
+
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Failed to read error response from /api/capital-calls/deal/139: 
+Error {}
+
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Exception during query fetch to /api/capital-calls/deal/139: 
+Error {}
+
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Query fetch request: /api/auth/me 
+Object {queryKey: Array(1), unauthorizedBehavior: "returnNull"}
+Query Response from /api/auth/me: 
+Object {status: 200, statusText: "OK", ok: true}
+Query data received from /api/auth/me: 
+Object {id: 4, username: "Gonz", fullName: "Brett Gonzalez", initials: "BG", email: "bgonzalez@doliveradvisors.com", …}
+ProtectedRoute for /deals/:id: isLoading=false, user=Gonz
+ProtectedRoute /deals/:id: Rendering component for user Gonz
+Using /me endpoint data for avatar 
+Object {id: 4, username: "Gonz", fullName: "Brett Gonzalez", initials: "BG", email: "bgonzalez@doliveradvisors.com", …}

@@ -129,6 +129,12 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 22, 2025**: Capital Calls API Route Fix
+  - **RESOLVED: Missing Deal Capital Calls Endpoint**: Added missing `/api/capital-calls/deal/:dealId` route that was causing 404 errors
+  - **Service Method Implementation**: Created `getCapitalCallsByDeal` method in capital call service to fetch all capital calls for a specific deal
+  - **Frontend Integration Fixed**: Deal detail pages now properly load capital calls without console errors
+  - **Data Structure**: Returns array of capital calls with allocation and fund information included
+
 - **July 21, 2025**: Devil's Advocate Feature Database Fix
   - **RESOLVED: Devils Advocate Comments Table Missing**: Created missing `devils_advocate_comments` table in database
   - **Database Schema Update**: Added table with proper foreign key relationships to deals and users tables
