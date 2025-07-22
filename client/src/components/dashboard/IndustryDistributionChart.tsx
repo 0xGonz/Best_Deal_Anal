@@ -79,11 +79,14 @@ export default function SectorDistributionChart() {
 
   // Handle clicking on pie chart sectors or legend
   const handleSectorClick = (sector: string) => {
+    console.log('Dashboard sector clicked:', sector);
     if (sector === 'Other Sectors') {
       // For "Other Sectors", navigate without sector filter
+      console.log('Dashboard navigating to pipeline without filter');
       navigate('/pipeline');
     } else {
       // Navigate to pipeline with sector filter
+      console.log(`Dashboard navigating to pipeline with sector filter: ${sector}`);
       navigate(`/pipeline?sector=${encodeURIComponent(sector)}`);
     }
   };
@@ -135,7 +138,12 @@ export default function SectorDistributionChart() {
                   outerRadius={100}
                   fill="#8884d8"
                   dataKey="count"
-                  onClick={(data) => handleSectorClick(data.sector)}
+                  onClick={(data, index) => {
+                    console.log('Dashboard pie clicked - data:', data, 'index:', index);
+                    if (data && data.sector) {
+                      handleSectorClick(data.sector);
+                    }
+                  }}
                 >
                   {processedData.map((entry, index) => (
                     <Cell 
@@ -149,7 +157,14 @@ export default function SectorDistributionChart() {
                 <Legend 
                   verticalAlign="bottom" 
                   height={36}
-                  onClick={(data) => handleSectorClick(data.value)}
+                  onClick={(data) => {
+                    console.log('Dashboard legend clicked - data:', data);
+                    if (data && data.value) {
+                      // Remove any trailing spaces that might be added for formatting
+                      const cleanValue = data.value.toString().trim();
+                      handleSectorClick(cleanValue);
+                    }
+                  }}
                   wrapperStyle={{ cursor: 'pointer' }}
                 />
               </PieChart>
