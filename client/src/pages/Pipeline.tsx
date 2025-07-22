@@ -337,7 +337,17 @@ export default function Pipeline() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <StageDistribution deals={filteredDeals} stage="all" />
-                  <SectorDistribution deals={filteredDeals} stage="all" />
+                  <SectorDistribution 
+                    deals={filteredDeals} 
+                    stage="all" 
+                    onSectorClick={(sector) => {
+                      if (sector === 'Other Sectors') {
+                        setSectorFilter("all");
+                      } else {
+                        setSectorFilter(sector);
+                      }
+                    }}
+                  />
                 </div>
                 
                 <DealsTable 
@@ -385,7 +395,17 @@ export default function Pipeline() {
                       <StageDistribution deals={dealsByStage[stage]} stage={stage} />
                     </div>
                     <div className="h-full">
-                      <SectorDistribution deals={dealsByStage[stage]} stage={stage} />
+                      <SectorDistribution 
+                        deals={dealsByStage[stage]} 
+                        stage={stage} 
+                        onSectorClick={(sector) => {
+                          if (sector === 'Other Sectors') {
+                            setSectorFilter("all");
+                          } else {
+                            setSectorFilter(sector);
+                          }
+                        }}
+                      />
                     </div>
                   </div>
                   

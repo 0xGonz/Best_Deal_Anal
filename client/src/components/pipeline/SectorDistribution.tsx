@@ -9,6 +9,7 @@ import { useLocation } from 'wouter';
 type SectorDistributionProps = {
   deals: Deal[] | undefined;
   stage: string;
+  onSectorClick?: (sector: string) => void; // Optional prop for custom click handling
 };
 
 // Use centralized chart colors for consistent look across app
@@ -71,19 +72,23 @@ const CustomTooltip = ({ active, payload, processedData }: CustomTooltipProps) =
   return null;
 };
 
-export default function SectorDistribution({ deals, stage }: SectorDistributionProps) {
+export default function SectorDistribution({ deals, stage, onSectorClick }: SectorDistributionProps) {
   if (!deals || deals.length === 0) return null;
   
   const [, navigate] = useLocation();
   
   // Handle clicking on pie chart sectors or legend
   const handleSectorClick = (sectorName: string) => {
-    if (sectorName === 'Other Sectors') {
-      // For "Other Sectors", navigate without sector filter
-      navigate('/pipeline');
+    if (onSectorClick) {
+      // If custom click handler is provided, use it instead
+      onSectorClick(sectorName);
     } else {
-      // Navigate to pipeline with sector filter
-      navigate(`/pipeline?sector=${encodeURIComponent(sectorName)}`);
+      // Default behavior: navigate to pipeline with sector filter
+      if (sectorName === 'Other Sectors') {
+        navigate('/pipeline');
+      } else {
+        navigate(`/pipeline?sector=${encodeURIComponent(sectorName)}`);
+      }
     }
   };
   
