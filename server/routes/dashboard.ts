@@ -145,7 +145,7 @@ async function getSectorStats(logPrefix: string, useIndustryField = false) {
 }
 
 // Get sector distribution stats
-router.get('/sector-stats', async (req: Request, res: Response) => {
+router.get('/sector-stats', requireAuth, async (req: Request, res: Response) => {
   try {
     const stats = await getSectorStats('Sector stats');
     res.json(stats);
