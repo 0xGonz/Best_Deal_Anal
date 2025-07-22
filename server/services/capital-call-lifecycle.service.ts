@@ -373,4 +373,50 @@ export class CapitalCallLifecycleService {
       };
     }
   }
+
+  /**
+   * Gets all capital calls with full fund and deal details
+   */
+  async getAllCapitalCallsWithDetails(): Promise<any[]> {
+    try {
+      // Get all allocations first to get fund and deal info
+      const allocations = await this.storage.getAllAllocations();
+      const allCapitalCalls: any[] = [];
+      
+      // Get capital calls for each allocation
+      for (const allocation of allocations) {
+        const capitalCalls = await this.storage.getCapitalCallsByAllocation(allocation.id);
+        
+        // Add allocation, fund, and deal info to each capital call
+        for (const call of capitalCalls) {
+          allCapitalCalls.push({
+            id: call.id,
+            allocationId: call.allocationId,
+            callAmount: call.callAmount,
+            amountType: call.amountType,
+            callDate: call.callDate,
+            dueDate: call.dueDate,
+            paidAmount: call.paidAmount || 0,
+            paidDate: call.paidDate,
+            status: call.status,
+            notes: call.notes,
+            createdBy: call.createdBy,
+            createdAt: call.createdAt,
+            dealId: allocation.dealId,
+            dealName: allocation.dealName || 'N/A',
+            fundId: allocation.fundId,
+            fundName: allocation.fundName || 'N/A'
+          });
+        }
+      }
+      
+      // Sort by due date
+      return allCapitalCalls.sort((a, b) => 
+        new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+      );
+    } catch (error) {
+      console.error('Error getting all capital calls with details:', error);
+      return [];
+    }
+  }
 }

@@ -31,6 +31,24 @@ const recordPaymentSchema = z.object({
 });
 
 /**
+ * GET /api/capital-calls - Get all capital calls with fund and deal info
+ */
+router.get('/', requireAuth, requirePermission('read', 'capital_call'), async (req: Request, res: Response) => {
+  try {
+    // Get all capital calls with related allocation, fund, and deal information
+    const capitalCalls = await capitalCallService.getAllCapitalCallsWithDetails();
+    
+    res.status(200).json(capitalCalls);
+  } catch (error) {
+    console.error('Error getting all capital calls:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
  * POST /api/capital-calls - Create new capital call
  */
 router.post('/', requireAuth, requirePermission('create', 'capital_call'), async (req: Request, res: Response) => {
