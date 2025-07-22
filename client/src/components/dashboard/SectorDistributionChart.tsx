@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { formatPercentage } from '@/lib/utils/format';
 import { FINANCIAL_CALCULATION } from '@/lib/constants/calculation-constants';
+import { useLocation } from 'wouter';
 
 // Define interfaces for our component
 // We'll use Recharts' own type system
@@ -84,6 +85,7 @@ const CustomTooltip = ({ active, payload, sectorData }: TooltipProps) => {
 
 export default function SectorDistributionChart() {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [, navigate] = useLocation();
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -94,6 +96,20 @@ export default function SectorDistributionChart() {
   const { data: sectorStats = [], isLoading } = useQuery<SectorStatItem[]>({
     queryKey: ['/api/dashboard/sector-stats'],
   });
+
+  // Handle clicking on pie chart sectors or legend
+  const handleSectorClick = (sector: string) => {
+    console.log('Dashboard sector click:', sector);
+    if (sector === 'Other Sectors') {
+      // For "Other Sectors", navigate without sector filter
+      navigate('/pipeline');
+    } else {
+      // Navigate to pipeline with sector filter
+      const url = `/pipeline?sector=${encodeURIComponent(sector)}`;
+      console.log('Navigating to:', url);
+      navigate(url);
+    }
+  };
 
   // Sort stats by count (descending) and limit to top 8 sectors
   const processedData = React.useMemo(() => {
@@ -153,11 +169,17 @@ export default function SectorDistributionChart() {
                   outerRadius={windowWidth < 375 ? 90 : windowWidth < 480 ? 100 : windowWidth < 640 ? 120 : 140}
                   fill="#8884d8"
                   dataKey="count"
+                  onClick={(data, index) => {
+                    if (data && data.sector) {
+                      handleSectorClick(data.sector);
+                    }
+                  }}
                 >
                   {processedData.map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`} 
                       fill={getSectorColor(entry.sector)} 
+                      style={{ cursor: 'pointer' }}
                     />
                   ))}
                 </Pie>
@@ -184,7 +206,12 @@ export default function SectorDistributionChart() {
                     })
                   }
                   iconSize={windowWidth < 640 ? 8 : 10}
-                  wrapperStyle={windowWidth < 640 ? { bottom: 0, maxWidth: '100%', overflowX: 'hidden' } : { right: 0, top: 20 }}
+                  wrapperStyle={windowWidth < 640 ? { bottom: 0, maxWidth: '100%', overflowX: 'hidden', cursor: 'pointer' } : { right: 0, top: 20, cursor: 'pointer' }}
+                  onClick={(data) => {
+                    if (data && data.id) {
+                      handleSectorClick(data.id);
+                    }
+                  }}
                   formatter={(value: string, entry) => {
                     const totalCount = processedData.reduce((sum, i) => sum + i.count, 0);
                     const item = processedData.find(item => item.sector === entry.id);

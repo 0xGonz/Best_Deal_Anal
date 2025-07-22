@@ -79,12 +79,15 @@ export default function SectorDistributionChart() {
 
   // Handle clicking on pie chart sectors or legend
   const handleSectorClick = (sector: string) => {
+    console.log('Dashboard sector click:', sector);
     if (sector === 'Other Sectors') {
       // For "Other Sectors", navigate without sector filter
       navigate('/pipeline');
     } else {
       // Navigate to pipeline with sector filter
-      navigate(`/pipeline?sector=${encodeURIComponent(sector)}`);
+      const url = `/pipeline?sector=${encodeURIComponent(sector)}`;
+      console.log('Navigating to:', url);
+      navigate(url);
     }
   };
 
