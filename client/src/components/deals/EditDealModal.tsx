@@ -53,6 +53,15 @@ const dealFormSchema = z.object({
   companyStage: z.enum(Object.keys(COMPANY_STAGES) as [string, ...string[]]).optional(),
   rejectionReason: z.string().optional(),
   tags: z.array(z.string()).optional()
+}).refine((data) => {
+  // If stage is rejected, rejection reason is required
+  if (data.stage === 'rejected' && (!data.rejectionReason || data.rejectionReason.trim() === '')) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Rejection reason is required when rejecting a deal",
+  path: ["rejectionReason"]
 });
 
 type DealFormValues = z.infer<typeof dealFormSchema>;
