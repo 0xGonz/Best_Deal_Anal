@@ -149,16 +149,23 @@ export class AllocationService {
   async createAllocation(allocationData: any, userId?: number): Promise<any> {
     try {
       // Check for existing allocation first to prevent duplicate key errors
+      console.log(`[ALLOCATION CHECK] Checking for duplicates - Deal ID: ${allocationData.dealId}, Fund ID: ${allocationData.fundId}`);
+      
       const existingAllocations = await this.storage.getAllocationsByDeal(allocationData.dealId);
+      console.log(`[ALLOCATION CHECK] Found ${existingAllocations.length} existing allocations for deal ${allocationData.dealId}`);
+      
       const duplicate = existingAllocations.find(a => a.fundId === allocationData.fundId);
       
       if (duplicate) {
+        console.log(`[ALLOCATION CHECK] Found duplicate allocation:`, duplicate);
         return {
           success: false,
           error: `Allocation already exists between this deal and fund (ID: ${duplicate.id})`,
           existingAllocation: duplicate
         };
       }
+      
+      console.log(`[ALLOCATION CHECK] No duplicate found, proceeding with creation`);
       
       // Create the allocation
       const allocation = await this.storage.createFundAllocation(allocationData);
