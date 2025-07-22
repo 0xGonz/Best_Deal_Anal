@@ -92,14 +92,12 @@ export default function Sidebar({ onCloseMobile }: SidebarProps) {
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto scrollbar-thin py-2">
           {/* Logo */}
-          <div className="mb-3 px-4">
-            <div className="flex items-center">
-              <img 
-                src={DoliverLogo} 
-                alt="Doliver Logo" 
-                className="h-6 w-auto" 
-              />
-            </div>
+          <div className="mb-3 px-4 pt-3">
+            <img 
+              src={DoliverLogo} 
+              alt="Doliver Logo" 
+              className="h-6 w-auto" 
+            />
           </div>
           
           <ul>
