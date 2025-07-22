@@ -18,9 +18,15 @@ import { UserAvatar } from "@/components/common/UserAvatar";
 interface ActivityItem {
   id: number;
   dealId: number;
-  eventType: 'stage_change' | 'memo_added' | 'note' | 'star_added' | 'document_upload' | 'fund_allocation' | 'ai_analysis' | 'deal_creation';
+  eventType: 'stage_change' | 'memo_added' | 'note' | 'star_added' | 'document_upload' | 'fund_allocation' | 'ai_analysis' | 'deal_creation' | 'capital_call' | 'capital_call_update';
   content: string;
   createdAt: string;
+  metadata?: {
+    dueDate?: string;
+    callDate?: string;
+    amount?: number;
+    [key: string]: any;
+  };
   deal?: {
     id: number;
     name: string;
@@ -82,6 +88,13 @@ export default function ActivityFeed() {
             <DollarSign className={iconClass} />
           </div>
         );
+      case 'capital_call':
+      case 'capital_call_update':
+        return (
+          <div className={`${containerClass} bg-warning`}>
+            <DollarSign className={iconClass} />
+          </div>
+        );
       case 'ai_analysis':
         return (
           <div className={`${containerClass} bg-primary`}>
@@ -135,7 +148,18 @@ export default function ActivityFeed() {
                       {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
                     </span>
                   </div>
-                  <p className="text-xs sm:text-sm text-neutral-600 mt-1 line-clamp-2">{activity.content}</p>
+                  <p className="text-xs sm:text-sm text-neutral-600 mt-1 line-clamp-2">
+                    {activity.content}
+                    {activity.eventType === 'capital_call' && activity.metadata?.dueDate && (
+                      <span className="block text-xs text-amber-600 font-medium mt-1">
+                        Scheduled for: {new Date(activity.metadata.dueDate).toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          day: 'numeric', 
+                          year: 'numeric' 
+                        })}
+                      </span>
+                    )}
+                  </p>
                   
                   {activity.user && (
                     <div className="flex items-center mt-2">
@@ -170,6 +194,10 @@ function getActivityTitle(activity: ActivityItem) {
       return 'was starred';
     case 'document_upload':
       return 'had a document uploaded';
+    case 'capital_call':
+      return 'capital call created';
+    case 'capital_call_update':
+      return 'capital call updated';
     case 'ai_analysis':
       return 'was analyzed by AI';
     case 'deal_creation':

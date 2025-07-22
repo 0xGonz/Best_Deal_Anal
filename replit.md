@@ -129,6 +129,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 22, 2025**: Capital Call Activity Feed Enhancement - COMPLETE
+  - **Enhanced Timeline Events**: Added capital call events to activity feed with proper metadata tracking
+  - **Dual Date Display**: Activity feed now shows both when capital call was created AND when it's scheduled for
+  - **Visual Indicators**: Capital call events display with amber warning icon and scheduled date in amber text
+  - **Metadata Integration**: Updated capital call creation to include dueDate and callDate in timeline event metadata
+  - **Improved User Context**: Users can now see "Capital call created for $X - Scheduled for: Dec 31, 2024"
+  - **Frontend Type Safety**: Extended ActivityItem interface to support capital_call and capital_call_update event types
+
 - **July 22, 2025**: Welcome Back Toast Notification - COMPLETE
   - **Login Success Notification**: Added welcome back toast popup that appears after successful login
   - **Personalized Message**: Toast displays user's full name with "Welcome back, [Name]!" message

@@ -110,7 +110,9 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
         capitalCallId: capitalCall.id,
         amount: callAmountInDollars,
         amountType,
-        fundId: allocation.fundId
+        fundId: allocation.fundId,
+        dueDate: dueDate.toISOString(),
+        callDate: capitalCall.callDate.toISOString()
       }
     });
 
