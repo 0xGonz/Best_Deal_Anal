@@ -196,7 +196,8 @@ export default function Timeline({ dealId }: TimelineProps) {
       setNewNote("");
       toast({
         title: "Note added",
-        description: "Your note has been added to the timeline."
+        description: "Your note has been added to the timeline.",
+        variant: "success"
       });
       await queryClient.invalidateQueries({ queryKey: [`/api/deals/${dealId}/timeline`] });
     },
@@ -234,7 +235,8 @@ export default function Timeline({ dealId }: TimelineProps) {
       setAnswerText("");
       toast({
         title: "Note updated",
-        description: "Your note has been updated successfully."
+        description: "Your note has been updated successfully.",
+        variant: "success"
       });
       await queryClient.invalidateQueries({ queryKey: [`/api/deals/${dealId}/timeline`] });
     },
@@ -255,7 +257,8 @@ export default function Timeline({ dealId }: TimelineProps) {
       setEventToDelete(null);
       toast({
         title: "Note deleted",
-        description: "Your note has been removed from the timeline."
+        description: "Your note has been removed from the timeline.",
+        variant: "success"
       });
       await queryClient.invalidateQueries({ queryKey: [`/api/deals/${dealId}/timeline`] });
     },

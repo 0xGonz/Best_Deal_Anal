@@ -127,7 +127,8 @@ export default function AssignUserModal({ isOpen, onClose, dealId }: AssignUserM
     // Everything is already saved in real-time
     toast({
       title: "Success",
-      description: "User assignments updated successfully."
+      description: "User assignments updated successfully.",
+      variant: "success"
     });
     onClose();
   };

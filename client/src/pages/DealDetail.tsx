@@ -162,7 +162,8 @@ export default function DealDetail() {
       setNewNote("");
       toast({
         title: "Note added",
-        description: "Your note has been added to the timeline."
+        description: "Your note has been added to the timeline.",
+        variant: "success"
       });
       await queryClient.invalidateQueries({ queryKey: [`/api/deals/${dealId}`] });
       await queryClient.invalidateQueries({ queryKey: [`/api/deals/${dealId}/timeline`] });
@@ -186,7 +187,8 @@ export default function DealDetail() {
         title: result.action === 'starred' ? "Deal starred" : "Star removed",
         description: result.action === 'starred' 
           ? "This deal has been added to your starred deals."
-          : "This deal has been removed from your starred deals."
+          : "This deal has been removed from your starred deals.",
+        variant: "success"
       });
       await queryClient.invalidateQueries({ queryKey: [`/api/deals/${dealId}`] });
       await queryClient.invalidateQueries({ queryKey: [`/api/deals/${dealId}/stars`] });

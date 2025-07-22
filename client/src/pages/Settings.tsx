@@ -108,6 +108,7 @@ export default function SettingsPage() {
                       toast({
                         title: "Settings updated",
                         description: "Your general settings have been updated.",
+                        variant: "success"
                       });
                     }}
                   >
@@ -201,6 +202,7 @@ export default function SettingsPage() {
                       toast({
                         title: "Database settings updated",
                         description: "Your database settings have been updated.",
+                        variant: "success"
                       });
                     }}
                   >
@@ -310,6 +312,7 @@ export default function SettingsPage() {
                       toast({
                         title: "Notification settings updated",
                         description: "Your notification preferences have been saved.",
+                        variant: "success"
                       });
                     }}
                   >
@@ -415,6 +418,7 @@ export default function SettingsPage() {
                       toast({
                         title: "Company settings updated",
                         description: "Your company information and branding have been updated.",
+                        variant: "success"
                       });
                     }}
                   >

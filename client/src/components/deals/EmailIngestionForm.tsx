@@ -54,7 +54,8 @@ export default function EmailIngestionForm({ onClose }: EmailIngestionFormProps)
     onSuccess: () => {
       toast({
         title: "Email processed",
-        description: "Deal has been created from email successfully."
+        description: "Deal has been created from email successfully.",
+        variant: "success"
       });
       form.reset(); // Reset form
       queryClient.invalidateQueries({ queryKey: ['/api/deals'] }); // Refresh deals data

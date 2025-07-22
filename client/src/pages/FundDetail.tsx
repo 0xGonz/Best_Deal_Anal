@@ -257,6 +257,7 @@ export default function FundDetail() {
       toast({
         title: "Allocation created",
         description: "The allocation has been created successfully.",
+        variant: "success"
       });
       // Reset the form and close the dialog
       setNewAllocationData({
@@ -308,6 +309,7 @@ export default function FundDetail() {
       toast({
         title: "Allocation updated",
         description: "The allocation has been updated successfully.",
+        variant: "success"
       });
       
       // Close the dialog and reset state
@@ -364,6 +366,7 @@ export default function FundDetail() {
       toast({
         title: "Allocation deleted",
         description: "The allocation has been deleted successfully.",
+        variant: "success"
       });
       
       // Close the dialog and reset state
@@ -426,6 +429,7 @@ export default function FundDetail() {
       toast({
         title: `Allocation marked as ${displayStatus}`,
         description: "The allocation status has been updated successfully.",
+        variant: "success"
       });
       
       // Invalidate queries to refresh data
@@ -477,6 +481,7 @@ export default function FundDetail() {
       toast({
         title: "Distribution added",
         description: "The distribution has been recorded successfully.",
+        variant: "success"
       });
       refetchDistributions();
       // Invalidate all related queries to update UI
@@ -504,6 +509,7 @@ export default function FundDetail() {
       toast({
         title: "Distribution deleted",
         description: "The distribution has been removed successfully.",
+        variant: "success"
       });
       refetchDistributions();
       queryClient.invalidateQueries({ queryKey: [`/api/production/allocations/fund/${fundId}`] });

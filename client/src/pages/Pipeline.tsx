@@ -68,7 +68,8 @@ export default function Pipeline() {
     onSuccess: () => {
       toast({
         title: "Deal deleted",
-        description: `${selectedDealName} has been deleted.`
+        description: `${selectedDealName} has been deleted.`,
+        variant: "success"
       });
       
       // Close any open modals
@@ -109,6 +110,7 @@ export default function Pipeline() {
       toast({
         title: "Status updated",
         description: `Deal has been moved to ${stageLabel}`,
+        variant: "success"
       });
       
       // Create notification for stage change

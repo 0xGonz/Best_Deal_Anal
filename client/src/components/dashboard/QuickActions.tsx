@@ -33,7 +33,8 @@ export default function QuickActions() {
         // For now, show a toast until we implement EmailForwardModal
         toast({
           title: "Email Forwarding",
-          description: "Email forwarding is coming soon!"
+          description: "Email forwarding is coming soon!",
+          variant: "default"
         });
         setIsEmailForwardOpen(true);
         break;
@@ -46,7 +47,8 @@ export default function QuickActions() {
         // For now, show a toast until we implement BulkImportModal
         toast({
           title: "Bulk Import",
-          description: "Bulk import functionality is coming soon!"
+          description: "Bulk import functionality is coming soon!",
+          variant: "default"
         });
         setIsBulkImportOpen(true);
         break;
@@ -55,7 +57,8 @@ export default function QuickActions() {
         // For now, show a toast until we implement ReportModal
         toast({
           title: "Reports",
-          description: "Report generation is coming soon!"
+          description: "Report generation is coming soon!",
+          variant: "default"
         });
         setIsReportModalOpen(true);
         break;
@@ -68,14 +71,16 @@ export default function QuickActions() {
         navigate("/pipeline"); // Navigate to pipeline for now
         toast({
           title: "Document Upload",
-          description: "Please select a deal from the pipeline to upload documents."
+          description: "Please select a deal from the pipeline to upload documents.",
+          variant: "default"
         });
         break;
       
       default:
         toast({
           title: "Action triggered",
-          description: `${action} action was clicked`
+          description: `${action} action was clicked`,
+          variant: "default"
         });
     }
   };

@@ -64,6 +64,7 @@ import * as z from 'zod';
 import AppLayout from '@/components/layout/AppLayout';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { DatePicker } from '@/components/ui/date-picker';
+import type { Allocation } from '@shared/schema';
 
 // Types for the component
 interface CapitalCall {
@@ -77,27 +78,6 @@ interface CapitalCall {
   paidDate: string | null;
   status: CapitalCallStatus;
   notes: string | null;
-}
-
-interface Allocation {
-  id: number;
-  fundId: number;
-  dealId: number;
-  amount: number;
-  amountType: 'percentage' | 'dollar';
-  securityType: string;
-  allocationDate: string;
-  notes: string | null;
-  status: string;
-  portfolioWeight: number;
-  deal?: {
-    id: number;
-    name: string;
-  };
-  fund?: {
-    id: number;
-    name: string;
-  };
 }
 
 // Form schema for creating a new capital call
@@ -178,6 +158,7 @@ const CapitalCallsByAllocation = () => {
       toast({
         title: "Success",
         description: "Capital call created successfully",
+        variant: "success"
       });
       setIsNewCallDialogOpen(false);
       form.reset();
@@ -213,6 +194,7 @@ const CapitalCallsByAllocation = () => {
       toast({
         title: "Success",
         description: "Capital call status updated successfully",
+        variant: "success"
       });
       queryClient.invalidateQueries({ queryKey: [`/api/production/allocations/${allocationId}/capital-calls`] });
       queryClient.invalidateQueries({ queryKey: [`/api/production/allocations/${allocationId}`] });

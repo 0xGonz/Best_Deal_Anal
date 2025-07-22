@@ -112,6 +112,7 @@ export default function Funds() {
       toast({
         title: "Success",
         description: "Fund updated successfully",
+        variant: "success"
       });
       setIsEditFundDialogOpen(false);
       queryClient.invalidateQueries({ queryKey: ["/api/funds"] });
@@ -135,6 +136,7 @@ export default function Funds() {
       toast({
         title: "Success",
         description: "Fund deleted successfully",
+        variant: "success"
       });
       setIsDeleteDialogOpen(false);
       queryClient.invalidateQueries({ queryKey: ["/api/funds"] });
@@ -174,6 +176,7 @@ export default function Funds() {
       toast({
         title: "Success",
         description: "Fund created successfully",
+        variant: "success"
       });
       
       // Reset form and close dialog

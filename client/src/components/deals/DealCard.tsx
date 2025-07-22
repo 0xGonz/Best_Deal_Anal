@@ -76,7 +76,8 @@ export default function DealCard({ deal: rawDeal, compact = false, onEdit, onAll
         title: result.action === 'starred' ? "Deal starred" : "Star removed",
         description: result.action === 'starred' 
           ? "This deal has been added to your starred deals."
-          : "This deal has been removed from your starred deals."
+          : "This deal has been removed from your starred deals.",
+        variant: "success"
       });
       
       // Refresh deals data and leaderboard
