@@ -4,6 +4,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 import { Deal } from "@/lib/types";
 import { formatPercentage } from '@/lib/utils/format';
 import { FINANCIAL_CALCULATION } from '@/lib/constants/calculation-constants';
+import { useLocation } from 'wouter';
 
 type SectorDistributionProps = {
   deals: Deal[] | undefined;
@@ -72,6 +73,19 @@ const CustomTooltip = ({ active, payload, processedData }: CustomTooltipProps) =
 
 export default function SectorDistribution({ deals, stage }: SectorDistributionProps) {
   if (!deals || deals.length === 0) return null;
+  
+  const [, navigate] = useLocation();
+  
+  // Handle clicking on pie chart sectors or legend
+  const handleSectorClick = (sectorName: string) => {
+    if (sectorName === 'Other Sectors') {
+      // For "Other Sectors", navigate without sector filter
+      navigate('/pipeline');
+    } else {
+      // Navigate to pipeline with sector filter
+      navigate(`/pipeline?sector=${encodeURIComponent(sectorName)}`);
+    }
+  };
   
   // Use state to track viewport size
   const [isMobile, setIsMobile] = React.useState(false);
@@ -151,11 +165,13 @@ export default function SectorDistribution({ deals, stage }: SectorDistributionP
                 fill="#8884d8"
                 dataKey="value"
                 nameKey="name"
+                onClick={(data) => handleSectorClick(data.name)}
               >
                 {processedData.map((entry, index) => (
                   <Cell 
                     key={`cell-${index}`} 
-                    fill={getSectorColor(entry.name)} 
+                    fill={getSectorColor(entry.name)}
+                    style={{ cursor: 'pointer' }}
                   />
                 ))}
               </Pie>
@@ -182,7 +198,17 @@ export default function SectorDistribution({ deals, stage }: SectorDistributionP
                   })
                 }
                 iconSize={isMobile ? 8 : 10}
-                wrapperStyle={isMobile ? { bottom: 0, maxWidth: '100%', overflowX: 'hidden' } : { right: 0, top: 20 }}
+                wrapperStyle={isMobile ? { 
+                  bottom: 0, 
+                  maxWidth: '100%', 
+                  overflowX: 'hidden',
+                  cursor: 'pointer'
+                } : { 
+                  right: 0, 
+                  top: 20,
+                  cursor: 'pointer'
+                }}
+                onClick={(data) => handleSectorClick(data.value)}
                 formatter={(value: string, entry) => {
                   const processedEntry = processedData.find(item => item.name === entry.id);
                   if (!processedEntry) return <span className="text-[10px] xs:text-xs sm:text-sm font-medium truncate text-black">{value}</span>;

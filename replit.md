@@ -130,12 +130,13 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 - **July 22, 2025**: Interactive Sector Chart Navigation Feature
-  - **IMPLEMENTED: Clickable Pie Chart Sectors**: Sector distribution chart on dashboard now has clickable pie sectors and legend items
+  - **IMPLEMENTED: Clickable Pie Chart Sectors**: Both dashboard and pipeline sector distribution charts now have clickable pie sectors and legend items
   - **Pipeline Navigation**: Clicking on any sector navigates directly to pipeline page with that sector automatically filtered
   - **URL Parameter Support**: Pipeline page now reads and respects ?sector= URL parameters for deep linking
   - **Visual Filter Indicator**: Active sector filters display prominently with clear button to remove filtering
   - **Smart "Other Sectors" Handling**: Clicking "Other Sectors" navigates to pipeline without filtering for broader exploration
   - **Enhanced User Experience**: Seamless navigation from overview charts to filtered deal lists improves workflow efficiency
+  - **Multi-Chart Support**: Feature works on both IndustryDistributionChart (dashboard) and SectorDistribution (pipeline) components
 
 - **July 22, 2025**: Capital Calls API Route Fix
   - **RESOLVED: Missing Deal Capital Calls Endpoint**: Added missing `/api/capital-calls/deal/:dealId` route that was causing 404 errors
