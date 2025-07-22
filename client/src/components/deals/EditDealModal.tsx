@@ -393,14 +393,18 @@ export default function EditDealModal({ isOpen, onClose, dealId }: EditDealModal
                   name="rejectionReason"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Rejection Reason</FormLabel>
+                      <FormLabel>Rejection Reason *</FormLabel>
                       <FormControl>
                         <Textarea 
-                          placeholder="Please provide a reason for rejecting this deal" 
+                          placeholder="Please provide a detailed reason for rejecting this deal (required)" 
                           rows={3} 
                           {...field} 
+                          required
                         />
                       </FormControl>
+                      <FormDescription>
+                        This helps track why deals don't work out and improves future decision-making
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
