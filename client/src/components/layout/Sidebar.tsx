@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LAYOUT } from "@/lib/constants/ui-constants";
+import DoliverLogo from "@/assets/doliver-logo-final.png";
 
 import { useAuth } from "@/hooks/use-auth";
 
@@ -90,10 +91,16 @@ export default function Sidebar({ onCloseMobile }: SidebarProps) {
         
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto scrollbar-thin py-2">
-          {/* Deal Flow Title */}
-          <div className="mb-4 px-4">
-            <h2 className="text-2xl font-extrabold tracking-tight text-primary-dark">Deal Flow 
-</h2>
+          {/* Deal Flow Title with Logo */}
+          <div className="mb-6 px-4">
+            <div className="flex items-center space-x-3">
+              <img 
+                src={DoliverLogo} 
+                alt="Doliver Logo" 
+                className="h-10 w-auto" 
+              />
+              <h2 className="text-2xl font-extrabold tracking-tight text-primary-dark">Deal Flow</h2>
+            </div>
           </div>
           
           <ul>
