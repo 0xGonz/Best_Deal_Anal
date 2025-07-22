@@ -26,7 +26,7 @@ export default function ProfileEditModal({
 }: ProfileEditModalProps) {
   const [name, setName] = useState(currentName);
   const [role, setRole] = useState(currentRole);
-  const [avatarColor, setAvatarColor] = useState<string | null>(null);
+  const [avatarColor, setAvatarColor] = useState<string | null>(AVATAR_COLORS.DEFAULT);
   
   const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);

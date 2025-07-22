@@ -159,7 +159,7 @@ export function CreateCapitalCallForm({ isOpen, onClose, dealId, onSuccess }: Cr
           <div className="space-y-2">
             <Label htmlFor="allocation">Fund Allocation *</Label>
             <Select
-              value={formData.allocationId?.toString() || ''}
+              value={formData.allocationId ? formData.allocationId.toString() : undefined}
               onValueChange={(value) => setFormData({
                 ...formData,
                 allocationId: parseInt(value)

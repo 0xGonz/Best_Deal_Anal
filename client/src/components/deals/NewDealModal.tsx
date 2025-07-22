@@ -101,7 +101,7 @@ export default function NewDealModal({ isOpen, onClose }: NewDealModalProps) {
       targetReturn: "",
       projectedMultiple: "",
       stage: "initial_review",
-      companyStage: undefined,
+      companyStage: "",
       tags: []
     }
   });

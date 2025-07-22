@@ -1,0 +1,73 @@
+Warning: A component is changing an uncontrolled input to be controlled. This is likely caused by the value changing from undefined to a defined value, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component. More info: https://reactjs.org/link/controlled-components
+    at input
+    at _c (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/src/components/ui/input.tsx:20:11)
+    at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=2edd085f:79:13
+    at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=2edd085f:56:13
+    at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/src/components/ui/form.tsx:130:9
+    at div
+    at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/src/components/ui/form.tsx:72:6
+    at Controller (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-MGW4VB6R.js?v=2edd085f:328:35)
+    at FormField (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/src/components/ui/form.tsx:33:6)
+    at form
+    at FormProvider (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-MGW4VB6R.js?v=2edd085f:103:11)
+    at div
+    at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=2edd085f:42:13
+    at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AFLIZ4FI.js?v=2edd085f:61:7
+    at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=2edd085f:79:13
+    at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=2edd085f:56:13
+    at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=2edd085f:42:13
+    at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-HG7P5XMB.js?v=2edd085f:29:5
+    at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-V4SDQJCY.js?v=2edd085f:235:13
+    at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-V4SDQJCY.js?v=2edd085f:158:58
+    at Presence (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LUE5KDWX.js?v=2edd085f:24:11)
+    at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-V4SDQJCY.js?v=2edd085f:149:64
+    at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=2edd085f:79:13
+    at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=2edd085f:56:13
+    at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=2edd085f:42:13
+    at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AFLIZ4FI.js?v=2edd085f:260:22
+    at Presence (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LUE5KDWX.js?v=2edd085f:24:11)
+    at Provider (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=2edd085f:38:15)
+    at DialogPortal (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-V4SDQJCY.js?v=2edd085f:111:11)
+    at _c3 (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/src/components/ui/dialog.tsx:52:12)
+    at Provider (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=2edd085f:38:15)
+    at Dialog…
+at input
+at _c (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/src/components/ui/input.tsx:20:11)
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=2edd085f:79:13
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=2edd085f:56:13
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/src/components/ui/form.tsx:130:9
+at div
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/src/components/ui/form.tsx:72:6
+at Controller (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-MGW4VB6R.js?v=2edd085f:328:35)
+at FormField (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/src/components/ui/form.tsx:33:6)
+at form
+at FormProvider (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-MGW4VB6R.js?v=2edd085f:103:11)
+at div
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=2edd085f:42:13
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AFLIZ4FI.js?v=2edd085f:61:7
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=2edd085f:79:13
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=2edd085f:56:13
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=2edd085f:42:13
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-HG7P5XMB.js?v=2edd085f:29:5
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-V4SDQJCY.js?v=2edd085f:235:13
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-V4SDQJCY.js?v=2edd085f:158:58
+at Presence (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LUE5KDWX.js?v=2edd085f:24:11)
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-V4SDQJCY.js?v=2edd085f:149:64
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=2edd085f:79:13
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=2edd085f:56:13
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=2edd085f:42:13
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AFLIZ4FI.js?v=2edd085f:260:22
+at Presence (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LUE5KDWX.js?v=2edd085f:24:11)
+at Provider (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=2edd085f:38:15)
+at DialogPortal (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-V4SDQJCY.js?v=2edd085f:111:11)
+at _c3 (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/src/components/ui/dialog.tsx:52:12)
+at Provider (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=2edd085f:38:15)
+at Dialog…
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Using /me endpoint data for avatar 
+Object {id: 4, username: "Gonz", fullName: "Brett Gonzalez", initials: "BG", email: "bgonzalez@doliveradvisors.com", …}
+Using /me endpoint data for avatar 
+Object {id: 4, username: "Gonz", fullName: "Brett Gonzalez", initials: "BG", email: "bgonzalez@doliveradvisors.com", …}
