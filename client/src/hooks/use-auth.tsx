@@ -126,6 +126,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Immediately update the local query cache
       localQueryClient.setQueryData(["/api/auth/me"], user);
       
+      // Show welcome back toast notification
+      toast({
+        title: "Welcome back!",
+        description: `Welcome back, ${user.fullName}! You're logged in and ready to go.`,
+      });
+      
       // Invalidate all queries to ensure fresh data after login
       localQueryClient.invalidateQueries();
       

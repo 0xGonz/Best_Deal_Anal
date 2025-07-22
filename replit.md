@@ -129,6 +129,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 22, 2025**: Welcome Back Toast Notification - COMPLETE
+  - **Login Success Notification**: Added welcome back toast popup that appears after successful login
+  - **Personalized Message**: Toast displays user's full name with "Welcome back, [Name]!" message
+  - **Professional Styling**: Uses existing toast system with clean design that appears at top of page
+  - **Perfect Timing**: Toast shows only on successful login completion, integrated into auth mutation flow
+  - **User Experience Enhancement**: Provides immediate positive feedback and confirmation of successful authentication
+
 - **July 22, 2025**: Sidebar Branding Update - COMPLETE
   - **Doliver Logo Implementation**: Replaced "Deal Flow" text header with Doliver logo in sidebar
   - **Visual Refinements**: Adjusted logo sizing based on user feedback (final size: 32px height)
