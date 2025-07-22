@@ -130,6 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toast({
         title: "Welcome back!",
         description: `Welcome back, ${user.fullName}! You're logged in and ready to go.`,
+        variant: "success",
       });
       
       // Invalidate all queries to ensure fresh data after login
