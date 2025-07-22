@@ -91,15 +91,14 @@ export default function Sidebar({ onCloseMobile }: SidebarProps) {
         
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto scrollbar-thin py-2">
-          {/* Deal Flow Title with Logo */}
+          {/* Logo */}
           <div className="mb-3 px-4">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center">
               <img 
                 src={DoliverLogo} 
                 alt="Doliver Logo" 
                 className="h-6 w-auto" 
               />
-              <h2 className="text-lg font-bold tracking-tight text-primary-dark">Deal Flow</h2>
             </div>
           </div>
           
