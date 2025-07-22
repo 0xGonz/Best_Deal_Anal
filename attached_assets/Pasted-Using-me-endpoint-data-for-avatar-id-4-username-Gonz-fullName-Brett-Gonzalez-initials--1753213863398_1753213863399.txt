@@ -1,0 +1,76 @@
+Using /me endpoint data for avatar {id: 4, username: 'Gonz', fullName: 'Brett Gonzalez', initials: 'BG', email: 'bgonzalez@doliveradvisors.com', …}
+index-Ul19lfL2.js:48 Query fetch request: /api/system/health {queryKey: Array(1), unauthorizedBehavior: 'returnNull'}
+index-Ul19lfL2.js:48 Query Response from /api/system/health: {status: 200, statusText: '', ok: true}
+index-Ul19lfL2.js:48 Query data received from /api/system/health: {status: 'ok', timestamp: '2025-07-22T19:50:23.082Z', storage: 'pg', databaseConnected: true, environment: 'production', …}
+index-Ul19lfL2.js:502 Using /me endpoint data for avatar {id: 4, username: 'Gonz', fullName: 'Brett Gonzalez', initials: 'BG', email: 'bgonzalez@doliveradvisors.com', …}
+index-Ul19lfL2.js:48 Query fetch request: /api/auth/me {queryKey: Array(1), unauthorizedBehavior: 'returnNull'}
+index-Ul19lfL2.js:48 Query Response from /api/auth/me: {status: 200, statusText: '', ok: true}
+index-Ul19lfL2.js:48 Query data received from /api/auth/me: {id: 4, username: 'Gonz', fullName: 'Brett Gonzalez', initials: 'BG', email: 'bgonzalez@doliveradvisors.com', …}
+index-Ul19lfL2.js:48 API Request: POST /api/production/allocations {data: {…}}
+index-Ul19lfL2.js:48 Sending fetch request to /api/production/allocations with options: {method: 'POST', credentials: 'include', headers: {…}, body: 'BODY_DATA'}
+index-Ul19lfL2.js:48   POST https://doliverdeals.com/api/production/allocations 409 (Conflict)
+gt @ index-Ul19lfL2.js:48
+mutationFn @ index-Ul19lfL2.js:502
+fn @ index-Ul19lfL2.js:48
+g @ index-Ul19lfL2.js:48
+start @ index-Ul19lfL2.js:48
+execute @ index-Ul19lfL2.js:48
+await in execute
+mutate @ index-Ul19lfL2.js:48
+(anonymous) @ index-Ul19lfL2.js:48
+h @ index-Ul19lfL2.js:502
+Ohe @ index-Ul19lfL2.js:37
+Mhe @ index-Ul19lfL2.js:37
+Rhe @ index-Ul19lfL2.js:37
+k$ @ index-Ul19lfL2.js:37
+FK @ index-Ul19lfL2.js:37
+(anonymous) @ index-Ul19lfL2.js:37
+h4 @ index-Ul19lfL2.js:40
+oK @ index-Ul19lfL2.js:37
+Qk @ index-Ul19lfL2.js:37
+UF @ index-Ul19lfL2.js:37
+Qhe @ index-Ul19lfL2.js:37
+index-Ul19lfL2.js:48 API Response from /api/production/allocations: {status: 409, statusText: '', ok: false}
+index-Ul19lfL2.js:48  Error response from /api/production/allocations: {status: 409, data: {…}}
+gt @ index-Ul19lfL2.js:48
+await in gt
+mutationFn @ index-Ul19lfL2.js:502
+fn @ index-Ul19lfL2.js:48
+g @ index-Ul19lfL2.js:48
+start @ index-Ul19lfL2.js:48
+execute @ index-Ul19lfL2.js:48
+await in execute
+mutate @ index-Ul19lfL2.js:48
+(anonymous) @ index-Ul19lfL2.js:48
+h @ index-Ul19lfL2.js:502
+Ohe @ index-Ul19lfL2.js:37
+Mhe @ index-Ul19lfL2.js:37
+Rhe @ index-Ul19lfL2.js:37
+k$ @ index-Ul19lfL2.js:37
+FK @ index-Ul19lfL2.js:37
+(anonymous) @ index-Ul19lfL2.js:37
+h4 @ index-Ul19lfL2.js:40
+oK @ index-Ul19lfL2.js:37
+Qk @ index-Ul19lfL2.js:37
+UF @ index-Ul19lfL2.js:37
+Qhe @ index-Ul19lfL2.js:37
+index-Ul19lfL2.js:502  Allocation creation error: Error: Failed to create allocation: 
+    at Object.mutationFn (index-Ul19lfL2.js:502:114077)
+onError @ index-Ul19lfL2.js:502
+execute @ index-Ul19lfL2.js:48
+await in execute
+mutate @ index-Ul19lfL2.js:48
+(anonymous) @ index-Ul19lfL2.js:48
+h @ index-Ul19lfL2.js:502
+Ohe @ index-Ul19lfL2.js:37
+Mhe @ index-Ul19lfL2.js:37
+Rhe @ index-Ul19lfL2.js:37
+k$ @ index-Ul19lfL2.js:37
+FK @ index-Ul19lfL2.js:37
+(anonymous) @ index-Ul19lfL2.js:37
+h4 @ index-Ul19lfL2.js:40
+oK @ index-Ul19lfL2.js:37
+Qk @ index-Ul19lfL2.js:37
+UF @ index-Ul19lfL2.js:37
+Qhe @ index-Ul19lfL2.js:37
+index-Ul19lfL2.js:502 Using /me endpoint data for avatar {id: 4, username: 'Gonz', fullName: 'Brett Gonzalez', initials: 'BG', email: 'bgonzalez@doliveradvisors.com', …}

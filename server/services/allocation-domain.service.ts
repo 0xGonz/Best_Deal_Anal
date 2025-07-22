@@ -24,11 +24,11 @@ export class AllocationDomainService {
       throw new Error('Allocation amount must be positive');
     }
 
-    // Check for duplicate allocations
-    const existingAllocations = await this.storage.getFundAllocations();
-    const duplicate = existingAllocations.find(a => 
-      a.dealId === allocationData.dealId && a.fundId === allocationData.fundId
-    );
+    // Check for duplicate allocations - only within the specific fund
+    const fundAllocations = await this.storage.getAllocationsByFund(allocationData.fundId);
+    
+    // Check if this deal is already allocated to this fund
+    const duplicate = fundAllocations.find(a => a.dealId === allocationData.dealId);
     
     if (duplicate) {
       throw new Error('Allocation already exists for this deal-fund combination');

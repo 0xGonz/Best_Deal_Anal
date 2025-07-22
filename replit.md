@@ -129,6 +129,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 22, 2025**: Allocation Duplicate Check Bug Fix - COMPLETE
+  - **Critical Bug Fixed**: Fixed 409 Conflict error when allocating deals to funds
+  - **Root Cause**: System was checking if deal existed in ANY fund, not just the specific fund
+  - **Solution**: Modified duplicate check in allocation-domain.service.ts to only check within the specific fund
+  - **Result**: Same deal can now be properly allocated to multiple different funds
+  - **Green Success Messages**: Deal allocation success messages properly show in green with variant="success"
+
 - **July 22, 2025**: Toast Message Color Standardization - IN PROGRESS
   - **Major Pages Updated**: Fixed toast messages in Pipeline, DealDetail, Settings, Funds, FundDetail, CapitalCallsByAllocation
   - **Allocation Success Fixed**: Deal allocation success messages now properly show in green with variant="success"
