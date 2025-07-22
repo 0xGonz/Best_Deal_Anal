@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -53,6 +53,14 @@ export default function AllocateFundModal({ isOpen, onClose, dealId, dealName }:
     paymentOption: 'commit_only',
     immediatePaymentAmount: 0
   });
+
+  // Update dealId when prop changes (fixes bug where dealId wouldn't update when modal reopens)
+  useEffect(() => {
+    setAllocationData(prev => ({
+      ...prev,
+      dealId: dealId
+    }));
+  }, [dealId]);
 
   // Fetch funds for dropdown
   const { data: funds = [], isLoading: isFundsLoading } = useQuery<any[]>({
