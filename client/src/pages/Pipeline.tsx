@@ -50,12 +50,15 @@ export default function Pipeline() {
 
   // Handle URL parameters for sector filtering
   useEffect(() => {
-    const urlParams = new URLSearchParams(location.split('?')[1] || '');
+    console.log('Pipeline page loaded, checking URL params');
+    const urlParams = new URLSearchParams(window.location.search);
     const sectorFromUrl = urlParams.get('sector');
+    console.log('Sector from URL:', sectorFromUrl);
     if (sectorFromUrl) {
       setSectorFilter(decodeURIComponent(sectorFromUrl));
+      console.log('Applied sector filter:', decodeURIComponent(sectorFromUrl));
     }
-  }, [location]); // React to location changes
+  }, []); // Run once on mount
 
   // Mutation for deleting a deal
   const deleteDealMutation = useMutation({
