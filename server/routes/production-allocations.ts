@@ -99,6 +99,14 @@ router.post('/', requireAuth, requirePermission('create', 'allocation'), async (
       allocationDate: request.allocationDate ? new Date(request.allocationDate) : new Date()
     } as any; // Type assertion to handle mixed string/Date interface
 
+    // Debug logging to identify allocation attempts
+    console.log(`[ALLOCATION CREATE] Attempting to create allocation:`, {
+      dealId: allocationData.dealId,
+      fundId: allocationData.fundId,
+      amount: allocationData.amount,
+      userId
+    });
+
     // Create allocation with proper error handling
     const result = await allocationService.createAllocation(allocationData, userId);
     
