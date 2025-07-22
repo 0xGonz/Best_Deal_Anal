@@ -129,6 +129,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 22, 2025**: Toast Message Color Standardization - IN PROGRESS
+  - **Major Pages Updated**: Fixed toast messages in Pipeline, DealDetail, Settings, Funds, FundDetail, CapitalCallsByAllocation
+  - **Allocation Success Fixed**: Deal allocation success messages now properly show in green with variant="success"
+  - **TypeScript Errors Resolved**: Fixed compilation errors in CapitalCallsByAllocation.tsx by importing proper Allocation type
+  - **Consistent Color Coding**: 30+ toast messages updated to use proper variants (green for success, red for errors)
+  - **Build Status**: Application builds successfully with no TypeScript errors
+  - **Remaining Work**: ~200 toast messages across components still need variant properties added
+
 - **July 22, 2025**: Capital Call Activity Feed Enhancement - COMPLETE
   - **Enhanced Timeline Events**: Added capital call events to activity feed with proper metadata tracking
   - **Dual Date Display**: Activity feed now shows both when capital call was created AND when it's scheduled for

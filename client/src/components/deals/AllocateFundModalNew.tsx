@@ -143,6 +143,7 @@ export default function AllocateFundModal({ isOpen, onClose, dealId, dealName }:
       toast({
         title: "Success",
         description: `Fund allocation for ${dealName} has been created.`,
+        variant: "success"
       });
       
       // Reset form and close modal
