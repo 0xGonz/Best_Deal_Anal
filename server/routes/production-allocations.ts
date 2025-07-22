@@ -106,6 +106,13 @@ router.post('/', requireAuth, requirePermission('create', 'allocation'), async (
       amount: allocationData.amount,
       userId
     });
+    
+    // Get deal and fund names for better debugging
+    const [deal] = await db.select().from(deals).where(eq(deals.id, allocationData.dealId));
+    const [fund] = await db.select().from(funds).where(eq(funds.id, allocationData.fundId));
+    
+    console.log(`[ALLOCATION CREATE] Deal: "${deal?.name}" (ID: ${allocationData.dealId})`);
+    console.log(`[ALLOCATION CREATE] Fund: "${fund?.name}" (ID: ${allocationData.fundId})`);
 
     // Create allocation with proper error handling
     const result = await allocationService.createAllocation(allocationData, userId);
