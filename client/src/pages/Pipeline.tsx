@@ -31,6 +31,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useLocation } from "wouter";
+import { useEffect } from "react";
 
 export default function Pipeline() {
   const [isNewDealModalOpen, setIsNewDealModalOpen] = useState(false);
@@ -46,6 +47,15 @@ export default function Pipeline() {
   const [returnFilter, setReturnFilter] = useState("all");
   const { toast } = useToast();
   const [, navigate] = useLocation();
+
+  // Handle URL parameters for sector filtering
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sectorFromUrl = urlParams.get('sector');
+    if (sectorFromUrl) {
+      setSectorFilter(decodeURIComponent(sectorFromUrl));
+    }
+  }, []);
 
   // Mutation for deleting a deal
   const deleteDealMutation = useMutation({
@@ -219,6 +229,22 @@ export default function Pipeline() {
       <div className="flex-1 overflow-y-auto pb-20">
         {/* Filters */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 sm:mb-6 gap-3 sm:gap-4 w-full">
+          {/* Active Filter Indicator */}
+          {sectorFilter !== "all" && (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-md text-sm text-blue-700">
+              <span>Filtered by sector: <strong>{sectorFilter}</strong></span>
+              <button 
+                onClick={() => {
+                  setSectorFilter("all");
+                  navigate('/pipeline');
+                }}
+                className="ml-1 text-blue-500 hover:text-blue-700 font-bold"
+                title="Clear sector filter"
+              >
+                ×
+              </button>
+            </div>
+          )}
           <div className="relative w-full md:max-w-md">
             <Search className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 text-neutral-500 h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <Input

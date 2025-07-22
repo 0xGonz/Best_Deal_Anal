@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { formatPercentage } from '@/lib/utils/format';
 import { FINANCIAL_CALCULATION } from '@/lib/constants/calculation-constants';
+import { useLocation } from 'wouter';
 
 interface SectorStatItem {
   sector: string;
@@ -71,9 +72,21 @@ const CustomTooltip = ({ active, payload }: any) => {
 };
 
 export default function SectorDistributionChart() {
+  const [, navigate] = useLocation();
   const { data: sectorStats = [], isLoading } = useQuery<SectorStatItem[]>({
     queryKey: ['/api/dashboard/sector-stats'],
   });
+
+  // Handle clicking on pie chart sectors or legend
+  const handleSectorClick = (sector: string) => {
+    if (sector === 'Other Sectors') {
+      // For "Other Sectors", navigate without sector filter
+      navigate('/pipeline');
+    } else {
+      // Navigate to pipeline with sector filter
+      navigate(`/pipeline?sector=${encodeURIComponent(sector)}`);
+    }
+  };
 
   // Limit to top 8 sectors for better visualization, combine others
   const processedData = React.useMemo(() => {
@@ -122,16 +135,23 @@ export default function SectorDistributionChart() {
                   outerRadius={100}
                   fill="#8884d8"
                   dataKey="count"
+                  onClick={(data) => handleSectorClick(data.sector)}
                 >
                   {processedData.map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`} 
-                      fill={SECTOR_COLORS[index % SECTOR_COLORS.length]} 
+                      fill={SECTOR_COLORS[index % SECTOR_COLORS.length]}
+                      style={{ cursor: 'pointer' }}
                     />
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
-                <Legend verticalAlign="bottom" height={36} />
+                <Legend 
+                  verticalAlign="bottom" 
+                  height={36}
+                  onClick={(data) => handleSectorClick(data.value)}
+                  wrapperStyle={{ cursor: 'pointer' }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
