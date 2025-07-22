@@ -78,14 +78,11 @@ export default function SectorDistribution({ deals, stage }: SectorDistributionP
   
   // Handle clicking on pie chart sectors or legend
   const handleSectorClick = (sectorName: string) => {
-    console.log('Sector clicked:', sectorName);
     if (sectorName === 'Other Sectors') {
       // For "Other Sectors", navigate without sector filter
-      console.log('Navigating to pipeline without filter');
       navigate('/pipeline');
     } else {
       // Navigate to pipeline with sector filter
-      console.log(`Navigating to pipeline with sector filter: ${sectorName}`);
       navigate(`/pipeline?sector=${encodeURIComponent(sectorName)}`);
     }
   };
@@ -169,7 +166,6 @@ export default function SectorDistribution({ deals, stage }: SectorDistributionP
                 dataKey="value"
                 nameKey="name"
                 onClick={(data, index) => {
-                  console.log('Pie clicked - data:', data, 'index:', index);
                   if (data && data.name) {
                     handleSectorClick(data.name);
                   }
@@ -217,7 +213,6 @@ export default function SectorDistribution({ deals, stage }: SectorDistributionP
                   cursor: 'pointer'
                 }}
                 onClick={(data) => {
-                  console.log('Legend clicked - data:', data);
                   if (data && data.value) {
                     // Remove any trailing spaces that might be added for formatting
                     const cleanValue = data.value.toString().trim();

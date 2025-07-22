@@ -46,16 +46,16 @@ export default function Pipeline() {
   const [dateFilter, setDateFilter] = useState("all");
   const [returnFilter, setReturnFilter] = useState("all");
   const { toast } = useToast();
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
 
   // Handle URL parameters for sector filtering
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
+    const urlParams = new URLSearchParams(location.split('?')[1] || '');
     const sectorFromUrl = urlParams.get('sector');
     if (sectorFromUrl) {
       setSectorFilter(decodeURIComponent(sectorFromUrl));
     }
-  }, []);
+  }, [location]); // React to location changes
 
   // Mutation for deleting a deal
   const deleteDealMutation = useMutation({
@@ -231,14 +231,14 @@ export default function Pipeline() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 sm:mb-6 gap-3 sm:gap-4 w-full">
           {/* Active Filter Indicator */}
           {sectorFilter !== "all" && (
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-md text-sm text-blue-700">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-md text-sm text-blue-700 w-full md:w-auto">
               <span>Filtered by sector: <strong>{sectorFilter}</strong></span>
               <button 
                 onClick={() => {
                   setSectorFilter("all");
                   navigate('/pipeline');
                 }}
-                className="ml-1 text-blue-500 hover:text-blue-700 font-bold"
+                className="ml-1 text-blue-500 hover:text-blue-700 font-bold text-lg leading-none"
                 title="Clear sector filter"
               >
                 ×
