@@ -1124,14 +1124,7 @@ export default function FundDetail() {
                       </CardDescription>
                     </div>
                     
-                    {/* Capital Metrics Toggle */}
-                    <Tabs value={capitalView} onValueChange={(value) => setCapitalView(value as 'total' | 'called' | 'uncalled')}>
-                      <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="total" className="text-xs">Total Committed</TabsTrigger>
-                        <TabsTrigger value="called" className="text-xs">Called Capital</TabsTrigger>
-                        <TabsTrigger value="uncalled" className="text-xs">Uncalled Capital</TabsTrigger>
-                      </TabsList>
-                    </Tabs>
+
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -1161,11 +1154,9 @@ export default function FundDetail() {
                               <TableHead className="font-semibold text-[10px] xs:text-xs sm:text-sm">Date</TableHead>
                               <TableHead className="font-semibold text-[10px] xs:text-xs sm:text-sm">Status</TableHead>
                               <TableHead className="font-semibold text-[10px] xs:text-xs sm:text-sm text-right">Weight</TableHead>
-                              <TableHead className="font-semibold text-[10px] xs:text-xs sm:text-sm text-right">
-                                {capitalView === 'total' && 'Committed'}
-                                {capitalView === 'called' && 'Called'}
-                                {capitalView === 'uncalled' && 'Remaining'}
-                              </TableHead>
+                              <TableHead className="font-semibold text-[10px] xs:text-xs sm:text-sm text-right">Committed</TableHead>
+                              <TableHead className="font-semibold text-[10px] xs:text-xs sm:text-sm text-right">Called</TableHead>
+                              <TableHead className="font-semibold text-[10px] xs:text-xs sm:text-sm text-right">Uncalled</TableHead>
                               <TableHead className="font-semibold text-[10px] xs:text-xs sm:text-sm text-right">
                                 <span className="flex items-center justify-end gap-1" title="Click amounts to manage distributions">
                                   Distributions
@@ -1245,8 +1236,18 @@ export default function FundDetail() {
                                 </span>
                               </TableCell>
                               <TableCell className="py-1.5 sm:py-2.5 px-2 sm:px-4 text-right">
-                                <span className={`text-2xs xs:text-xs sm:text-sm ${getCapitalViewColorClass(capitalView)}`}>
-                                  {formatCurrency(displayAmount)}
+                                <span className="text-2xs xs:text-xs sm:text-sm text-blue-600">
+                                  {formatCurrency(allocation.amount || 0)}
+                                </span>
+                              </TableCell>
+                              <TableCell className="py-1.5 sm:py-2.5 px-2 sm:px-4 text-right">
+                                <span className="text-2xs xs:text-xs sm:text-sm text-orange-600">
+                                  {formatCurrency(allocation.calledAmount || 0)}
+                                </span>
+                              </TableCell>
+                              <TableCell className="py-1.5 sm:py-2.5 px-2 sm:px-4 text-right">
+                                <span className="text-2xs xs:text-xs sm:text-sm text-gray-600">
+                                  {formatCurrency((allocation.amount || 0) - (allocation.calledAmount || 0))}
                                 </span>
                               </TableCell>
                               <TableCell className="py-1.5 sm:py-2.5 px-2 sm:px-4 text-right">
@@ -1360,8 +1361,18 @@ export default function FundDetail() {
                                 100.0%
                               </TableCell>
                               <TableCell className="py-3 px-2 sm:px-4 text-right font-bold">
-                                <span className="text-[#000000] font-bold">
-                                  {formatCurrency(displayTotalAmount)}
+                                <span className="text-blue-600 font-bold">
+                                  {formatCurrency(fundMetrics.committedAmount)}
+                                </span>
+                              </TableCell>
+                              <TableCell className="py-3 px-2 sm:px-4 text-right font-bold">
+                                <span className="text-orange-600 font-bold">
+                                  {formatCurrency(fundMetrics.calledAmount)}
+                                </span>
+                              </TableCell>
+                              <TableCell className="py-3 px-2 sm:px-4 text-right font-bold">
+                                <span className="text-gray-600 font-bold">
+                                  {formatCurrency(fundMetrics.uncalledAmount)}
                                 </span>
                               </TableCell>
                               <TableCell className="py-3 px-2 sm:px-4 text-right font-bold text-gray-800">
