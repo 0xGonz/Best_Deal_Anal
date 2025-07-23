@@ -131,9 +131,6 @@ export default function RejectedStageDistribution({ deals }: RejectedStageDistri
         <CardTitle className="text-base sm:text-lg">
           Rejection Category Distribution
         </CardTitle>
-        <p className="text-xs sm:text-sm text-neutral-600">
-          {deals.length} rejected deals categorized by reason
-        </p>
       </CardHeader>
       <CardContent className="flex-1 pt-2">
         <div className="space-y-3">
