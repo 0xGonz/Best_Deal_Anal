@@ -215,6 +215,16 @@ Preferred communication style: Simple, everyday language.
   - **User Experience**: Capital call form now only requires allocation, amount, call date, status, and optional notes
   - **Business Logic**: Capital calls default to "Called" status since they're not scheduled with due dates
 
+- **July 23, 2025**: Capital Calls Dialog UI Cleanup - COMPLETE
+  - **RESOLVED: Redundant Payment Status Display**: Removed duplicate "PAID" text in payments section that was redundant with status column
+  - **RESOLVED: Outstanding Column Display**: Fixed outstanding column to show "—" instead of "Paid" when capital call is fully paid
+  - **UI Improvements**: 
+    - Payments section now shows only amount with green dollar icon
+    - Outstanding column shows actual outstanding amounts or clean dash when fully paid
+    - Eliminated double "PAID" display between Status and Payments columns
+  - **User Experience**: Capital calls dialog now has clean, professional display without redundant status information
+  - **Database Integration**: Proper filtering of payment data to show only actual payments, not synthetic data
+
 - **July 23, 2025**: Comprehensive Codebase Cleanup Round 2 - COMPLETE
   - **Additional Test Files Removed**: Deleted test-upload.ts, StarTest.tsx, auth-context.tsx.bak
   - **Import References Fixed**: Removed all import references to deleted test files in App.tsx and routes.ts

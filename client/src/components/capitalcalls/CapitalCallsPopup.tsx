@@ -235,7 +235,6 @@ export function CapitalCallsPopup({
                                   <span className="font-medium text-green-600">
                                     {formatCurrency(payment.amount)}
                                   </span>
-                                  <span className="text-xs text-green-600">PAID</span>
                                 </div>
                               </div>
                             ))}
@@ -251,7 +250,7 @@ export function CapitalCallsPopup({
                             {formatCurrency(callOutstanding)}
                           </span>
                         ) : (
-                          <span className="text-green-600">Paid</span>
+                          <span className="text-green-600">—</span>
                         )}
                       </TableCell>
                       <TableCell>
