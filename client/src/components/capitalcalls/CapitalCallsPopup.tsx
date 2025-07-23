@@ -103,7 +103,7 @@ export function CapitalCallsPopup({
     id: call.id,
     capitalCallId: call.id,
     amount: call.paidAmount || 0,
-    paymentDate: call.paidDate || call.callDate,
+    paymentDate: call.dueDate || call.callDate, // Use due date if available, fallback to call date
     paymentMethod: 'bank_transfer',
     status: call.paidAmount > 0 ? 'completed' : 'pending',
     notes: call.notes
@@ -132,7 +132,14 @@ export function CapitalCallsPopup({
         </DialogHeader>
 
         {/* Summary Section */}
-        <div className="grid grid-cols-3 gap-4 mb-6 p-4 bg-neutral-50 rounded-lg border">
+        <div className="grid grid-cols-4 gap-4 mb-6 p-4 bg-neutral-50 rounded-lg border">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <CreditCard className="h-4 w-4 text-neutral-600" />
+              <span className="text-sm font-medium text-neutral-600">Committed</span>
+            </div>
+            <p className="text-xl font-semibold text-neutral-900">{formatCurrency(capitalCallsData?.committedAmount || 0)}</p>
+          </div>
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
               <CreditCard className="h-4 w-4 text-neutral-600" />
@@ -140,7 +147,7 @@ export function CapitalCallsPopup({
             </div>
             <p className="text-xl font-semibold text-neutral-900">{formatCurrency(totalCalled)}</p>
           </div>
-          <div className="text-center border-l border-r border-neutral-200 px-4">
+          <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
               <DollarSign className="h-4 w-4 text-neutral-600" />
               <span className="text-sm font-medium text-neutral-600">Total Paid</span>
@@ -150,9 +157,9 @@ export function CapitalCallsPopup({
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
               <AlertCircle className="h-4 w-4 text-neutral-600" />
-              <span className="text-sm font-medium text-neutral-600">Outstanding</span>
+              <span className="text-sm font-medium text-neutral-600">Uncalled</span>
             </div>
-            <p className="text-xl font-semibold text-neutral-900">{formatCurrency(outstanding)}</p>
+            <p className="text-xl font-semibold text-neutral-900">{formatCurrency((capitalCallsData?.committedAmount || 0) - totalCalled)}</p>
           </div>
         </div>
 
@@ -203,7 +210,7 @@ export function CapitalCallsPopup({
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Calendar className="h-4 w-4 text-gray-500" />
-                          {format(new Date(call.callDate), 'MMM dd, yyyy')}
+                          {format(new Date(call.dueDate || call.callDate), 'MMM dd, yyyy')}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -245,7 +252,7 @@ export function CapitalCallsPopup({
                             {formatCurrency(callOutstanding)}
                           </span>
                         ) : (
-                          <span className="text-green-600">Fully Paid</span>
+                          <span className="text-green-600">Paid</span>
                         )}
                       </TableCell>
                       <TableCell>
