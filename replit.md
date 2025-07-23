@@ -225,6 +225,16 @@ Preferred communication style: Simple, everyday language.
   - **User Experience**: Capital calls dialog now has clean, professional display without redundant status information
   - **Database Integration**: Proper filtering of payment data to show only actual payments, not synthetic data
 
+- **July 23, 2025**: Deal Creation Form Validation Fix - COMPLETE
+  - **RESOLVED: Company Stage Field Validation Error**: Fixed "Invalid enum value" error appearing when Company Stage field was left empty
+  - **Root Cause**: Optional enum field validation was rejecting empty strings instead of treating them as valid optional values
+  - **Changes Made**: 
+    - Updated validation schema to use string refinement instead of strict enum validation for optional company stage
+    - Modified Select components to properly handle empty values by converting to undefined
+    - Fixed both NewDealModal and EditDealModal to use consistent value handling
+  - **User Experience**: Company Stage field now works properly as optional field without validation errors when left empty
+  - **Form Validation**: Validation now only checks company stage validity when a value is actually selected
+
 - **July 23, 2025**: Comprehensive Codebase Cleanup Round 2 - COMPLETE
   - **Additional Test Files Removed**: Deleted test-upload.ts, StarTest.tsx, auth-context.tsx.bak
   - **Import References Fixed**: Removed all import references to deleted test files in App.tsx and routes.ts

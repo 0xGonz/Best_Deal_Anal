@@ -50,7 +50,10 @@ const dealFormSchema = z.object({
   // Removed projectedIrr - using targetReturn instead
   projectedMultiple: z.string().optional().or(z.literal("")),
   stage: z.enum(DEAL_STAGES),
-  companyStage: z.enum(Object.keys(COMPANY_STAGES) as [string, ...string[]]).optional(),
+  companyStage: z.string().optional().refine(
+    (val) => !val || Object.keys(COMPANY_STAGES).includes(val),
+    { message: "Invalid company stage selected" }
+  ),
   rejectionReason: z.string().optional(),
   tags: z.array(z.string()).optional()
 }).refine((data) => {
@@ -372,7 +375,7 @@ export default function EditDealModal({ isOpen, onClose, dealId }: EditDealModal
                     <FormLabel>Company Stage</FormLabel>
                     <Select 
                       value={field.value || ""} 
-                      onValueChange={field.onChange}
+                      onValueChange={(value) => field.onChange(value || undefined)}
                       disabled={updateDealMutation.isPending}
                     >
                       <FormControl>

@@ -53,7 +53,10 @@ const dealFormSchema = z.object({
   // Removed projectedIrr - using targetReturn instead
   projectedMultiple: z.string().optional().or(z.literal("")),
   stage: z.enum(DEAL_STAGES),
-  companyStage: z.enum(Object.keys(COMPANY_STAGES) as [string, ...string[]]).optional(),
+  companyStage: z.string().optional().refine(
+    (val) => !val || Object.keys(COMPANY_STAGES).includes(val),
+    { message: "Invalid company stage selected" }
+  ),
   tags: z.array(z.string()).optional()
 });
 
@@ -494,8 +497,8 @@ export default function NewDealModal({ isOpen, onClose }: NewDealModalProps) {
                 <FormItem className="space-y-1">
                   <FormLabel>Company Stage</FormLabel>
                   <Select 
-                    onValueChange={field.onChange} 
-                    defaultValue={field.value}
+                    onValueChange={(value) => field.onChange(value || undefined)} 
+                    value={field.value || ""}
                   >
                     <FormControl>
                       <SelectTrigger>
