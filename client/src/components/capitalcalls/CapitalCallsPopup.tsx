@@ -90,20 +90,28 @@ export function CapitalCallsPopup({
   fundName,
 }: CapitalCallsPopupProps) {
   // Fetch capital calls for this allocation
-  const { data: capitalCalls = [], isLoading, error } = useQuery<CapitalCall[]>({
+  const { data: capitalCallsData, isLoading, error } = useQuery({
     queryKey: [`/api/capital-calls/allocation/${allocationId}`],
     enabled: isOpen && !!allocationId,
   });
 
-  // Fetch payments for each capital call
-  const { data: allPayments = [], isLoading: isLoadingPayments } = useQuery<Payment[]>({
-    queryKey: [`/api/payments/allocation/${allocationId}`],
-    enabled: isOpen && !!allocationId,
-  });
+  // Extract capital calls from the response
+  const capitalCalls = capitalCallsData?.capitalCalls || [];
+  
+  // Extract payment info from capital calls data (since payments endpoint doesn't exist)
+  const allPayments = capitalCalls.map((call: any) => ({
+    id: call.id,
+    capitalCallId: call.id,
+    amount: call.paidAmount || 0,
+    paymentDate: call.paidDate || call.callDate,
+    paymentMethod: 'bank_transfer',
+    status: call.paidAmount > 0 ? 'completed' : 'pending',
+    notes: call.notes
+  })).filter((payment: any) => payment.amount > 0);
 
   // Calculate totals
-  const totalCalled = capitalCalls.reduce((sum, call) => sum + call.amount, 0);
-  const totalPaid = allPayments.reduce((sum, payment) => sum + payment.amount, 0);
+  const totalCalled = capitalCalls.reduce((sum: number, call: any) => sum + (call.callAmount || 0), 0);
+  const totalPaid = allPayments.reduce((sum: number, payment: any) => sum + payment.amount, 0);
   const outstanding = totalCalled - totalPaid;
 
   if (!isOpen) return null;
@@ -123,33 +131,33 @@ export function CapitalCallsPopup({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="p-4 bg-blue-50 rounded-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <CreditCard className="h-4 w-4 text-blue-600" />
-              <span className="text-sm font-medium text-blue-900">Total Called</span>
+        {/* Summary Section */}
+        <div className="grid grid-cols-3 gap-4 mb-6 p-4 bg-neutral-50 rounded-lg border">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <CreditCard className="h-4 w-4 text-neutral-600" />
+              <span className="text-sm font-medium text-neutral-600">Total Called</span>
             </div>
-            <p className="text-2xl font-bold text-blue-900">{formatCurrency(totalCalled)}</p>
+            <p className="text-xl font-semibold text-neutral-900">{formatCurrency(totalCalled)}</p>
           </div>
-          <div className="p-4 bg-green-50 rounded-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <DollarSign className="h-4 w-4 text-green-600" />
-              <span className="text-sm font-medium text-green-900">Total Paid</span>
+          <div className="text-center border-l border-r border-neutral-200 px-4">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <DollarSign className="h-4 w-4 text-neutral-600" />
+              <span className="text-sm font-medium text-neutral-600">Total Paid</span>
             </div>
-            <p className="text-2xl font-bold text-green-900">{formatCurrency(totalPaid)}</p>
+            <p className="text-xl font-semibold text-neutral-900">{formatCurrency(totalPaid)}</p>
           </div>
-          <div className="p-4 bg-red-50 rounded-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <AlertCircle className="h-4 w-4 text-red-600" />
-              <span className="text-sm font-medium text-red-900">Outstanding</span>
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <AlertCircle className="h-4 w-4 text-neutral-600" />
+              <span className="text-sm font-medium text-neutral-600">Outstanding</span>
             </div>
-            <p className="text-2xl font-bold text-red-900">{formatCurrency(outstanding)}</p>
+            <p className="text-xl font-semibold text-neutral-900">{formatCurrency(outstanding)}</p>
           </div>
         </div>
 
         {/* Loading State */}
-        {(isLoading || isLoadingPayments) && (
+        {isLoading && (
           <div className="space-y-4">
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-3/4" />
@@ -185,10 +193,10 @@ export function CapitalCallsPopup({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {capitalCalls.map((call) => {
-                  const callPayments = allPayments.filter(p => p.capitalCallId === call.id);
-                  const paidAmount = callPayments.reduce((sum, p) => sum + p.amount, 0);
-                  const callOutstanding = call.amount - paidAmount;
+                {capitalCalls.map((call: any) => {
+                  const callPayments = allPayments.filter((p: any) => p.capitalCallId === call.id);
+                  const paidAmount = callPayments.reduce((sum: number, p: any) => sum + p.amount, 0);
+                  const callOutstanding = (call.callAmount || 0) - paidAmount;
 
                   return (
                     <TableRow key={call.id}>
@@ -199,7 +207,7 @@ export function CapitalCallsPopup({
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className="font-medium">{formatCurrency(call.amount)}</span>
+                        <span className="font-medium">{formatCurrency(call.callAmount || 0)}</span>
                       </TableCell>
                       <TableCell>
                         <Badge className={`${getStatusColor(call.status)} flex items-center gap-1 w-fit`}>
