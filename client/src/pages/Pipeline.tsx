@@ -9,6 +9,7 @@ import EditDealModal from "@/components/deals/EditDealModal";
 import AllocateFundModal from "@/components/deals/AllocateFundModal";
 import PipelineStats from "@/components/pipeline/PipelineStats";
 import StageDistribution from "@/components/pipeline/StageDistribution";
+import RejectedStageDistribution from "@/components/pipeline/RejectedStageDistribution";
 import SectorDistribution from "@/components/pipeline/SectorDistribution";
 import { Button } from "@/components/ui/button";
 import { Select, SelectItem, SelectTrigger, SelectValue, SelectContent } from "@/components/ui/select";
@@ -170,7 +171,7 @@ export default function Pipeline() {
       
       // Create notification for rejection
       try {
-        await generateDealNotification(1, data.name, 'rejected', data.id, 'rejected');
+        await generateDealNotification(1, data.name, 'moved', data.id, 'rejected');
         queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
         queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
       } catch (err) {
@@ -452,7 +453,10 @@ export default function Pipeline() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div className="h-full">
-                      <StageDistribution deals={dealsByStage[stage]} stage={stage} />
+                      {stage === 'rejected' 
+                        ? <RejectedStageDistribution deals={dealsByStage[stage]} />
+                        : <StageDistribution deals={dealsByStage[stage]} stage={stage} />
+                      }
                     </div>
                     <div className="h-full">
                       <SectorDistribution 

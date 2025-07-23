@@ -33,6 +33,14 @@ export interface Deal {
   targetReturn?: string | null;
   notes?: string | null;
   rejectionReason?: string | null;
+  rejectionCategory?: string | null;
+  rejectionData?: {
+    category: string;
+    reason: string;
+    notes?: string;
+    rejectedBy?: number;
+    rejectedAt?: string;
+  } | null;
   rejectedAt?: string | null;
   createdAt: string;
   updatedAt: string;
