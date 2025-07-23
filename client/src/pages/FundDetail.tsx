@@ -92,6 +92,7 @@ import {
 } from '@/lib/services/dataIntegration';
 import { TABLE_CONFIGS } from "@/lib/services/tableConfig";
 import { DistributionsManagementHub } from '@/components/distributions/DistributionsManagementHub';
+import { AddCapitalCallForm } from '@/components/capitalcalls/AddCapitalCallForm';
 // Import local types instead of schema types to ensure consistency
 import { Fund, FundAllocation, Deal } from "@/lib/types";
 
@@ -110,6 +111,10 @@ export default function FundDetail() {
   const [isDistributionsDialogOpen, setIsDistributionsDialogOpen] = useState(false);
   const [isDistributionsHubOpen, setIsDistributionsHubOpen] = useState(false);
   const [currentAllocationId, setCurrentAllocationId] = useState<number | null>(null);
+  
+  // Capital call state
+  const [isAddCapitalCallDialogOpen, setIsAddCapitalCallDialogOpen] = useState(false);
+  const [selectedAllocationForCapitalCall, setSelectedAllocationForCapitalCall] = useState<FundAllocation | null>(null);
   
   // Define types for editing allocation with dealName added
   type EditingAllocation = FundAllocation & { dealName?: string };
@@ -527,6 +532,12 @@ export default function FundDetail() {
   const handleManageDistributions = (allocation: FundAllocation) => {
     setCurrentAllocationId(allocation.id);
     setIsDistributionsDialogOpen(true);
+  };
+
+  // Handler for opening add capital call dialog
+  const handleAddCapitalCall = (allocation: FundAllocation) => {
+    setSelectedAllocationForCapitalCall(allocation);
+    setIsAddCapitalCallDialogOpen(true);
   };
 
   // We don't need to warn about invalid allocations anymore
@@ -1308,11 +1319,12 @@ export default function FundDetail() {
                                           View Capital Calls
                                         </a>
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem asChild>
-                                        <a href={`/deals/${allocation.dealId}?tab=capitalcalls&createFor=${allocation.id}`} className="cursor-pointer flex items-center text-xs sm:text-sm" onClick={(e) => e.stopPropagation()}>
-                                          <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-2" />
-                                          Create Capital Call
-                                        </a>
+                                      <DropdownMenuItem 
+                                        onClick={(e) => { e.stopPropagation(); handleAddCapitalCall(allocation); }} 
+                                        className="cursor-pointer flex items-center text-xs sm:text-sm"
+                                      >
+                                        <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-2" />
+                                        Add Capital Call
                                       </DropdownMenuItem>
                                       <DropdownMenuItem 
                                         className="cursor-pointer flex items-center text-xs sm:text-sm text-blue-600"
@@ -1693,6 +1705,24 @@ export default function FundDetail() {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+
+            {/* Add Capital Call Dialog */}
+            <AddCapitalCallForm
+              isOpen={isAddCapitalCallDialogOpen}
+              onClose={() => {
+                setIsAddCapitalCallDialogOpen(false);
+                setSelectedAllocationForCapitalCall(null);
+              }}
+              allocationId={selectedAllocationForCapitalCall?.id || 0}
+              allocationDetails={selectedAllocationForCapitalCall ? {
+                dealName: selectedAllocationForCapitalCall.dealName || "Unknown Deal",
+                fundName: fund?.name || "Unknown Fund",
+                totalCommitted: selectedAllocationForCapitalCall.amount || 0,
+                totalCalled: selectedAllocationForCapitalCall.calledAmount || 0,
+                uncalledAmount: (selectedAllocationForCapitalCall.amount || 0) - (selectedAllocationForCapitalCall.calledAmount || 0),
+                status: selectedAllocationForCapitalCall.status || "unknown"
+              } : undefined}
+            />
           </>
         )}
       </div>

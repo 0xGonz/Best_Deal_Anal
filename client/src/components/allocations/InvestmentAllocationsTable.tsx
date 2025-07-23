@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { CreditCard, Eye, MoreHorizontal, Edit, Trash2, TrendingDown } from 'lucide-react';
+import { CreditCard, Eye, MoreHorizontal, Edit, Trash2, TrendingDown, Plus } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import type { FundAllocation } from '@/lib/types';
 
@@ -14,6 +14,7 @@ interface InvestmentAllocationsTableProps {
   onEditAllocation?: (allocation: FundAllocation) => void;
   onDeleteAllocation?: (allocationId: number) => void;
   onViewCapitalCalls?: (allocationId: number) => void;
+  onAddCapitalCall?: (allocation: FundAllocation) => void;
   onManageDistributions?: (allocation: FundAllocation) => void;
   capitalView?: 'committed' | 'called' | 'paid';
   showCapitalCallColumn?: boolean;
@@ -25,6 +26,7 @@ export const InvestmentAllocationsTable: React.FC<InvestmentAllocationsTableProp
   onEditAllocation,
   onDeleteAllocation,
   onViewCapitalCalls,
+  onAddCapitalCall,
   onManageDistributions,
   capitalView = 'committed',
   showCapitalCallColumn = true
@@ -260,13 +262,24 @@ export const InvestmentAllocationsTable: React.FC<InvestmentAllocationsTableProp
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
                           <DropdownMenuSeparator />
                           {showCapitalCallColumn && (
-                            <DropdownMenuItem 
-                              onClick={() => onViewCapitalCalls?.(allocation.id)}
-                              className="cursor-pointer"
-                            >
-                              <Eye className="h-4 w-4 mr-2" />
-                              View Capital Calls
-                            </DropdownMenuItem>
+                            <>
+                              <DropdownMenuItem 
+                                onClick={() => onViewCapitalCalls?.(allocation.id)}
+                                className="cursor-pointer"
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                View Capital Calls
+                              </DropdownMenuItem>
+                              {onAddCapitalCall && (
+                                <DropdownMenuItem 
+                                  onClick={() => onAddCapitalCall(allocation)}
+                                  className="cursor-pointer"
+                                >
+                                  <Plus className="h-4 w-4 mr-2" />
+                                  Add Capital Call
+                                </DropdownMenuItem>
+                              )}
+                            </>
                           )}
                           {onManageDistributions && (
                             <DropdownMenuItem 
