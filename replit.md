@@ -183,6 +183,14 @@ Preferred communication style: Simple, everyday language.
   - **Frontend Integration Fixed**: Deal detail pages now properly load capital calls without console errors
   - **Data Structure**: Returns array of capital calls with allocation and fund information included
 
+- **July 23, 2025**: Documents Database Query Fix - COMPLETE
+  - **RESOLVED: 507 Response Size Error**: Fixed critical error when querying documents table with file_data column
+  - **Root Cause**: Binary file_data column (127MB total) exceeded 67MB response limit when included in queries
+  - **Solution**: Created `documents_metadata` view that excludes file_data for safe document listing
+  - **Data Cleanup**: Removed corrupted document entry (ID 30) with NULL file data
+  - **Best Practice Established**: Always use `documents_metadata` view for queries, only fetch file_data for single documents
+  - **Large File Identified**: 25MB test.pdf file contributing to size issues
+
 - **July 21, 2025**: Devil's Advocate Feature Database Fix
   - **RESOLVED: Devils Advocate Comments Table Missing**: Created missing `devils_advocate_comments` table in database
   - **Database Schema Update**: Added table with proper foreign key relationships to deals and users tables
