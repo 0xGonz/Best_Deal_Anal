@@ -43,13 +43,25 @@ interface CapitalCallsModalProps {
 
 interface CapitalCall {
   id: number;
-  allocationId: number;
+  allocationId?: number;
   callAmount: number;
+  amountType?: string;
   callDate: string;
   dueDate: string;
   status: 'scheduled' | 'sent' | 'paid' | 'overdue';
   paidAmount: number | null;
   notes: string | null;
+}
+
+interface CapitalCallsResponse {
+  allocationId: number;
+  committedAmount: number;
+  totalCalled: number;
+  totalPaid: number;
+  percentageCalled: number;
+  percentagePaid: number;
+  currentStatus: string;
+  capitalCalls: CapitalCall[];
 }
 
 export default function CapitalCallsModal({ 
@@ -69,14 +81,15 @@ export default function CapitalCallsModal({
   });
 
   // Fetch capital calls for this allocation
-  const { data: capitalCalls = [], isLoading } = useQuery<CapitalCall[]>({
+  const { data: capitalCallsData, isLoading } = useQuery<CapitalCallsResponse>({
     queryKey: [`/api/capital-calls/allocation/${allocation.id}`],
     enabled: isOpen && !!allocation.id
   });
 
-  // Calculate totals
-  const totalCalled = capitalCalls.reduce((sum, call) => sum + call.callAmount, 0);
-  const totalPaid = capitalCalls.reduce((sum, call) => sum + (call.paidAmount || 0), 0);
+  // Extract data from response
+  const capitalCalls = capitalCallsData?.capitalCalls || [];
+  const totalCalled = capitalCallsData?.totalCalled || 0;
+  const totalPaid = capitalCallsData?.totalPaid || 0;
   const remainingCommitment = allocation.amount - totalCalled;
   const outstandingAmount = totalCalled - totalPaid;
 
@@ -145,14 +158,14 @@ export default function CapitalCallsModal({
 
   const getStatusBadge = (call: CapitalCall) => {
     const statusConfig = {
-      scheduled: { label: "Scheduled", className: "bg-gray-100 text-gray-700" },
-      sent: { label: "Sent", className: "bg-blue-100 text-blue-700" },
-      paid: { label: "Paid", className: "bg-green-100 text-green-700" },
-      overdue: { label: "Overdue", className: "bg-red-100 text-red-700" }
+      scheduled: { label: "Scheduled", className: "bg-gray-100 text-gray-700 border-gray-200" },
+      sent: { label: "Sent", className: "bg-blue-50 text-blue-700 border-blue-200" },
+      paid: { label: "Paid", className: "bg-green-50 text-green-700 border-green-200" },
+      overdue: { label: "Overdue", className: "bg-red-50 text-red-700 border-red-200" }
     };
     
     const config = statusConfig[call.status];
-    return <Badge className={config.className}>{config.label}</Badge>;
+    return <Badge variant="outline" className={config.className}>{config.label}</Badge>;
   };
 
   return (
@@ -170,22 +183,22 @@ export default function CapitalCallsModal({
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 my-6">
-          <div className="bg-blue-50 p-4 rounded-lg">
+          <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg">
             <p className="text-sm text-gray-600 mb-1">Committed</p>
-            <p className="text-xl font-semibold text-blue-700">
+            <p className="text-xl font-semibold text-neutral-900">
               {formatCurrency(allocation.amount)}
             </p>
           </div>
-          <div className="bg-amber-50 p-4 rounded-lg">
+          <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
             <p className="text-sm text-gray-600 mb-1">Called</p>
             <p className="text-xl font-semibold text-amber-700">
               {formatCurrency(totalCalled)}
             </p>
             <p className="text-xs text-gray-500 mt-1">
-              {((totalCalled / allocation.amount) * 100).toFixed(0)}% of commitment
+              {allocation.amount > 0 ? ((totalCalled / allocation.amount) * 100).toFixed(0) : 0}% of commitment
             </p>
           </div>
-          <div className="bg-green-50 p-4 rounded-lg">
+          <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
             <p className="text-sm text-gray-600 mb-1">Paid</p>
             <p className="text-xl font-semibold text-green-700">
               {formatCurrency(totalPaid)}
@@ -194,9 +207,9 @@ export default function CapitalCallsModal({
               {totalCalled > 0 ? ((totalPaid / totalCalled) * 100).toFixed(0) : 0}% of called
             </p>
           </div>
-          <div className="bg-purple-50 p-4 rounded-lg">
+          <div className="bg-neutral-50 border border-neutral-200 p-4 rounded-lg">
             <p className="text-sm text-gray-600 mb-1">Remaining</p>
-            <p className="text-xl font-semibold text-purple-700">
+            <p className="text-xl font-semibold text-neutral-700">
               {formatCurrency(remainingCommitment)}
             </p>
             <p className="text-xs text-gray-500 mt-1">
@@ -224,7 +237,7 @@ export default function CapitalCallsModal({
               <Button 
                 onClick={() => setShowAddForm(true)}
                 size="sm"
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-neutral-900 hover:bg-neutral-800 text-white"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Capital Call
@@ -234,17 +247,17 @@ export default function CapitalCallsModal({
 
           {/* Add New Capital Call Form */}
           {showAddForm && (
-            <div className="border rounded-lg p-4 bg-gray-50">
-              <h4 className="font-medium mb-4">New Capital Call</h4>
+            <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+              <h4 className="font-semibold text-neutral-900 mb-4">New Capital Call</h4>
               <form onSubmit={(e) => {
                 e.preventDefault();
                 createCapitalCall.mutate(formData);
               }} className="space-y-4">
-                <Alert className="mb-4">
-                  <Info className="h-4 w-4" />
-                  <AlertDescription>
+                <Alert className="mb-4 bg-blue-50 border-blue-200">
+                  <Info className="h-4 w-4 text-blue-600" />
+                  <AlertDescription className="text-blue-700">
                     You can call up to {formatCurrency(remainingCommitment)} 
-                    ({((remainingCommitment / allocation.amount) * 100).toFixed(0)}% of commitment remaining)
+                    ({allocation.amount > 0 ? ((remainingCommitment / allocation.amount) * 100).toFixed(0) : 0}% of commitment remaining)
                   </AlertDescription>
                 </Alert>
 
@@ -339,17 +352,19 @@ export default function CapitalCallsModal({
                   />
                 </div>
 
-                <div className="flex justify-end gap-2">
+                <div className="flex justify-end gap-2 pt-4">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setShowAddForm(false)}
+                    className="border-gray-300"
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
                     disabled={createCapitalCall.isPending || formData.callAmount <= 0}
+                    className="bg-neutral-900 hover:bg-neutral-800 text-white"
                   >
                     {createCapitalCall.isPending ? "Creating..." : "Create Capital Call"}
                   </Button>
@@ -361,37 +376,48 @@ export default function CapitalCallsModal({
           {/* Capital Calls List */}
           {isLoading ? (
             <div className="text-center py-8">
-              <div className="animate-pulse">Loading capital calls...</div>
+              <div className="animate-pulse text-gray-500">Loading capital calls...</div>
             </div>
           ) : capitalCalls.length === 0 ? (
-            <div className="text-center py-8 bg-gray-50 rounded-lg">
-              <CreditCard className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-              <p className="text-gray-500">No capital calls yet</p>
-              <p className="text-sm text-gray-400 mt-1">
+            <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+              <CreditCard className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+              <p className="text-gray-600 font-medium">No capital calls yet</p>
+              <p className="text-sm text-gray-500 mt-1">
                 Click "Add Capital Call" to create the first one
               </p>
             </div>
           ) : (
             <div className="space-y-3">
               {capitalCalls.map((call) => (
-                <div key={call.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                <div key={call.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                   <div className="flex justify-between items-start">
                     <div className="space-y-2">
                       <div className="flex items-center gap-3">
-                        <h4 className="font-medium text-lg">
+                        <h4 className="font-semibold text-lg text-neutral-900">
                           {formatCurrency(call.callAmount)}
                         </h4>
                         {getStatusBadge(call)}
                         {call.paidAmount && call.paidAmount < call.callAmount && (
-                          <Badge className="bg-purple-100 text-purple-700">
+                          <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
                             Partial: {formatCurrency(call.paidAmount)} paid
                           </Badge>
                         )}
                       </div>
                       <div className="text-sm text-gray-600 space-y-1">
-                        <p>Call Date: {format(new Date(call.callDate), "MMM d, yyyy")}</p>
-                        <p>Due Date: {format(new Date(call.dueDate), "MMM d, yyyy")}</p>
-                        {call.notes && <p className="italic">Note: {call.notes}</p>}
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                          <span>Call Date: {format(new Date(call.callDate), "MMM d, yyyy")}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                          <span>Due Date: {format(new Date(call.dueDate), "MMM d, yyyy")}</span>
+                        </div>
+                        {call.notes && (
+                          <div className="flex items-start gap-2 mt-2">
+                            <Info className="h-3.5 w-3.5 text-gray-400 mt-0.5" />
+                            <p className="italic text-gray-600">{call.notes}</p>
+                          </div>
+                        )}
                       </div>
                     </div>
                     
@@ -404,6 +430,7 @@ export default function CapitalCallsModal({
                           amount: call.callAmount 
                         })}
                         disabled={markAsPaid.isPending}
+                        className="border-green-200 text-green-700 hover:bg-green-50"
                       >
                         <CheckCircle className="h-4 w-4 mr-2" />
                         Mark as Paid
@@ -413,14 +440,14 @@ export default function CapitalCallsModal({
 
                   {/* Progress Bar for Partial Payments */}
                   {call.paidAmount && call.paidAmount > 0 && call.paidAmount < call.callAmount && (
-                    <div className="mt-3">
-                      <div className="flex justify-between text-xs text-gray-600 mb-1">
-                        <span>Payment Progress</span>
-                        <span>{((call.paidAmount / call.callAmount) * 100).toFixed(0)}%</span>
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <div className="flex justify-between text-xs text-gray-600 mb-1.5">
+                        <span className="font-medium">Payment Progress</span>
+                        <span className="font-medium">{((call.paidAmount / call.callAmount) * 100).toFixed(0)}%</span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                         <div 
-                          className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                          className="bg-green-600 h-2 rounded-full transition-all duration-500 ease-out"
                           style={{ width: `${(call.paidAmount / call.callAmount) * 100}%` }}
                         />
                       </div>
