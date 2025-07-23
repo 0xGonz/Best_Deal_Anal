@@ -92,7 +92,6 @@ import {
 } from '@/lib/services/dataIntegration';
 import { TABLE_CONFIGS } from "@/lib/services/tableConfig";
 import { DistributionsManagementHub } from '@/components/distributions/DistributionsManagementHub';
-import CapitalCallsModal from '@/components/capitalcalls/CapitalCallsModal';
 // Import local types instead of schema types to ensure consistency
 import { Fund, FundAllocation, Deal } from "@/lib/types";
 
@@ -111,12 +110,6 @@ export default function FundDetail() {
   const [isDistributionsDialogOpen, setIsDistributionsDialogOpen] = useState(false);
   const [isDistributionsHubOpen, setIsDistributionsHubOpen] = useState(false);
   const [currentAllocationId, setCurrentAllocationId] = useState<number | null>(null);
-  
-  // Capital calls modal state
-  const [capitalCallsModal, setCapitalCallsModal] = useState<{
-    isOpen: boolean;
-    allocation: FundAllocation | null;
-  }>({ isOpen: false, allocation: null });
   
   // Define types for editing allocation with dealName added
   type EditingAllocation = FundAllocation & { dealName?: string };
@@ -1124,7 +1117,14 @@ export default function FundDetail() {
                       </CardDescription>
                     </div>
                     
-
+                    {/* Capital Metrics Toggle */}
+                    <Tabs value={capitalView} onValueChange={(value) => setCapitalView(value as 'total' | 'called' | 'uncalled')}>
+                      <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="total" className="text-xs">Total Committed</TabsTrigger>
+                        <TabsTrigger value="called" className="text-xs">Called Capital</TabsTrigger>
+                        <TabsTrigger value="uncalled" className="text-xs">Uncalled Capital</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -1154,9 +1154,11 @@ export default function FundDetail() {
                               <TableHead className="font-semibold text-[10px] xs:text-xs sm:text-sm">Date</TableHead>
                               <TableHead className="font-semibold text-[10px] xs:text-xs sm:text-sm">Status</TableHead>
                               <TableHead className="font-semibold text-[10px] xs:text-xs sm:text-sm text-right">Weight</TableHead>
-                              <TableHead className="font-semibold text-[10px] xs:text-xs sm:text-sm text-right">Committed</TableHead>
-                              <TableHead className="font-semibold text-[10px] xs:text-xs sm:text-sm text-right">Called</TableHead>
-                              <TableHead className="font-semibold text-[10px] xs:text-xs sm:text-sm text-right">Uncalled</TableHead>
+                              <TableHead className="font-semibold text-[10px] xs:text-xs sm:text-sm text-right">
+                                {capitalView === 'total' && 'Committed'}
+                                {capitalView === 'called' && 'Called'}
+                                {capitalView === 'uncalled' && 'Remaining'}
+                              </TableHead>
                               <TableHead className="font-semibold text-[10px] xs:text-xs sm:text-sm text-right">
                                 <span className="flex items-center justify-end gap-1" title="Click amounts to manage distributions">
                                   Distributions
@@ -1236,18 +1238,8 @@ export default function FundDetail() {
                                 </span>
                               </TableCell>
                               <TableCell className="py-1.5 sm:py-2.5 px-2 sm:px-4 text-right">
-                                <span className="text-2xs xs:text-xs sm:text-sm text-blue-600">
-                                  {formatCurrency(allocation.amount || 0)}
-                                </span>
-                              </TableCell>
-                              <TableCell className="py-1.5 sm:py-2.5 px-2 sm:px-4 text-right">
-                                <span className="text-2xs xs:text-xs sm:text-sm text-orange-600">
-                                  {formatCurrency(allocation.calledAmount || 0)}
-                                </span>
-                              </TableCell>
-                              <TableCell className="py-1.5 sm:py-2.5 px-2 sm:px-4 text-right">
-                                <span className="text-2xs xs:text-xs sm:text-sm text-gray-600">
-                                  {formatCurrency((allocation.amount || 0) - (allocation.calledAmount || 0))}
+                                <span className={`text-2xs xs:text-xs sm:text-sm ${getCapitalViewColorClass(capitalView)}`}>
+                                  {formatCurrency(displayAmount)}
                                 </span>
                               </TableCell>
                               <TableCell className="py-1.5 sm:py-2.5 px-2 sm:px-4 text-right">
@@ -1296,21 +1288,79 @@ export default function FundDetail() {
                                   >
                                     <TrendingDown className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-blue-600" />
                                   </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={(e) => { 
-                                      e.stopPropagation(); 
-                                      setCapitalCallsModal({ 
-                                        isOpen: true, 
-                                        allocation 
-                                      }); 
-                                    }}
-                                    className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 p-0 hover:bg-blue-100"
-                                    title="Manage capital calls"
-                                  >
-                                    <CreditCard className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-blue-600" />
-                                  </Button>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 p-0"
+                                        title="Capital calls"
+                                      >
+                                        <CreditCard className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-neutral-600" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuLabel>Capital Calls</DropdownMenuLabel>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem asChild>
+                                        <a href={`/capital-calls/allocation/${allocation.id}`} className="cursor-pointer flex items-center text-xs sm:text-sm" onClick={(e) => e.stopPropagation()}>
+                                          <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-2" />
+                                          View Capital Calls
+                                        </a>
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem asChild>
+                                        <a href={`/deals/${allocation.dealId}?tab=capitalcalls&createFor=${allocation.id}`} className="cursor-pointer flex items-center text-xs sm:text-sm" onClick={(e) => e.stopPropagation()}>
+                                          <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-2" />
+                                          Create Capital Call
+                                        </a>
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem 
+                                        className="cursor-pointer flex items-center text-xs sm:text-sm text-blue-600"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleManageDistributions(allocation);
+                                        }}
+                                      >
+                                        <TrendingDown className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-2" />
+                                        Add Distributions
+                                      </DropdownMenuItem>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem 
+                                        disabled={allocation.status === 'funded'}
+                                        className={`text-xs sm:text-sm ${allocation.status === 'funded' ? "text-gray-400" : "text-green-600"}`}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          allocation.status !== 'funded' && handleMarkAsFunded(allocation);
+                                        }}
+                                      >
+                                        <CheckCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-2" />
+                                        {allocation.status === 'funded' ? 'Already Funded' : 'Mark as Funded'}
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem 
+                                        disabled={allocation.status === 'partially_paid'}
+                                        className={`text-xs sm:text-sm ${allocation.status === 'partially_paid' ? "text-gray-400" : "text-purple-600"}`}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          allocation.status !== 'partially_paid' && 
+                                          handleMarkAsPartiallyPaid(allocation);
+                                        }}
+                                      >
+                                        <CreditCard className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-2" />
+                                        {allocation.status === 'partially_paid' ? 'Already Partially Paid' : 'Mark as Partially Paid'}
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem 
+                                        disabled={allocation.status === 'unfunded'}
+                                        className={`text-xs sm:text-sm ${allocation.status === 'unfunded' ? "text-gray-400" : "text-amber-600"}`}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          allocation.status !== 'unfunded' && handleMarkAsUnfunded(allocation);
+                                        }}
+                                      >
+                                        <AlertCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-2" />
+                                        {allocation.status === 'unfunded' ? 'Already Unfunded' : 'Mark as Unfunded'}
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
                                   <Button 
                                     variant="ghost"
                                     size="sm"
@@ -1361,18 +1411,8 @@ export default function FundDetail() {
                                 100.0%
                               </TableCell>
                               <TableCell className="py-3 px-2 sm:px-4 text-right font-bold">
-                                <span className="text-blue-600 font-bold">
-                                  {formatCurrency(fundMetrics.committedAmount)}
-                                </span>
-                              </TableCell>
-                              <TableCell className="py-3 px-2 sm:px-4 text-right font-bold">
-                                <span className="text-orange-600 font-bold">
-                                  {formatCurrency(fundMetrics.calledAmount)}
-                                </span>
-                              </TableCell>
-                              <TableCell className="py-3 px-2 sm:px-4 text-right font-bold">
-                                <span className="text-gray-600 font-bold">
-                                  {formatCurrency(fundMetrics.uncalledAmount)}
+                                <span className="text-[#000000] font-bold">
+                                  {formatCurrency(displayTotalAmount)}
                                 </span>
                               </TableCell>
                               <TableCell className="py-3 px-2 sm:px-4 text-right font-bold text-gray-800">
@@ -1654,16 +1694,6 @@ export default function FundDetail() {
               </DialogContent>
             </Dialog>
           </>
-        )}
-        
-        {/* Capital Calls Modal */}
-        {capitalCallsModal.allocation && (
-          <CapitalCallsModal
-            isOpen={capitalCallsModal.isOpen}
-            onClose={() => setCapitalCallsModal({ isOpen: false, allocation: null })}
-            allocation={capitalCallsModal.allocation}
-            dealName={capitalCallsModal.allocation.dealName || "Unknown Deal"}
-          />
         )}
       </div>
     </AppLayout>

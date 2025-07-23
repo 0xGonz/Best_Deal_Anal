@@ -73,7 +73,7 @@ router.post('/', requireAuth, requirePermission('create', 'capital_call'), async
       if (result.validationErrors) {
         return res.status(400).json({
           error: result.error,
-          validationErrors: result.validationErrors
+          details: result.validationErrors
         });
       }
       return res.status(400).json({ error: result.error });

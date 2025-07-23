@@ -129,32 +129,6 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 23, 2025**: Capital Call Creation API Contract Fix - COMPLETE
-  - **Root Cause Identified**: Frontend/backend API mismatch - frontend was sending extra fields (callDate, status, paidAmount, outstanding_amount, callPct) that backend Zod schema rejected
-  - **Solution Implemented**: Simplified capital call creation to match working allocation pattern - only send required fields
-  - **Fields Removed**: Eliminated callDate and status from frontend form, letting backend service handle these automatically
-  - **Form Simplification**: Capital call form now only collects essential data: amount, type (dollar/percentage), due date, and notes
-  - **Backend Handles**: Service layer automatically sets status to 'called', calculates outstanding amounts, and creates timeline events
-  - **Result**: Capital calls can now be created successfully without 400 validation errors
-  - **Pattern Reuse**: Applied the same successful pattern used in allocation creation for consistency
-
-- **July 23, 2025**: Capital Calls Full Database Integration - COMPLETE
-  - **Historical & Future Support**: Capital calls properly handle past, present, and future dates with appropriate messaging
-  - **Database Field Integration**: Fully integrated with all capital_calls table fields including outstanding_amount and callPct
-  - **Dynamic Status Management**: Changed default status from 'scheduled' to 'called' so capital calls properly update totals
-  - **Real-time Calculations**: Automatic calculation of outstanding amounts and percentage-based calls
-  - **Visual Date Indicators**: Shows amber indicator for historical calls, blue for future scheduled calls
-  - **Query Invalidation**: Comprehensive cache invalidation ensures called/uncalled amounts update immediately
-  - **Form Enhancements**: Dollar/percentage toggle with real-time conversion and smart input labels
-
-- **July 23, 2025**: Capital Calls Management UI Enhancement - COMPLETE
-  - **Simplified Interface**: Replaced complex dropdown menu with single-click capital calls button
-  - **New Modal Design**: Created dedicated CapitalCallsModal component with clean summary cards
-  - **Stacked Payments**: Support for multiple partial capital calls that stack towards commitment
-  - **Visual Progress**: Added progress bars and percentage indicators for partial payments
-  - **Removed Clutter**: Eliminated unnecessary "add distributions", "mark as funded/unfunded" buttons
-  - **Improved UX**: Direct icon click opens modal, showing committed/called/paid/remaining amounts at a glance
-
 - **July 22, 2025**: Allocation Duplicate Check Bug Fix - COMPLETE
   - **Critical Bug Fixed**: Fixed 409 Conflict error when allocating deals to funds
   - **Root Cause**: System was checking if deal existed in ANY fund, not just the specific fund
