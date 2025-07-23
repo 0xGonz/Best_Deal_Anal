@@ -24,6 +24,7 @@ import { DocumentAnalysisPanel } from "@/components/DocumentAnalysisPanel";
 import InvestmentTrackingTab from "@/components/deals/InvestmentTrackingTab";
 import { DealDistributionsTab } from "@/components/deals/DealDistributionsTab";
 import { DevilsAdvocateTab } from "@/components/deals/DevilsAdvocateTab";
+import { DealRejectionDialog } from "@/components/deals/DealRejectionDialog";
 import { 
   Card, 
   CardHeader, 
@@ -88,6 +89,7 @@ import { Deal, MiniMemo, User } from "@/lib/types";
 import { DEFAULT_EMPTY_TEXT, DEFAULT_AVATAR_TEXT, COMPANY_LABELS } from "@/lib/constants/display-constants";
 import { DEAL_STAGES } from "@/lib/constants/deal-constants";
 import { COMPANY_STAGES, CompanyStage } from "@/lib/constants/company-stages";
+import { type RejectionCategory, type RejectionReason } from "@/lib/constants/rejection-reasons";
 
 export default function DealDetail() {
   const [match, params] = useRoute("/deals/:id");
@@ -100,6 +102,7 @@ export default function DealDetail() {
   const [isAllocateModalOpen, setIsAllocateModalOpen] = useState(false);
   const [isCapitalCallFormOpen, setIsCapitalCallFormOpen] = useState(false);
   const [isMeetingFormOpen, setIsMeetingFormOpen] = useState(false);
+  const [showRejectionDialog, setShowRejectionDialog] = useState(false);
   
   // Get the active tab from URL query parameter
   const getActiveTab = () => {
@@ -269,6 +272,29 @@ export default function DealDetail() {
     // at the beginning of the component
     deleteDealMutation.mutate();
   };
+
+  // Handle rejection through structured dialog
+  const handleRejection = (rejectionData: { category: RejectionCategory; reason: RejectionReason; notes?: string }) => {
+    const displayReason = rejectionData.reason === 'Other' && rejectionData.notes
+      ? rejectionData.notes
+      : rejectionData.reason;
+      
+    const fullRejectionData = {
+      category: rejectionData.category,
+      reason: rejectionData.reason,
+      notes: rejectionData.notes || null
+    };
+
+    updateDealMutation.mutate({ 
+      id: Number(dealId),
+      stage: "rejected", 
+      rejectionReason: displayReason,
+      rejectionCategory: rejectionData.category,
+      rejectionData: fullRejectionData
+    });
+    
+    setShowRejectionDialog(false);
+  };
   
   if (isLoading) {
     return (
@@ -335,6 +361,16 @@ export default function DealDetail() {
               // Refresh capital calls data
               queryClient.invalidateQueries({ queryKey: [`/api/capital-calls/deal/${dealId}`] });
             }}
+          />
+        )}
+
+        {/* Rejection Dialog */}
+        {deal && (
+          <DealRejectionDialog
+            isOpen={showRejectionDialog}
+            onClose={() => setShowRejectionDialog(false)}
+            onConfirm={handleRejection}
+            dealName={deal.name}
           />
         )}
         
@@ -438,10 +474,14 @@ export default function DealDetail() {
                             disabled={deal?.stage === value}
                             onClick={() => {
                               if (dealId && deal?.stage !== value) {
-                                updateDealMutation.mutate({ 
-                                  id: Number(dealId), 
-                                  stage: value 
-                                });
+                                if (value === "rejected") {
+                                  setShowRejectionDialog(true);
+                                } else {
+                                  updateDealMutation.mutate({ 
+                                    id: Number(dealId), 
+                                    stage: value 
+                                  });
+                                }
                               }
                             }}
                             className="text-xs flex items-center justify-between px-3 py-1.5"

@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
+import { type RejectionCategory, type RejectionReason } from "@/lib/constants/rejection-reasons";
 
 export default function Pipeline() {
   const [isNewDealModalOpen, setIsNewDealModalOpen] = useState(false);
@@ -132,6 +133,57 @@ export default function Pipeline() {
       toast({
         title: "Error",
         description: "Failed to update deal status. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Mutation for rejecting deals with structured data
+  const rejectDealMutation = useMutation({
+    mutationFn: async ({ dealId, rejectionData }: { 
+      dealId: number; 
+      rejectionData: { category: RejectionCategory; reason: RejectionReason; notes?: string } 
+    }) => {
+      const displayReason = rejectionData.reason === 'Other' && rejectionData.notes
+        ? rejectionData.notes
+        : rejectionData.reason;
+        
+      const fullRejectionData = {
+        category: rejectionData.category,
+        reason: rejectionData.reason,
+        notes: rejectionData.notes || null
+      };
+
+      return apiRequest("PATCH", `/api/deals/${dealId}`, { 
+        stage: "rejected", 
+        rejectionReason: displayReason,
+        rejectionCategory: rejectionData.category,
+        rejectionData: fullRejectionData
+      });
+    },
+    onSuccess: async (data: any) => {
+      toast({
+        title: "Deal rejected",
+        description: `Deal has been rejected with structured feedback`,
+        variant: "success"
+      });
+      
+      // Create notification for rejection
+      try {
+        await generateDealNotification(1, data.name, 'rejected', data.id, 'rejected');
+        queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
+      } catch (err) {
+        console.error('Failed to create notification:', err);
+      }
+      
+      // Refresh deals data
+      queryClient.invalidateQueries({ queryKey: ["/api/deals"] });
+    },
+    onError: (error: unknown) => {
+      toast({
+        title: "Error",
+        description: "Failed to reject deal. Please try again.",
         variant: "destructive"
       });
     }
@@ -378,6 +430,9 @@ export default function Pipeline() {
                     setSelectedDealName(dealName);
                     setIsDeleteDialogOpen(true);
                   }}
+                  onReject={(dealId, rejectionData) => {
+                    rejectDealMutation.mutate({ dealId, rejectionData });
+                  }}
                 />
               </>
             )}
@@ -436,6 +491,9 @@ export default function Pipeline() {
                       setSelectedDealId(dealId);
                       setSelectedDealName(dealName);
                       setIsDeleteDialogOpen(true);
+                    }}
+                    onReject={(dealId, rejectionData) => {
+                      rejectDealMutation.mutate({ dealId, rejectionData });
                     }}
                   />
                 </>

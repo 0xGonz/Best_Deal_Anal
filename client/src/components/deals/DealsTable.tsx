@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'wouter';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,8 @@ import { getDealStageBadgeClass, formatDate, formatPercentage } from "@/lib/util
 import { formatCurrency } from "@/lib/utils/formatters";
 import { DealStageLabels } from "@shared/schema";
 import { DEFAULT_DEAL_SECTOR, DEAL_STAGES } from "@/lib/constants/deal-constants";
+import { DealRejectionDialog } from "./DealRejectionDialog";
+import { type RejectionCategory, type RejectionReason } from "@/lib/constants/rejection-reasons";
 
 type DealsTableProps = {
   deals: Deal[] | undefined;
@@ -24,10 +26,13 @@ type DealsTableProps = {
   onUpdateStatus?: (dealId: number, newStatus: string) => void;
   onViewDocuments?: (dealId: number) => void;
   onDelete?: (dealId: number, dealName: string) => void;
+  onReject?: (dealId: number, rejectionData: { category: RejectionCategory; reason: RejectionReason; notes?: string }) => void;
   isLoading: boolean;
 };
 
-export default function DealsTable({ deals, onEdit, onAllocate, onUpdateStatus, onViewDocuments, onDelete, isLoading }: DealsTableProps) {
+export default function DealsTable({ deals, onEdit, onAllocate, onUpdateStatus, onViewDocuments, onDelete, onReject, isLoading }: DealsTableProps) {
+  const [showRejectionDialog, setShowRejectionDialog] = useState(false);
+  const [selectedDealForRejection, setSelectedDealForRejection] = useState<Deal | null>(null);
   if (isLoading) {
     return (
       <div className="py-8 text-center text-neutral-500">
@@ -111,7 +116,12 @@ export default function DealsTable({ deals, onEdit, onAllocate, onUpdateStatus, 
                             className="flex items-center justify-between text-xs sm:text-sm px-3 py-1.5"
                             onClick={(e) => {
                               e.stopPropagation();
-                              onUpdateStatus ? onUpdateStatus(deal.id, stage) : console.log(`Changed status to ${stage}`);
+                              if (stage === "rejected") {
+                                setSelectedDealForRejection(deal);
+                                setShowRejectionDialog(true);
+                              } else {
+                                onUpdateStatus ? onUpdateStatus(deal.id, stage) : console.log(`Changed status to ${stage}`);
+                              }
                             }}
                           >
                             <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -175,6 +185,25 @@ export default function DealsTable({ deals, onEdit, onAllocate, onUpdateStatus, 
           </TableBody>
         </Table>
       </div>
+
+      {/* Rejection Dialog */}
+      {selectedDealForRejection && (
+        <DealRejectionDialog
+          isOpen={showRejectionDialog}
+          onClose={() => {
+            setShowRejectionDialog(false);
+            setSelectedDealForRejection(null);
+          }}
+          onConfirm={(rejectionData) => {
+            if (onReject && selectedDealForRejection) {
+              onReject(selectedDealForRejection.id, rejectionData);
+            }
+            setShowRejectionDialog(false);
+            setSelectedDealForRejection(null);
+          }}
+          dealName={selectedDealForRejection.name}
+        />
+      )}
     </div>
   );
 }
