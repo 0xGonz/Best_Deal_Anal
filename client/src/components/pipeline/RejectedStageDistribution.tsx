@@ -11,15 +11,69 @@ interface RejectedStageDistributionProps {
 export default function RejectedStageDistribution({ deals }: RejectedStageDistributionProps) {
   if (!deals || deals.length === 0) return null;
 
+  // First, let's categorize deals - both with structured data and legacy free-text reasons
+  const categorizeReason = (deal: Deal): { category: string; reason: string } => {
+    // If we have structured rejection data, use it
+    if (deal.rejectionData && deal.rejectionData.category) {
+      return {
+        category: deal.rejectionData.category,
+        reason: deal.rejectionData.reason || 'Unspecified'
+      };
+    }
+    
+    // If we have rejection category but no structured data
+    if (deal.rejectionCategory) {
+      return {
+        category: deal.rejectionCategory,
+        reason: deal.rejectionReason || 'Unspecified'
+      };
+    }
+    
+    // For legacy free-text rejection reasons, try to categorize them
+    const reason = deal.rejectionReason?.toLowerCase() || '';
+    
+    if (reason.includes('valuation') || reason.includes('price') || reason.includes('expensive')) {
+      return { category: 'FINANCIAL', reason: deal.rejectionReason || 'Valuation concerns' };
+    }
+    if (reason.includes('market') || reason.includes('competitive') || reason.includes('timing')) {
+      return { category: 'MARKET', reason: deal.rejectionReason || 'Market concerns' };
+    }
+    if (reason.includes('team') || reason.includes('management') || reason.includes('founder')) {
+      return { category: 'TEAM', reason: deal.rejectionReason || 'Team concerns' };
+    }
+    if (reason.includes('business model') || reason.includes('revenue') || reason.includes('unit economics')) {
+      return { category: 'BUSINESS_MODEL', reason: deal.rejectionReason || 'Business model concerns' };
+    }
+    if (reason.includes('legal') || reason.includes('compliance') || reason.includes('ip')) {
+      return { category: 'DUE_DILIGENCE', reason: deal.rejectionReason || 'Due diligence concerns' };
+    }
+    if (reason.includes('thesis') || reason.includes('fit') || reason.includes('strategy')) {
+      return { category: 'STRATEGIC', reason: deal.rejectionReason || 'Strategic concerns' };
+    }
+    if (reason.includes('terms') || reason.includes('deal structure')) {
+      return { category: 'TERMS', reason: deal.rejectionReason || 'Terms concerns' };
+    }
+    
+    // Default for unspecified or unknown reasons
+    return { 
+      category: 'OTHER', 
+      reason: deal.rejectionReason || 'No reason specified' 
+    };
+  };
+
+  // Categorize all deals
+  const categorizedDeals = deals.map(deal => ({
+    ...deal,
+    ...categorizeReason(deal)
+  }));
+
   // Count rejections by category
-  const rejectionStats = Object.keys(REJECTION_CATEGORIES).map(category => {
-    const categoryDeals = deals.filter(deal => 
-      deal.rejectionCategory === category || 
-      (deal.rejectionData && deal.rejectionData.category === category)
-    );
+  const rejectionStats = Object.keys(REJECTION_CATEGORIES).map(categoryKey => {
+    const categoryDeals = categorizedDeals.filter(deal => deal.category === categoryKey);
     
     return {
-      category,
+      category: REJECTION_CATEGORIES[categoryKey as keyof typeof REJECTION_CATEGORIES].label,
+      categoryKey,
       count: categoryDeals.length,
       percentage: Math.round((categoryDeals.length / deals.length) * 100),
       deals: categoryDeals
@@ -27,13 +81,11 @@ export default function RejectedStageDistribution({ deals }: RejectedStageDistri
   }).filter(stat => stat.count > 0); // Only show categories with rejections
 
   // Count specific reasons within each category
-  const getReasonBreakdown = (categoryDeals: Deal[]) => {
+  const getReasonBreakdown = (categoryDeals: any[]) => {
     const reasonCounts: Record<string, number> = {};
     
     categoryDeals.forEach(deal => {
-      const reason = deal.rejectionReason || 
-        (deal.rejectionData && deal.rejectionData.reason) || 
-        'Unspecified';
+      const reason = deal.reason || 'Unspecified';
       reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
     });
     
@@ -47,15 +99,31 @@ export default function RejectedStageDistribution({ deals }: RejectedStageDistri
   // Get color for category badge
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
-      'Market': 'bg-red-100 text-red-700 border-red-200',
+      'Market Issues': 'bg-red-100 text-red-700 border-red-200',
       'Financial': 'bg-orange-100 text-orange-700 border-orange-200',
-      'Team': 'bg-purple-100 text-purple-700 border-purple-200',
-      'Product': 'bg-blue-100 text-blue-700 border-blue-200',
-      'Legal': 'bg-gray-100 text-gray-700 border-gray-200',
-      'Strategic': 'bg-green-100 text-green-700 border-green-200',
+      'Management Team': 'bg-purple-100 text-purple-700 border-purple-200',
+      'Business Model': 'bg-blue-100 text-blue-700 border-blue-200',
+      'Due Diligence': 'bg-gray-100 text-gray-700 border-gray-200',
+      'Strategic Fit': 'bg-green-100 text-green-700 border-green-200',
+      'Deal Terms': 'bg-indigo-100 text-indigo-700 border-indigo-200',
       'Other': 'bg-yellow-100 text-yellow-700 border-yellow-200'
     };
     return colors[category] || 'bg-neutral-100 text-neutral-700 border-neutral-200';
+  };
+  
+  // Get progress bar color
+  const getProgressBarColor = (category: string) => {
+    const colors: Record<string, string> = {
+      'Market Issues': '#dc2626',
+      'Financial': '#ea580c', 
+      'Management Team': '#9333ea',
+      'Business Model': '#2563eb',
+      'Due Diligence': '#6b7280',
+      'Strategic Fit': '#16a34a',
+      'Deal Terms': '#4f46e5',
+      'Other': '#ca8a04'
+    };
+    return colors[category] || '#6b7280';
   };
 
   return (
@@ -117,13 +185,7 @@ export default function RejectedStageDistribution({ deals }: RejectedStageDistri
                     className="h-2 rounded-full transition-all duration-300"
                     style={{ 
                       width: `${percentage}%`,
-                      backgroundColor: getCategoryColor(category).includes('red') ? '#dc2626' :
-                                    getCategoryColor(category).includes('orange') ? '#ea580c' :
-                                    getCategoryColor(category).includes('purple') ? '#9333ea' :
-                                    getCategoryColor(category).includes('blue') ? '#2563eb' :
-                                    getCategoryColor(category).includes('gray') ? '#6b7280' :
-                                    getCategoryColor(category).includes('green') ? '#16a34a' :
-                                    '#ca8a04'
+                      backgroundColor: getProgressBarColor(category)
                     }}
                   />
                 </div>
@@ -142,6 +204,11 @@ export default function RejectedStageDistribution({ deals }: RejectedStageDistri
               <p className="mt-1">
                 Categories with rejections: {rejectionStats.length} of {Object.keys(REJECTION_CATEGORIES).length}
               </p>
+              {rejectionStats.some(stat => !stat.categoryKey || stat.categoryKey === 'OTHER') && (
+                <p className="text-xs text-amber-600 mt-1">
+                  ⚠️ Some rejections categorized from legacy free-text reasons
+                </p>
+              )}
             </div>
           </div>
         )}
