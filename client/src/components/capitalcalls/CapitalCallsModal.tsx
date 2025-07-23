@@ -76,9 +76,7 @@ export default function CapitalCallsModal({
   const [formData, setFormData] = useState({
     callAmount: '',
     amountType: 'dollar' as 'dollar' | 'percentage',
-    callDate: format(new Date(), "yyyy-MM-dd"),
     dueDate: format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), "yyyy-MM-dd"), // 30 days from now
-    status: 'called' as const,
     notes: ''
   });
 
@@ -125,19 +123,13 @@ export default function CapitalCallsModal({
         }
       });
       
-      // Prepare the capital call data with all database fields
+      // Prepare the capital call data - only send fields the backend expects
       const capitalCallData = {
         allocationId: allocation.id,
         callAmount: finalAmount,
         amountType: data.amountType,
-        callDate: data.callDate,
         dueDate: data.dueDate,
-        status: data.status,
-        notes: data.notes,
-        paidAmount: 0, // New capital calls start with 0 paid
-        outstanding_amount: outstandingAmount,
-        // Include percentage for percentage-based calls
-        ...(data.amountType === 'percentage' && { callPct: amount })
+        notes: data.notes
       };
       
       return apiRequest('POST', '/api/capital-calls', capitalCallData);
@@ -160,16 +152,16 @@ export default function CapitalCallsModal({
         queryKey: [`/api/allocations/deal/${allocation.dealId}`] 
       });
       
-      // Determine appropriate message based on call date
-      const callDate = new Date(variables.callDate);
+      // Determine appropriate message based on due date
+      const dueDate = new Date(variables.dueDate);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      callDate.setHours(0, 0, 0, 0);
+      dueDate.setHours(0, 0, 0, 0);
       
       let message = "The capital call has been created successfully.";
-      if (callDate < today) {
+      if (dueDate < today) {
         message = "The historical capital call has been recorded successfully.";
-      } else if (callDate > today) {
+      } else if (dueDate > today) {
         message = "The capital call has been scheduled successfully.";
       }
       
@@ -185,9 +177,7 @@ export default function CapitalCallsModal({
       setFormData({
         callAmount: '',
         amountType: 'dollar',
-        callDate: format(new Date(), "yyyy-MM-dd"),
         dueDate: format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), "yyyy-MM-dd"),
-        status: 'called',
         notes: ''
       });
     },
@@ -415,42 +405,7 @@ export default function CapitalCallsModal({
                     )}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="status">Initial Status *</Label>
-                    <Select
-                      value={formData.status}
-                      onValueChange={(value) => setFormData({
-                        ...formData,
-                        status: value as any
-                      })}
-                    >
-                      <SelectTrigger id="status">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="scheduled">Scheduled</SelectItem>
-                        <SelectItem value="sent">Sent</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="callDate">Call Date *</Label>
-                    <div className="relative">
-                      <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-                      <Input
-                        id="callDate"
-                        type="date"
-                        className="pl-10"
-                        value={formData.callDate}
-                        onChange={(e) => setFormData({
-                          ...formData,
-                          callDate: e.target.value
-                        })}
-                        required
-                      />
-                    </div>
-                  </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="dueDate">Due Date *</Label>
@@ -485,13 +440,13 @@ export default function CapitalCallsModal({
                 </div>
 
                 {/* Visual indicator for historical vs future capital calls */}
-                {formData.callDate && (() => {
-                  const callDate = new Date(formData.callDate);
+                {formData.dueDate && (() => {
+                  const dueDate = new Date(formData.dueDate);
                   const today = new Date();
                   today.setHours(0, 0, 0, 0);
-                  callDate.setHours(0, 0, 0, 0);
+                  dueDate.setHours(0, 0, 0, 0);
                   
-                  if (callDate < today) {
+                  if (dueDate < today) {
                     return (
                       <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
                         <History className="h-4 w-4 text-amber-600" />
@@ -500,7 +455,7 @@ export default function CapitalCallsModal({
                         </span>
                       </div>
                     );
-                  } else if (callDate > today) {
+                  } else if (dueDate > today) {
                     return (
                       <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                         <Calendar className="h-4 w-4 text-blue-600" />

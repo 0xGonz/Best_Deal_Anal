@@ -129,6 +129,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 23, 2025**: Capital Call Creation API Contract Fix - COMPLETE
+  - **Root Cause Identified**: Frontend/backend API mismatch - frontend was sending extra fields (callDate, status, paidAmount, outstanding_amount, callPct) that backend Zod schema rejected
+  - **Solution Implemented**: Simplified capital call creation to match working allocation pattern - only send required fields
+  - **Fields Removed**: Eliminated callDate and status from frontend form, letting backend service handle these automatically
+  - **Form Simplification**: Capital call form now only collects essential data: amount, type (dollar/percentage), due date, and notes
+  - **Backend Handles**: Service layer automatically sets status to 'called', calculates outstanding amounts, and creates timeline events
+  - **Result**: Capital calls can now be created successfully without 400 validation errors
+  - **Pattern Reuse**: Applied the same successful pattern used in allocation creation for consistency
+
 - **July 23, 2025**: Capital Calls Full Database Integration - COMPLETE
   - **Historical & Future Support**: Capital calls properly handle past, present, and future dates with appropriate messaging
   - **Database Field Integration**: Fully integrated with all capital_calls table fields including outstanding_amount and callPct
