@@ -1327,28 +1327,6 @@ export default function FundDetail() {
                                         Add Capital Call
                                       </DropdownMenuItem>
                                       <DropdownMenuItem 
-                                        className="cursor-pointer flex items-center text-xs sm:text-sm text-blue-600"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleManageDistributions(allocation);
-                                        }}
-                                      >
-                                        <TrendingDown className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-2" />
-                                        Add Distributions
-                                      </DropdownMenuItem>
-                                      <DropdownMenuSeparator />
-                                      <DropdownMenuItem 
-                                        disabled={allocation.status === 'funded'}
-                                        className={`text-xs sm:text-sm ${allocation.status === 'funded' ? "text-gray-400" : "text-green-600"}`}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          allocation.status !== 'funded' && handleMarkAsFunded(allocation);
-                                        }}
-                                      >
-                                        <CheckCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-2" />
-                                        {allocation.status === 'funded' ? 'Already Funded' : 'Mark as Funded'}
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem 
                                         disabled={allocation.status === 'partially_paid'}
                                         className={`text-xs sm:text-sm ${allocation.status === 'partially_paid' ? "text-gray-400" : "text-purple-600"}`}
                                         onClick={(e) => {
@@ -1359,17 +1337,6 @@ export default function FundDetail() {
                                       >
                                         <CreditCard className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-2" />
                                         {allocation.status === 'partially_paid' ? 'Already Partially Paid' : 'Mark as Partially Paid'}
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem 
-                                        disabled={allocation.status === 'unfunded'}
-                                        className={`text-xs sm:text-sm ${allocation.status === 'unfunded' ? "text-gray-400" : "text-amber-600"}`}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          allocation.status !== 'unfunded' && handleMarkAsUnfunded(allocation);
-                                        }}
-                                      >
-                                        <AlertCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-2" />
-                                        {allocation.status === 'unfunded' ? 'Already Unfunded' : 'Mark as Unfunded'}
                                       </DropdownMenuItem>
                                     </DropdownMenuContent>
                                   </DropdownMenu>
