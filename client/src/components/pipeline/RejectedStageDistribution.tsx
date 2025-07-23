@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Deal } from "@/lib/types";
 import { REJECTION_CATEGORIES } from "@/lib/constants/rejection-reasons";
 
@@ -8,7 +9,19 @@ interface RejectedStageDistributionProps {
 }
 
 export default function RejectedStageDistribution({ deals }: RejectedStageDistributionProps) {
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  
   if (!deals || deals.length === 0) return null;
+
+  const toggleCategory = (category: string) => {
+    const newExpanded = new Set(expandedCategories);
+    if (newExpanded.has(category)) {
+      newExpanded.delete(category);
+    } else {
+      newExpanded.add(category);
+    }
+    setExpandedCategories(newExpanded);
+  };
 
   // First, let's categorize deals - both with structured data and legacy free-text reasons
   const categorizeReason = (deal: Deal): { category: string; reason: string } => {
@@ -140,15 +153,25 @@ export default function RejectedStageDistribution({ deals }: RejectedStageDistri
               <p className="text-xs mt-1">Deals may have been rejected before structured rejection system was implemented</p>
             </div>
           ) : (
-            rejectionStats.map(({ category, count, percentage }) => (
+            rejectionStats.map(({ category, count, percentage, deals: categoryDeals }) => (
               <div key={category} className="space-y-2">
-                {/* Category Row */}
-                <div className="flex items-center justify-between">
+                {/* Category Row - Clickable */}
+                <div 
+                  className="flex items-center justify-between cursor-pointer hover:bg-neutral-50 rounded-md p-2 -m-2 transition-colors"
+                  onClick={() => toggleCategory(category)}
+                >
                   <div className="flex items-center gap-3">
-                    <div 
-                      className="w-3 h-3 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: getProgressBarColor(category) }}
-                    />
+                    <div className="flex items-center gap-2">
+                      {expandedCategories.has(category) ? (
+                        <ChevronDown className="w-4 h-4 text-neutral-500" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4 text-neutral-500" />
+                      )}
+                      <div 
+                        className="w-3 h-3 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: getProgressBarColor(category) }}
+                      />
+                    </div>
                     <span className="text-sm font-medium text-neutral-900">
                       {category}
                     </span>
@@ -173,6 +196,23 @@ export default function RejectedStageDistribution({ deals }: RejectedStageDistri
                     }}
                   />
                 </div>
+
+                {/* Expanded Reasons */}
+                {expandedCategories.has(category) && (
+                  <div className="ml-8 mt-3 space-y-2 border-l-2 border-neutral-100 pl-4">
+                    {getReasonBreakdown(categoryDeals).map(({ reason, count: reasonCount, percentage: reasonPercentage }) => (
+                      <div key={reason} className="flex items-center justify-between text-sm">
+                        <span className="text-neutral-700 truncate flex-1 mr-2">
+                          {reason === 'Other' ? 'Custom reasons' : reason}
+                        </span>
+                        <div className="flex items-center gap-2 text-neutral-600">
+                          <span>{reasonCount}</span>
+                          <span className="text-xs">({reasonPercentage}%)</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))
           )}
