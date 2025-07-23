@@ -29,6 +29,14 @@ export const deals = pgTable("deals", {
     enum: ["initial_review", "screening", "diligence", "ic_review", "closing", "closed", "invested", "rejected"]
   }).notNull().default("initial_review"),
   rejectionReason: text("rejection_reason"),
+  rejectionCategory: text("rejection_category"),
+  rejectionData: jsonb("rejection_data").$type<{
+    category: string;
+    reason: string;
+    additionalNotes?: string;
+    rejectedBy: number;
+    rejectedAt: string;
+  }>(),
   rejectedAt: timestamp("rejected_at"),
   targetReturn: text("target_return"),
   score: integer("score"),

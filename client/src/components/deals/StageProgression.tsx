@@ -1,22 +1,12 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { generateDealNotification } from "@/lib/utils/notification-utils";
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { DealStageLabels } from "@shared/schema";
+import { DealRejectionDialog } from "./DealRejectionDialog";
+import { type RejectionCategory, type RejectionReason } from "@/lib/constants/rejection-reasons";
 
 // Define the stage order for progression
 const stageOrder = [
@@ -37,8 +27,13 @@ interface StageProgressionProps {
 
 export default function StageProgression({ deal, onStageUpdated }: StageProgressionProps) {
   const { toast } = useToast();
-  const [rejectionReason, setRejectionReason] = useState("");
   const [showRejectionDialog, setShowRejectionDialog] = useState(false);
+  
+  // Get current user for rejection tracking
+  const { data: currentUser } = useQuery({
+    queryKey: ["/api/auth/me"],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
   
   // Calculate the current stage index
   const currentStageIndex = stageOrder.indexOf(deal.stage);
@@ -51,7 +46,12 @@ export default function StageProgression({ deal, onStageUpdated }: StageProgress
   
   // Update deal mutation
   const updateDealMutation = useMutation({
-    mutationFn: async (stageData: { stage: string; rejectionReason?: string }) => {
+    mutationFn: async (stageData: { 
+      stage: string; 
+      rejectionReason?: string;
+      rejectionCategory?: string;
+      rejectionData?: any;
+    }) => {
       return apiRequest("PATCH", `/api/deals/${deal.id}`, stageData);
     },
     onSuccess: async (data: any) => {
@@ -106,24 +106,42 @@ export default function StageProgression({ deal, onStageUpdated }: StageProgress
     }
   };
   
-  // Handle rejection with reason
-  const rejectDeal = () => {
-    if (rejectionReason.trim() === "") {
+  // Handle structured rejection
+  const handleRejection = (rejectionData: {
+    category: RejectionCategory;
+    reason: RejectionReason;
+    additionalNotes?: string;
+  }) => {
+    if (!currentUser) {
       toast({
-        title: "Rejection Reason Required",
-        description: "Please provide a reason for rejecting this deal.",
+        title: "Authentication Error",
+        description: "Please log in to reject deals.",
         variant: "destructive"
       });
       return;
     }
-    
+
+    const fullRejectionData = {
+      category: rejectionData.category,
+      reason: rejectionData.reason,
+      additionalNotes: rejectionData.additionalNotes,
+      rejectedBy: (currentUser as any).id,
+      rejectedAt: new Date().toISOString(),
+    };
+
+    // Create combined rejection reason for display
+    const displayReason = rejectionData.additionalNotes
+      ? `${rejectionData.reason} - ${rejectionData.additionalNotes}`
+      : rejectionData.reason;
+
     updateDealMutation.mutate({ 
       stage: "rejected", 
-      rejectionReason 
+      rejectionReason: displayReason,
+      rejectionCategory: rejectionData.category,
+      rejectionData: fullRejectionData
     });
     
     setShowRejectionDialog(false);
-    setRejectionReason("");
   };
   
   // Handle passing on a deal
@@ -186,39 +204,14 @@ export default function StageProgression({ deal, onStageUpdated }: StageProgress
       
       {!isRejected && !isPassed && (
         <div className="flex justify-end space-x-2">
-          <AlertDialog open={showRejectionDialog} onOpenChange={setShowRejectionDialog}>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" className="text-destructive hover:bg-destructive/10">
-                Reject Deal
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Reject Deal</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Please provide a reason for rejecting this deal. This information will be tracked and visible to the team.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <Textarea
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder="Enter rejection reason..."
-                className="min-h-[100px]"
-              />
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    rejectDeal();
-                  }}
-                  className="bg-destructive hover:bg-destructive/90"
-                >
-                  Reject
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <Button 
+            variant="outline" 
+            className="text-destructive hover:bg-destructive/10"
+            onClick={() => setShowRejectionDialog(true)}
+            disabled={updateDealMutation.isPending}
+          >
+            Reject Deal
+          </Button>
           
           <Button 
             variant="outline" 
@@ -229,6 +222,15 @@ export default function StageProgression({ deal, onStageUpdated }: StageProgress
           </Button>
         </div>
       )}
+
+      {/* Structured Rejection Dialog */}
+      <DealRejectionDialog
+        isOpen={showRejectionDialog}
+        onClose={() => setShowRejectionDialog(false)}
+        onConfirm={handleRejection}
+        dealName={deal.name}
+        isLoading={updateDealMutation.isPending}
+      />
     </div>
   );
 }
