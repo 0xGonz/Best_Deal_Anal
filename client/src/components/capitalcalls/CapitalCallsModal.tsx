@@ -45,7 +45,7 @@ interface CapitalCall {
   id: number;
   allocationId?: number;
   callAmount: number;
-  amountType?: string;
+  amountType?: 'dollar' | 'percentage';
   callDate: string;
   dueDate: string;
   status: 'scheduled' | 'sent' | 'paid' | 'overdue';
@@ -73,7 +73,8 @@ export default function CapitalCallsModal({
   const { toast } = useToast();
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState({
-    callAmount: 0,
+    callAmount: '',
+    amountType: 'dollar' as 'dollar' | 'percentage',
     callDate: format(new Date(), "yyyy-MM-dd"),
     dueDate: format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), "yyyy-MM-dd"), // 30 days from now
     status: 'scheduled' as const,
@@ -96,10 +97,16 @@ export default function CapitalCallsModal({
   // Create capital call mutation
   const createCapitalCall = useMutation({
     mutationFn: async (data: typeof formData) => {
+      const amount = parseFloat(data.callAmount);
+      const finalAmount = data.amountType === 'percentage' 
+        ? (amount / 100) * allocation.amount 
+        : amount;
+      
       return apiRequest('POST', '/api/capital-calls', {
         allocationId: allocation.id,
         ...data,
-        callAmount: parseFloat(data.callAmount.toString())
+        callAmount: finalAmount,
+        amountType: data.amountType
       });
     },
     onSuccess: () => {
@@ -113,7 +120,8 @@ export default function CapitalCallsModal({
       });
       setShowAddForm(false);
       setFormData({
-        callAmount: 0,
+        callAmount: '',
+        amountType: 'dollar',
         callDate: format(new Date(), "yyyy-MM-dd"),
         dueDate: format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), "yyyy-MM-dd"),
         status: 'scheduled',
@@ -263,24 +271,56 @@ export default function CapitalCallsModal({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="callAmount">Call Amount *</Label>
+                    <Label htmlFor="amountType">Amount Type *</Label>
+                    <Select
+                      value={formData.amountType}
+                      onValueChange={(value: 'dollar' | 'percentage') => setFormData({
+                        ...formData,
+                        amountType: value,
+                        callAmount: '' // Reset amount when type changes
+                      })}
+                    >
+                      <SelectTrigger id="amountType">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="dollar">Dollar Amount</SelectItem>
+                        <SelectItem value="percentage">Percentage of Commitment</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="callAmount">
+                      {formData.amountType === 'dollar' ? 'Call Amount *' : 'Percentage (%) *'}
+                    </Label>
                     <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                      {formData.amountType === 'dollar' ? (
+                        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                      ) : (
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
+                      )}
                       <Input
                         id="callAmount"
                         type="number"
-                        step="0.01"
+                        step={formData.amountType === 'dollar' ? "0.01" : "1"}
                         min="0"
-                        max={remainingCommitment}
+                        max={formData.amountType === 'dollar' ? remainingCommitment : 100}
                         className="pl-10"
                         value={formData.callAmount}
                         onChange={(e) => setFormData({
                           ...formData,
-                          callAmount: parseFloat(e.target.value) || 0
+                          callAmount: e.target.value
                         })}
+                        placeholder={formData.amountType === 'dollar' ? "0.00" : "0"}
                         required
                       />
                     </div>
+                    {formData.amountType === 'percentage' && formData.callAmount && (
+                      <p className="text-xs text-gray-600">
+                        = {formatCurrency((parseFloat(formData.callAmount) / 100) * allocation.amount)}
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -363,7 +403,7 @@ export default function CapitalCallsModal({
                   </Button>
                   <Button
                     type="submit"
-                    disabled={createCapitalCall.isPending || formData.callAmount <= 0}
+                    disabled={createCapitalCall.isPending || !formData.callAmount || parseFloat(formData.callAmount) <= 0}
                     className="bg-neutral-900 hover:bg-neutral-800 text-white"
                   >
                     {createCapitalCall.isPending ? "Creating..." : "Create Capital Call"}

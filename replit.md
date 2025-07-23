@@ -129,6 +129,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 23, 2025**: Capital Calls Input Form Enhancement - COMPLETE
+  - **Fixed Amount Input**: Changed from numeric 0 to empty string so users can properly type amounts
+  - **Dollar/Percentage Toggle**: Added amount type selector matching allocation form functionality
+  - **Dynamic Calculations**: Real-time conversion display when entering percentages (shows dollar equivalent)
+  - **Smart Input Labels**: Shows "$" icon for dollars, "%" for percentages with appropriate placeholders
+  - **Improved Validation**: Proper string-to-number conversion with validation for empty/invalid inputs
+  - **Consistent UX**: Capital calls form now matches allocation form behavior for familiar user experience
+
 - **July 23, 2025**: Capital Calls Management UI Enhancement - COMPLETE
   - **Simplified Interface**: Replaced complex dropdown menu with single-click capital calls button
   - **New Modal Design**: Created dedicated CapitalCallsModal component with clean summary cards
