@@ -194,19 +194,7 @@ export default function RejectedStageDistribution({ deals }: RejectedStageDistri
           )}
         </div>
 
-        {/* Summary */}
-        {rejectionStats.length > 0 && (
-          <div className="mt-6 pt-4 border-t border-neutral-200">
-            <div className="text-xs text-neutral-600">
-              <p>Top rejection category: <span className="font-medium text-neutral-900">
-                {rejectionStats[0]?.category} ({rejectionStats[0]?.percentage}%)
-              </span></p>
-              <p className="mt-1">
-                Categories with rejections: {rejectionStats.length} of {Object.keys(REJECTION_CATEGORIES).length}
-              </p>
-            </div>
-          </div>
-        )}
+
       </CardContent>
     </Card>
   );
