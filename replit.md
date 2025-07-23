@@ -203,6 +203,18 @@ Preferred communication style: Simple, everyday language.
   - **Database Schema**: Reviewed all tables - no obviously unused columns identified, schema appears well-structured
   - **Result**: First round of cleanup complete, codebase significantly cleaner
 
+- **July 23, 2025**: Capital Call Due Date Removal - COMPLETE
+  - **RESOLVED: Due Date Field Removed**: Completely removed due date requirement from capital call creation process
+  - **Root Cause**: Found correct form component (AddCapitalCallForm.tsx) that was actually being displayed in UI
+  - **Changes Made**: 
+    - Removed Due Date input field from capital call form
+    - Changed default status from "Scheduled" to "Called"
+    - Made dueDate optional in validation schema and API calls
+    - Updated form reset logic to use new defaults
+    - Fixed validation to only check due date if provided
+  - **User Experience**: Capital call form now only requires allocation, amount, call date, status, and optional notes
+  - **Business Logic**: Capital calls default to "Called" status since they're not scheduled with due dates
+
 - **July 23, 2025**: Comprehensive Codebase Cleanup Round 2 - COMPLETE
   - **Additional Test Files Removed**: Deleted test-upload.ts, StarTest.tsx, auth-context.tsx.bak
   - **Import References Fixed**: Removed all import references to deleted test files in App.tsx and routes.ts

@@ -48,7 +48,7 @@ const capitalCallSchema = z.object({
   callAmount: z.number().positive('Call amount must be greater than 0'),
   amountType: z.enum(['dollar', 'percentage'], { required_error: 'Please select amount type' }),
   callDate: z.string().min(1, 'Call date is required'),
-  dueDate: z.string().min(1, 'Due date is required'),
+  dueDate: z.string().optional(),
   status: z.enum(['scheduled', 'called', 'partially_paid', 'paid'], { required_error: 'Please select status' }),
   notes: z.string().optional(),
 });
@@ -68,8 +68,8 @@ export function AddCapitalCallForm({
     callAmount: 0,
     amountType: 'percentage',
     callDate: format(new Date(), 'yyyy-MM-dd'),
-    dueDate: format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'), // 30 days from now
-    status: 'scheduled',
+    dueDate: undefined,
+    status: 'called',
     notes: '',
   });
 
@@ -109,8 +109,8 @@ export function AddCapitalCallForm({
         callAmount: 0,
         amountType: 'percentage',
         callDate: format(new Date(), 'yyyy-MM-dd'),
-        dueDate: format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'),
-        status: 'scheduled',
+        dueDate: undefined,
+        status: 'called',
         notes: '',
       });
       setValidationErrors({});
@@ -162,8 +162,8 @@ export function AddCapitalCallForm({
           errors.callAmount = `Call amount (${formatCurrency(dollarAmount)}) exceeds uncalled capital (${formatCurrency(allocationDetails.uncalledAmount)})`;
         }
         
-        // Check if due date is after call date
-        if (new Date(formData.dueDate) <= new Date(formData.callDate)) {
+        // Check if due date is after call date (only if due date is provided)
+        if (formData.dueDate && new Date(formData.dueDate) <= new Date(formData.callDate)) {
           errors.dueDate = 'Due date must be after call date';
         }
       }
@@ -323,38 +323,23 @@ export function AddCapitalCallForm({
               </div>
             </div>
 
-            {/* Dates */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="callDate">Call Date</Label>
-                <Input
-                  id="callDate"
-                  type="date"
-                  value={formData.callDate}
-                  onChange={(e) => setFormData({ ...formData, callDate: e.target.value })}
-                />
-                {validationErrors.callDate && (
-                  <p className="text-sm text-destructive">{validationErrors.callDate}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="dueDate">Due Date</Label>
-                <Input
-                  id="dueDate"
-                  type="date"
-                  value={formData.dueDate}
-                  onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                />
-                {validationErrors.dueDate && (
-                  <p className="text-sm text-destructive">{validationErrors.dueDate}</p>
-                )}
-              </div>
+            {/* Call Date */}
+            <div className="space-y-2">
+              <Label htmlFor="callDate">Call Date</Label>
+              <Input
+                id="callDate"
+                type="date"
+                value={formData.callDate}
+                onChange={(e) => setFormData({ ...formData, callDate: e.target.value })}
+              />
+              {validationErrors.callDate && (
+                <p className="text-sm text-destructive">{validationErrors.callDate}</p>
+              )}
             </div>
 
             {/* Status */}
             <div className="space-y-2">
-              <Label htmlFor="status">Initial Status</Label>
+              <Label htmlFor="status">Status</Label>
               <Select
                 value={formData.status}
                 onValueChange={(value: 'scheduled' | 'called' | 'partially_paid' | 'paid') => 
@@ -365,10 +350,10 @@ export function AddCapitalCallForm({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="scheduled">Scheduled</SelectItem>
                   <SelectItem value="called">Called</SelectItem>
                   <SelectItem value="partially_paid">Partially Paid</SelectItem>
                   <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="scheduled">Scheduled</SelectItem>
                 </SelectContent>
               </Select>
             </div>
