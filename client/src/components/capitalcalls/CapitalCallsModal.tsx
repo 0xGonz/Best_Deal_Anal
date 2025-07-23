@@ -106,6 +106,25 @@ export default function CapitalCallsModal({
       // Calculate outstanding amount (for new capital calls, it's the full amount)
       const outstandingAmount = finalAmount;
       
+      // Log current state before attempting to create capital call
+      console.log('Creating capital call with:', {
+        allocation: {
+          id: allocation.id,
+          committed: allocation.amount,
+          dealName: allocation.dealName
+        },
+        currentState: {
+          totalCalled,
+          totalPaid,
+          remainingCommitment
+        },
+        newCall: {
+          amount: finalAmount,
+          type: data.amountType,
+          dueDate: data.dueDate
+        }
+      });
+      
       // Prepare the capital call data with all database fields
       const capitalCallData = {
         allocationId: allocation.id,
@@ -173,11 +192,29 @@ export default function CapitalCallsModal({
       });
     },
     onError: (error: any) => {
+      console.error('Capital call creation failed:', {
+        status: error?.response?.status,
+        data: error?.response?.data,
+        fullError: error
+      });
+      
       // Check if it's a validation error about exceeding commitment
-      const errorMessage = error?.response?.data?.details?.[0] || 
-                          error?.response?.data?.error ||
-                          error?.message || 
-                          "An unknown error occurred";
+      let errorMessage = "An unknown error occurred";
+      
+      if (error?.response?.data?.validationErrors?.length > 0) {
+        errorMessage = error.response.data.validationErrors.join(', ');
+      } else if (error?.response?.data?.details?.length > 0) {
+        errorMessage = error.response.data.details.join(', ');
+      } else if (error?.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      // Show specific error based on status code
+      if (error?.response?.status === 409) {
+        errorMessage = "This allocation has already been fully called or has pending capital calls that would exceed the commitment.";
+      }
       
       toast({
         title: "Cannot create capital call",

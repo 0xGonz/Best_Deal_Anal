@@ -64,11 +64,20 @@ export class CapitalCallLifecycleService {
     validationErrors?: string[];
   }> {
     try {
+      console.log('Creating capital call with request:', request);
+      
       // Get allocation details
       const allocation = await this.storage.getFundAllocation(request.allocationId);
       if (!allocation) {
         return { success: false, error: 'Allocation not found' };
       }
+
+      console.log('Found allocation:', {
+        id: allocation.id,
+        amount: allocation.amount,
+        dealId: allocation.dealId,
+        fundId: allocation.fundId
+      });
 
       // Validate capital call amount
       const validationResult = await this.validateCapitalCallAmount(
@@ -76,6 +85,8 @@ export class CapitalCallLifecycleService {
         request.callAmount, 
         request.amountType
       );
+
+      console.log('Validation result:', validationResult);
 
       if (!validationResult.valid) {
         return { 
@@ -251,6 +262,8 @@ export class CapitalCallLifecycleService {
     const errors: string[] = [];
 
     try {
+      console.log('Validating capital call amount:', { allocationId, amount, amountType });
+      
       const allocation = await this.storage.getFundAllocation(allocationId);
       if (!allocation) {
         errors.push('Allocation not found');
@@ -258,9 +271,11 @@ export class CapitalCallLifecycleService {
       }
 
       const existingCalls = await this.storage.getCapitalCallsByAllocation(allocationId);
+      console.log('Existing capital calls:', existingCalls.length);
       
       // Calculate total already called
       const totalCalled = existingCalls.reduce((sum, call) => sum + call.callAmount, 0);
+      console.log('Total already called:', totalCalled);
       
       // Convert amount to dollars for validation
       let callAmountInDollars = amount;
@@ -272,6 +287,14 @@ export class CapitalCallLifecycleService {
         callAmountInDollars = (allocation.amount * amount) / 100;
       }
 
+      console.log('Validation check:', {
+        committedAmount: allocation.amount,
+        totalCalled,
+        newCallAmount: callAmountInDollars,
+        wouldTotal: totalCalled + callAmountInDollars,
+        remaining: allocation.amount - totalCalled
+      });
+
       // Check if this call would exceed committed amount
       if (totalCalled + callAmountInDollars > allocation.amount) {
         const remaining = allocation.amount - totalCalled;
@@ -280,6 +303,7 @@ export class CapitalCallLifecycleService {
 
       return { valid: errors.length === 0, errors };
     } catch (error) {
+      console.error('Error during validation:', error);
       errors.push('Error validating capital call amount');
       return { valid: false, errors };
     }
