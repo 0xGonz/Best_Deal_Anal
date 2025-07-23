@@ -30,7 +30,8 @@ import {
   AlertCircle,
   Info,
   CreditCard,
-  CheckCircle
+  CheckCircle,
+  History
 } from "lucide-react";
 import { FundAllocation } from "@/lib/types";
 
@@ -109,7 +110,7 @@ export default function CapitalCallsModal({
         amountType: data.amountType
       });
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       // Invalidate all related queries to refresh called/uncalled amounts
       queryClient.invalidateQueries({ 
         queryKey: [`/api/capital-calls/allocation/${allocation.id}`] 
@@ -126,9 +127,23 @@ export default function CapitalCallsModal({
       queryClient.invalidateQueries({ 
         queryKey: [`/api/allocations/deal/${allocation.dealId}`] 
       });
+      
+      // Determine appropriate message based on call date
+      const callDate = new Date(variables.callDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      callDate.setHours(0, 0, 0, 0);
+      
+      let message = "The capital call has been created successfully.";
+      if (callDate < today) {
+        message = "The historical capital call has been recorded successfully.";
+      } else if (callDate > today) {
+        message = "The capital call has been scheduled successfully.";
+      }
+      
       toast({
         title: "Capital call created",
-        description: "The capital call has been scheduled successfully.",
+        description: message,
         variant: "success"
       });
       setShowAddForm(false);
@@ -404,6 +419,35 @@ export default function CapitalCallsModal({
                     placeholder="Additional details about this capital call"
                   />
                 </div>
+
+                {/* Visual indicator for historical vs future capital calls */}
+                {formData.callDate && (() => {
+                  const callDate = new Date(formData.callDate);
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  callDate.setHours(0, 0, 0, 0);
+                  
+                  if (callDate < today) {
+                    return (
+                      <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                        <History className="h-4 w-4 text-amber-600" />
+                        <span className="text-sm text-amber-700">
+                          This will be recorded as a historical capital call
+                        </span>
+                      </div>
+                    );
+                  } else if (callDate > today) {
+                    return (
+                      <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <Calendar className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm text-blue-700">
+                          This capital call will be scheduled for the future
+                        </span>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
 
                 <div className="flex justify-end gap-2 pt-4">
                   <Button
