@@ -12,11 +12,25 @@ import { eq } from 'drizzle-orm';
 
 const router = express.Router();
 
+// Ensure upload directory exists
+const uploadDir = 'temp/uploads/';
+fs.mkdir(uploadDir, { recursive: true }).catch((err) => {
+  if (err.code !== 'EEXIST') {
+    console.error('Failed to create upload directory:', err);
+  }
+});
+
 // Configure multer with disk storage to avoid memory issues
 const upload = multer({
   storage: multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, 'temp/uploads/');
+    destination: async function (req, file, cb) {
+      try {
+        await fs.mkdir(uploadDir, { recursive: true });
+        cb(null, uploadDir);
+      } catch (error) {
+        console.error('Error creating upload directory:', error);
+        cb(error, uploadDir);
+      }
     },
     filename: function (req, file, cb) {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
