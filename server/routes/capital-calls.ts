@@ -19,7 +19,8 @@ const createCapitalCallSchema = z.object({
   allocationId: z.number().positive(),
   callAmount: z.number().positive(),
   amountType: z.enum(['percentage', 'dollar']),
-  dueDate: z.string().transform(val => new Date(val)),
+  callDate: z.string().transform(val => new Date(val)),
+  status: z.enum(['scheduled', 'called', 'partially_paid', 'paid', 'defaulted', 'overdue']).optional().default('called'),
   notes: z.string().optional()
 });
 

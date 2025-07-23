@@ -15,7 +15,9 @@ interface CapitalCallRequest {
   allocationId: number;
   callAmount: number;
   amountType: 'percentage' | 'dollar';
-  dueDate: Date;
+  callDate: Date;
+  status?: string;
+  dueDate?: Date;
   notes?: string;
 }
 
@@ -42,7 +44,7 @@ interface CapitalCallSummary {
   callAmount: number;
   amountType: string;
   callDate: Date;
-  dueDate: Date;
+  dueDate?: Date;
   paidAmount: number;
   outstandingAmount: number;
   status: string;
@@ -96,11 +98,11 @@ export class CapitalCallLifecycleService {
         allocationId: request.allocationId,
         callAmount: callAmountInDollars,
         amountType: request.amountType,
-        dueDate: request.dueDate,
-        callDate: new Date(),
+        dueDate: request.dueDate || null,
+        callDate: request.callDate,
         paidAmount: 0,
         outstanding_amount: callAmountInDollars.toString(),
-        status: 'called',
+        status: request.status || 'called',
         notes: request.notes,
         callPct: request.amountType === 'percentage' ? request.callAmount : null
       });

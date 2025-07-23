@@ -34,7 +34,6 @@ interface CapitalCallFormData {
   callAmount: number;
   amountType: 'percentage' | 'dollar';
   callDate: string;
-  dueDate: string;
   notes: string;
   status: string;
 }
@@ -48,9 +47,8 @@ export function CreateCapitalCallForm({ isOpen, onClose, dealId, onSuccess }: Cr
     callAmount: 0,
     amountType: 'percentage',
     callDate: getTodayUTC(),
-    dueDate: formatDateForInput(addDays(new Date(), 30)),
     notes: '',
-    status: 'scheduled'
+    status: 'called'
   });
 
   // Fetch allocations for this deal
@@ -65,8 +63,7 @@ export function CreateCapitalCallForm({ isOpen, onClose, dealId, onSuccess }: Cr
       // Convert date strings to proper UTC date objects for the API
       const formattedData = {
         ...data,
-        callDate: parseUTCDate(data.callDate).toISOString(),
-        dueDate: parseUTCDate(data.dueDate).toISOString()
+        callDate: parseUTCDate(data.callDate).toISOString()
       };
       
       const response = await apiRequest("POST", "/api/capital-calls", formattedData);
@@ -88,9 +85,8 @@ export function CreateCapitalCallForm({ isOpen, onClose, dealId, onSuccess }: Cr
         callAmount: 0,
         amountType: 'percentage',
         callDate: getTodayUTC(),
-        dueDate: formatDateForInput(addDays(new Date(), 30)),
         notes: '',
-        status: 'scheduled'
+        status: 'called'
       });
       
       // Invalidate relevant queries
@@ -231,38 +227,20 @@ export function CreateCapitalCallForm({ isOpen, onClose, dealId, onSuccess }: Cr
             </div>
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="callDate" className="flex items-center gap-1">
-                <Calendar className="h-3.5 w-3.5" />
-                Call Date *
-              </Label>
-              <Input
-                id="callDate"
-                type="date"
-                value={formData.callDate}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  callDate: e.target.value
-                })}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="dueDate" className="flex items-center gap-1">
-                <Calendar className="h-3.5 w-3.5" />
-                Due Date *
-              </Label>
-              <Input
-                id="dueDate"
-                type="date"
-                value={formData.dueDate}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  dueDate: e.target.value
-                })}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="callDate" className="flex items-center gap-1">
+              <Calendar className="h-3.5 w-3.5" />
+              Call Date *
+            </Label>
+            <Input
+              id="callDate"
+              type="date"
+              value={formData.callDate}
+              onChange={(e) => setFormData({
+                ...formData,
+                callDate: e.target.value
+              })}
+            />
           </div>
           
           <div className="space-y-2">
@@ -281,7 +259,6 @@ export function CreateCapitalCallForm({ isOpen, onClose, dealId, onSuccess }: Cr
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="scheduled">Scheduled</SelectItem>
                 <SelectItem value="called">Called</SelectItem>
                 <SelectItem value="partial">Partial Payment</SelectItem>
                 <SelectItem value="paid">Paid</SelectItem>
@@ -289,9 +266,8 @@ export function CreateCapitalCallForm({ isOpen, onClose, dealId, onSuccess }: Cr
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground mt-1">
-              {formData.status === 'scheduled' && "The capital call is planned but not yet issued to investors."}
               {formData.status === 'called' && "Official notice has been issued to investors."}
-              {formData.status === 'partially_paid' && "Some funds have been received but not the full amount."}
+              {formData.status === 'partial' && "Some funds have been received but not the full amount."}
               {formData.status === 'paid' && "The capital call has been fully paid by investors."}
               {formData.status === 'defaulted' && "The investor failed to meet their payment obligation."}
             </p>
