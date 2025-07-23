@@ -173,14 +173,8 @@ export const DealDistributionsTab: React.FC<DealDistributionsTabProps> = ({ deal
   };
 
   const getDistributionTypeBadge = (type: string) => {
-    const classes = {
-      dividend: "bg-green-100 text-green-800",
-      capital_return: "bg-blue-100 text-blue-800",
-      interest: "bg-purple-100 text-purple-800",
-      fee: "bg-red-100 text-red-800",
-      other: "bg-gray-100 text-gray-800",
-    };
-    return classes[type as keyof typeof classes] || "bg-gray-100 text-gray-800";
+    // Using consistent badge styling that follows the theme
+    return "bg-muted/50 text-muted-foreground border border-border";
   };
 
   const handleEditDistribution = (distribution: DealDistribution) => {
@@ -369,35 +363,47 @@ export const DealDistributionsTab: React.FC<DealDistributionsTabProps> = ({ deal
       <CardContent>
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-blue-600" />
-              <div>
-                <p className="text-sm text-blue-600 font-medium">Total Distributions</p>
-                <p className="text-lg font-bold text-blue-800">{formatCurrency(totalDistributions)}</p>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-muted rounded-lg">
+                  <DollarSign className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground font-medium">Total Distributions</p>
+                  <p className="text-lg font-bold text-foreground">{formatCurrency(totalDistributions)}</p>
+                </div>
               </div>
-            </div>
-          </div>
-          <div className="bg-green-50 p-4 rounded-lg">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-green-600" />
-              <div>
-                <p className="text-sm text-green-600 font-medium">Distribution Count</p>
-                <p className="text-lg font-bold text-green-800">{distributions.length}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-muted rounded-lg">
+                  <Calendar className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground font-medium">Distribution Count</p>
+                  <p className="text-lg font-bold text-foreground">{distributions.length}</p>
+                </div>
               </div>
-            </div>
-          </div>
-          <div className="bg-purple-50 p-4 rounded-lg">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-purple-600" />
-              <div>
-                <p className="text-sm text-purple-600 font-medium">Avg Distribution</p>
-                <p className="text-lg font-bold text-purple-800">
-                  {distributions.length > 0 ? formatCurrency(totalDistributions / distributions.length) : '$0'}
-                </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-muted rounded-lg">
+                  <TrendingUp className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground font-medium">Avg Distribution</p>
+                  <p className="text-lg font-bold text-foreground">
+                    {distributions.length > 0 ? formatCurrency(totalDistributions / distributions.length) : '$0'}
+                  </p>
+                </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Distributions List */}
