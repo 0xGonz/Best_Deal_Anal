@@ -1,0 +1,43 @@
+ProtectedRoute /funds/:id: Rendering component for user Gonz
+Allocations API response: 
+(10) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+Using /me endpoint data for avatar 
+Object {id: 4, username: "Gonz", fullName: "Brett Gonzalez", initials: "BG", email: "bgonzalez@doliveradvisors.com", …}
+API Request: POST /api/capital-calls 
+Object {data: {…}}
+Sending fetch request to /api/capital-calls with options: 
+Object {method: "POST", credentials: "include", headers: {…}, body: "BODY_DATA"}
+API Response from /api/capital-calls: 
+Object {status: 400, statusText: "Bad Request", ok: false}
+Error response from /api/capital-calls: 
+Object {status: 400, data: {…}}
+
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://3719d615-d375-4d11-b366-6e5abe95fce6-00-23dnoltc5ai2v.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Query fetch request: /api/capital-calls/allocation/82 
+Object {queryKey: Array(1), unauthorizedBehavior: "returnNull"}
+Query fetch request: /api/production/allocations/fund/2 
+Object {queryKey: Array(1), unauthorizedBehavior: "returnNull"}
+Query fetch request: /api/funds/2 
+Object {queryKey: Array(1), unauthorizedBehavior: "returnNull"}
+ProtectedRoute for /funds/:id: isLoading=false, user=Gonz
+ProtectedRoute /funds/:id: Rendering component for user Gonz
+Allocations API response: 
+(10) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+Using /me endpoint data for avatar 
+Object {id: 4, username: "Gonz", fullName: "Brett Gonzalez", initials: "BG", email: "bgonzalez@doliveradvisors.com", …}
+Query Response from /api/production/allocations/fund/2: 
+Object {status: 200, statusText: "OK", ok: true}
+Query data received from /api/production/allocations/fund/2: 
+(10) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+Query Response from /api/capital-calls/allocation/82: 
+Object {status: 200, statusText: "OK", ok: true}
+Query data received from /api/capital-calls/allocation/82: 
+Object {allocationId: 82, committedAmount: 750000, totalCalled: 196910, totalPaid: 196910, percentageCalled: 26.254666666666665, …}
+Query Response from /api/funds/2: 
+Object {status: 200, statusText: "OK", ok: true}
+Query data received from /api/funds/2: 
+Object {id: 2, name: "Doliver Private Opportunity Fund III", description: "Flagship opportunistic fund that consists of all assets.", aum: 4646910, vintage: 2024, …}
+ProtectedRoute for /funds/:id: isLoading=false, user=Gonz

@@ -172,10 +172,16 @@ export default function CapitalCallsModal({
         notes: ''
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      // Check if it's a validation error about exceeding commitment
+      const errorMessage = error?.response?.data?.details?.[0] || 
+                          error?.response?.data?.error ||
+                          error?.message || 
+                          "An unknown error occurred";
+      
       toast({
-        title: "Error creating capital call",
-        description: error instanceof Error ? error.message : "An unknown error occurred",
+        title: "Cannot create capital call",
+        description: errorMessage,
         variant: "destructive"
       });
     }
@@ -294,6 +300,11 @@ export default function CapitalCallsModal({
                 <Plus className="h-4 w-4 mr-2" />
                 Add Capital Call
               </Button>
+            )}
+            {!showAddForm && remainingCommitment <= 0 && (
+              <div className="text-sm text-gray-500 italic">
+                Fully called - no remaining commitment
+              </div>
             )}
           </div>
 
