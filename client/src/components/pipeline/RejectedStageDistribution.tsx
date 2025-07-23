@@ -1,6 +1,5 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Deal } from "@/lib/types";
 import { REJECTION_CATEGORIES } from "@/lib/constants/rejection-reasons";
 
@@ -130,53 +129,41 @@ export default function RejectedStageDistribution({ deals }: RejectedStageDistri
     <Card className="mb-6 h-full w-full flex flex-col">
       <CardHeader className="pb-2">
         <CardTitle className="text-base sm:text-lg">
-          Rejection Reasons Analysis
+          Rejection Category Distribution
         </CardTitle>
         <p className="text-xs sm:text-sm text-neutral-600">
           {deals.length} rejected deals categorized by reason
         </p>
       </CardHeader>
       <CardContent className="flex-1 pt-2">
-        <div className="space-y-4">
+        <div className="space-y-3">
           {rejectionStats.length === 0 ? (
             <div className="text-center text-neutral-500 py-8">
               <p className="text-sm">No rejection reason data available</p>
               <p className="text-xs mt-1">Deals may have been rejected before structured rejection system was implemented</p>
             </div>
           ) : (
-            rejectionStats.map(({ category, count, percentage, deals: categoryDeals }) => (
-              <div key={category} className="space-y-3">
-                {/* Category Header */}
+            rejectionStats.map(({ category, count, percentage }) => (
+              <div key={category} className="space-y-2">
+                {/* Category Row */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Badge 
-                      variant="outline" 
-                      className={`text-xs font-medium ${getCategoryColor(category)}`}
-                    >
-                      {category}
-                    </Badge>
+                  <div className="flex items-center gap-3">
+                    <div 
+                      className="w-3 h-3 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: getProgressBarColor(category) }}
+                    />
                     <span className="text-sm font-medium text-neutral-900">
-                      {count} deal{count !== 1 ? 's' : ''}
+                      {category}
                     </span>
                   </div>
-                  <span className="text-sm text-neutral-600 font-medium">
-                    {percentage}%
-                  </span>
-                </div>
-
-                {/* Reason Breakdown */}
-                <div className="ml-4 space-y-2">
-                  {getReasonBreakdown(categoryDeals).map(({ reason, count: reasonCount, percentage: reasonPercentage }) => (
-                    <div key={reason} className="flex items-center justify-between text-sm">
-                      <span className="text-neutral-700 truncate flex-1 mr-2">
-                        {reason === 'Other' ? 'Custom reasons' : reason}
-                      </span>
-                      <div className="flex items-center gap-2 text-neutral-600">
-                        <span>{reasonCount}</span>
-                        <span className="text-xs">({reasonPercentage}%)</span>
-                      </div>
-                    </div>
-                  ))}
+                  <div className="flex items-center gap-4 text-sm">
+                    <span className="text-neutral-600">
+                      {count} deal{count !== 1 ? 's' : ''}
+                    </span>
+                    <span className="font-medium text-neutral-900 min-w-[3rem] text-right">
+                      {percentage}%
+                    </span>
+                  </div>
                 </div>
 
                 {/* Progress Bar */}
