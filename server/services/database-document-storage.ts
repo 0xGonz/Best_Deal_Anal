@@ -114,7 +114,21 @@ export class DatabaseDocumentStorage {
   async getDocumentsByDeal(dealId: number) {
     try {
       const result = await db
-        .select()
+        .select({
+          id: documents.id,
+          dealId: documents.dealId,
+          fileName: documents.fileName,
+          fileType: documents.fileType,
+          fileSize: documents.fileSize,
+          filePath: documents.filePath,
+          uploadedBy: documents.uploadedBy,
+          uploadedAt: documents.uploadedAt,
+          description: documents.description,
+          documentType: documents.documentType,
+          metadata: documents.metadata,
+          version: documents.version
+          // Explicitly excluding fileData to avoid large payloads
+        })
         .from(documents)
         .where(eq(documents.dealId, dealId))
         .orderBy(desc(documents.uploadedAt));
@@ -199,6 +213,34 @@ export class DatabaseDocumentStorage {
     } catch (error) {
       console.error(`❌ Error deleting document ${documentId}:`, error);
       throw error;
+    }
+  }
+
+  async getAllDocumentsMetadata() {
+    try {
+      const result = await db
+        .select({
+          id: documents.id,
+          dealId: documents.dealId,
+          fileName: documents.fileName,
+          fileType: documents.fileType,
+          fileSize: documents.fileSize,
+          filePath: documents.filePath,
+          uploadedBy: documents.uploadedBy,
+          uploadedAt: documents.uploadedAt,
+          description: documents.description,
+          documentType: documents.documentType,
+          metadata: documents.metadata,
+          version: documents.version
+          // Explicitly excluding fileData to avoid large payloads
+        })
+        .from(documents)
+        .orderBy(desc(documents.uploadedAt));
+      
+      return result;
+    } catch (error) {
+      console.error('Error fetching all documents metadata:', error);
+      return [];
     }
   }
 }
