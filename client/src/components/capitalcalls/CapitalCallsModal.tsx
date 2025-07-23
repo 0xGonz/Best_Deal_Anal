@@ -77,7 +77,7 @@ export default function CapitalCallsModal({
     amountType: 'dollar' as 'dollar' | 'percentage',
     callDate: format(new Date(), "yyyy-MM-dd"),
     dueDate: format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), "yyyy-MM-dd"), // 30 days from now
-    status: 'scheduled' as const,
+    status: 'called' as const,
     notes: ''
   });
 
@@ -110,8 +110,21 @@ export default function CapitalCallsModal({
       });
     },
     onSuccess: () => {
+      // Invalidate all related queries to refresh called/uncalled amounts
       queryClient.invalidateQueries({ 
         queryKey: [`/api/capital-calls/allocation/${allocation.id}`] 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: [`/api/production/allocations/fund/${allocation.fundId}`] 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: [`/api/funds/${allocation.fundId}`] 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: [`/api/fund-overview/${allocation.fundId}`] 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: [`/api/allocations/deal/${allocation.dealId}`] 
       });
       toast({
         title: "Capital call created",
@@ -124,7 +137,7 @@ export default function CapitalCallsModal({
         amountType: 'dollar',
         callDate: format(new Date(), "yyyy-MM-dd"),
         dueDate: format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), "yyyy-MM-dd"),
-        status: 'scheduled',
+        status: 'called',
         notes: ''
       });
     },
