@@ -129,13 +129,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 23, 2025**: Capital Calls Input Form Enhancement - COMPLETE
-  - **Fixed Amount Input**: Changed from numeric 0 to empty string so users can properly type amounts
-  - **Dollar/Percentage Toggle**: Added amount type selector matching allocation form functionality
-  - **Dynamic Calculations**: Real-time conversion display when entering percentages (shows dollar equivalent)
-  - **Smart Input Labels**: Shows "$" icon for dollars, "%" for percentages with appropriate placeholders
-  - **Improved Validation**: Proper string-to-number conversion with validation for empty/invalid inputs
-  - **Consistent UX**: Capital calls form now matches allocation form behavior for familiar user experience
+- **July 23, 2025**: Capital Calls Full Database Integration - COMPLETE
+  - **Historical & Future Support**: Capital calls properly handle past, present, and future dates with appropriate messaging
+  - **Database Field Integration**: Fully integrated with all capital_calls table fields including outstanding_amount and callPct
+  - **Dynamic Status Management**: Changed default status from 'scheduled' to 'called' so capital calls properly update totals
+  - **Real-time Calculations**: Automatic calculation of outstanding amounts and percentage-based calls
+  - **Visual Date Indicators**: Shows amber indicator for historical calls, blue for future scheduled calls
+  - **Query Invalidation**: Comprehensive cache invalidation ensures called/uncalled amounts update immediately
+  - **Form Enhancements**: Dollar/percentage toggle with real-time conversion and smart input labels
 
 - **July 23, 2025**: Capital Calls Management UI Enhancement - COMPLETE
   - **Simplified Interface**: Replaced complex dropdown menu with single-click capital calls button

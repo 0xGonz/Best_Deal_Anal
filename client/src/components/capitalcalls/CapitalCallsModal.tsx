@@ -103,12 +103,25 @@ export default function CapitalCallsModal({
         ? (amount / 100) * allocation.amount 
         : amount;
       
-      return apiRequest('POST', '/api/capital-calls', {
+      // Calculate outstanding amount (for new capital calls, it's the full amount)
+      const outstandingAmount = finalAmount;
+      
+      // Prepare the capital call data with all database fields
+      const capitalCallData = {
         allocationId: allocation.id,
-        ...data,
         callAmount: finalAmount,
-        amountType: data.amountType
-      });
+        amountType: data.amountType,
+        callDate: data.callDate,
+        dueDate: data.dueDate,
+        status: data.status,
+        notes: data.notes,
+        paidAmount: 0, // New capital calls start with 0 paid
+        outstanding_amount: outstandingAmount,
+        // Include percentage for percentage-based calls
+        ...(data.amountType === 'percentage' && { callPct: amount })
+      };
+      
+      return apiRequest('POST', '/api/capital-calls', capitalCallData);
     },
     onSuccess: (_, variables) => {
       // Invalidate all related queries to refresh called/uncalled amounts
@@ -146,6 +159,9 @@ export default function CapitalCallsModal({
         description: message,
         variant: "success"
       });
+      
+      // The backend will automatically create a timeline event for this capital call
+      // through the capital call service integration
       setShowAddForm(false);
       setFormData({
         callAmount: '',
