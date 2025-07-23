@@ -100,13 +100,22 @@ router.post('/upload', requireAuth, handleUpload, async (req, res) => {
     }
 
     // Validate file
+    console.log('🔍 Validating file:', {
+      originalname: req.file.originalname,
+      mimetype: req.file.mimetype,
+      size: req.file.size
+    });
+    
     const validation = await databaseDocumentStorage.validateFile(
       req.file.originalname,
       req.file.mimetype,
       req.file.size
     );
 
+    console.log('📋 File validation result:', validation);
+
     if (!validation.valid) {
+      console.error('❌ File validation failed:', validation.reason);
       return res.status(400).json({ error: validation.reason });
     }
 

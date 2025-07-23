@@ -32,9 +32,20 @@ export class DatabaseDocumentStorage {
       return { valid: false, reason: `File extension ${fileExtension} not allowed` };
     }
 
-    // Check for valid filename (no path traversal)
+    // Check for valid filename (only prevent actual path traversal attacks)
+    // Be permissive with business document filenames that may contain various characters
     if (fileName.includes('..') || fileName.includes('/') || fileName.includes('\\')) {
-      return { valid: false, reason: 'Invalid filename' };
+      return { valid: false, reason: 'Invalid filename: contains path traversal characters' };
+    }
+
+    // Prevent null bytes and control characters
+    if (fileName.includes('\0') || /[\x00-\x1f\x7f]/.test(fileName)) {
+      return { valid: false, reason: 'Invalid filename: contains control characters' };
+    }
+
+    // Check for empty or too long filename
+    if (!fileName.trim() || fileName.length > 255) {
+      return { valid: false, reason: 'Invalid filename: too long or empty' };
     }
 
     return { valid: true };
@@ -63,16 +74,9 @@ export class DatabaseDocumentStorage {
         console.log(`✅ Valid PDF header detected: ${pdfHeader}`);
       }
       
-      // Convert buffer to base64 for storage
+      // Convert to base64 for compatibility with text column type in schema
       const fileDataBase64 = documentData.fileBuffer.toString('base64');
-      console.log(`📝 Base64 string length: ${fileDataBase64.length} characters`);
-      console.log(`🔍 First 50 chars of base64: ${fileDataBase64.substring(0, 50)}...`);
-      
-      // Validate base64 can be decoded back correctly
-      const testBuffer = Buffer.from(fileDataBase64, 'base64');
-      if (testBuffer.length !== documentData.fileBuffer.length) {
-        throw new Error(`Base64 encoding/decoding mismatch: original=${documentData.fileBuffer.length}, decoded=${testBuffer.length}`);
-      }
+      console.log(`📝 Storing ${documentData.fileBuffer.length} bytes as base64 (${fileDataBase64.length} chars) to database`);
       
       const [newDocument] = await db
         .insert(documents)
