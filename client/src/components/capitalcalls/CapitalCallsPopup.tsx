@@ -98,16 +98,17 @@ export function CapitalCallsPopup({
   // Extract capital calls from the response
   const capitalCalls = capitalCallsData?.capitalCalls || [];
   
-  // Extract payment info from capital calls data (since payments endpoint doesn't exist)
-  const allPayments = capitalCalls.map((call: any) => ({
-    id: call.id,
-    capitalCallId: call.id,
-    amount: call.paidAmount || 0,
-    paymentDate: call.dueDate || call.callDate, // Use due date if available, fallback to call date
-    paymentMethod: 'bank_transfer',
-    status: call.paidAmount > 0 ? 'completed' : 'pending',
-    notes: call.notes
-  })).filter((payment: any) => payment.amount > 0);
+  // Extract payment information from capital calls (only show actual payments, not synthetic data)
+  const allPayments = capitalCalls
+    .filter((call: any) => call.paidAmount && call.paidAmount > 0)
+    .map((call: any) => ({
+      id: call.id,
+      capitalCallId: call.id,
+      amount: call.paidAmount,
+      paymentDate: call.paidDate || call.callDate,
+      status: 'completed',
+      notes: call.notes
+    }));
 
   // Calculate totals
   const totalCalled = capitalCalls.reduce((sum: number, call: any) => sum + (call.callAmount || 0), 0);
@@ -234,9 +235,7 @@ export function CapitalCallsPopup({
                                   <span className="font-medium text-green-600">
                                     {formatCurrency(payment.amount)}
                                   </span>
-                                  <span className="text-gray-500">
-                                    {format(new Date(payment.paymentDate), 'MMM dd')}
-                                  </span>
+                                  <span className="text-xs text-green-600">PAID</span>
                                 </div>
                               </div>
                             ))}
