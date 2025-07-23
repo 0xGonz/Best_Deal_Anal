@@ -34,7 +34,8 @@ export class DatabaseDocumentStorage {
 
     // Check for valid filename (only prevent actual path traversal attacks)
     // Be permissive with business document filenames that may contain various characters
-    if (fileName.includes('..') || fileName.includes('/') || fileName.includes('\\')) {
+    // Only block actual path traversal patterns, not legitimate underscores or periods
+    if (fileName.includes('../') || fileName.includes('..\\') || fileName.includes('/') || fileName.includes('\\')) {
       return { valid: false, reason: 'Invalid filename: contains path traversal characters' };
     }
 
