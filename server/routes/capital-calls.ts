@@ -185,6 +185,45 @@ router.get('/allocation/:id', requireAuth, requirePermission('read', 'capital_ca
   }
 });
 
+// Get all payments for an allocation
+router.get('/payments/allocation/:allocationId', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const allocationId = parseInt(req.params.allocationId);
+    if (isNaN(allocationId)) {
+      return res.status(400).json({ error: 'Invalid allocation ID' });
+    }
+
+    // Get all capital calls for this allocation first
+    const capitalCalls = await storage.getCapitalCallsByAllocation(allocationId);
+    
+    // Get all payments for these capital calls
+    const allPayments = [];
+    for (const call of capitalCalls) {
+      // Note: We'll need to add a getPaymentsByCapitalCall method to storage
+      // For now, we'll return the payment info embedded in capital calls
+      if (call.paidAmount && call.paidAmount > 0) {
+        allPayments.push({
+          id: call.id * 1000, // Temporary ID generation
+          capitalCallId: call.id,
+          amount: call.paidAmount,
+          paymentDate: call.paidDate || call.callDate,
+          paymentMethod: 'bank_transfer',
+          status: 'completed',
+          notes: call.notes
+        });
+      }
+    }
+
+    res.json(allPayments);
+  } catch (error) {
+    console.error('Error fetching allocation payments:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch allocation payments',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 /**
  * GET /api/capital-calls/deal/:id - Get all capital calls for deal
  */

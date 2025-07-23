@@ -93,6 +93,7 @@ import {
 import { TABLE_CONFIGS } from "@/lib/services/tableConfig";
 import { DistributionsManagementHub } from '@/components/distributions/DistributionsManagementHub';
 import { AddCapitalCallForm } from '@/components/capitalcalls/AddCapitalCallForm';
+import { CapitalCallsPopup } from '@/components/capitalcalls/CapitalCallsPopup';
 // Import local types instead of schema types to ensure consistency
 import { Fund, FundAllocation, Deal } from "@/lib/types";
 
@@ -124,6 +125,12 @@ export default function FundDetail() {
   
   // State for capital metrics toggle
   const [capitalView, setCapitalView] = useState<'total' | 'called' | 'uncalled'>('total');
+  
+  // Capital calls popup state
+  const [capitalCallsPopup, setCapitalCallsPopup] = useState<{
+    isOpen: boolean;
+    allocation?: FundAllocation;
+  }>({ isOpen: false });
   
   // Type for new allocation form data
   interface NewAllocationData {
@@ -538,6 +545,17 @@ export default function FundDetail() {
   const handleAddCapitalCall = (allocation: FundAllocation) => {
     setSelectedAllocationForCapitalCall(allocation);
     setIsAddCapitalCallDialogOpen(true);
+  };
+
+  // Handler for viewing capital calls
+  const handleViewCapitalCalls = (allocationId: number) => {
+    const allocation = allocations?.find(a => a.id === allocationId);
+    if (allocation) {
+      setCapitalCallsPopup({
+        isOpen: true,
+        allocation
+      });
+    }
   };
 
   // We don't need to warn about invalid allocations anymore
@@ -1313,11 +1331,12 @@ export default function FundDetail() {
                                     <DropdownMenuContent align="end">
                                       <DropdownMenuLabel>Capital Calls</DropdownMenuLabel>
                                       <DropdownMenuSeparator />
-                                      <DropdownMenuItem asChild>
-                                        <a href={`/capital-calls/allocation/${allocation.id}`} className="cursor-pointer flex items-center text-xs sm:text-sm" onClick={(e) => e.stopPropagation()}>
-                                          <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-2" />
-                                          View Capital Calls
-                                        </a>
+                                      <DropdownMenuItem 
+                                        onClick={(e) => { e.stopPropagation(); handleViewCapitalCalls(allocation.id); }}
+                                        className="cursor-pointer flex items-center text-xs sm:text-sm"
+                                      >
+                                        <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-2" />
+                                        View Capital Calls
                                       </DropdownMenuItem>
                                       <DropdownMenuItem 
                                         onClick={(e) => { e.stopPropagation(); handleAddCapitalCall(allocation); }} 
@@ -1689,6 +1708,15 @@ export default function FundDetail() {
                 uncalledAmount: (selectedAllocationForCapitalCall.amount || 0) - (selectedAllocationForCapitalCall.calledAmount || 0),
                 status: selectedAllocationForCapitalCall.status || "unknown"
               } : undefined}
+            />
+
+            {/* Capital Calls Popup */}
+            <CapitalCallsPopup
+              isOpen={capitalCallsPopup.isOpen}
+              onClose={() => setCapitalCallsPopup({ isOpen: false })}
+              allocationId={capitalCallsPopup.allocation?.id || 0}
+              dealName={capitalCallsPopup.allocation?.dealName}
+              fundName={fund?.name}
             />
           </>
         )}
