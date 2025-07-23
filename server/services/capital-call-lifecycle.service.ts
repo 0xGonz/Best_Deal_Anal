@@ -135,8 +135,27 @@ export class CapitalCallLifecycleService {
       });
 
       return { success: true, capitalCall };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating capital call:', error);
+      
+      // Check for unique constraint violation
+      if (error.code === '23505' && error.constraint === 'unique_allocation_due_date') {
+        return { 
+          success: false, 
+          error: 'A capital call with this due date already exists',
+          validationErrors: ['Please select a different due date. Each capital call for an allocation must have a unique due date.']
+        };
+      }
+      
+      // Check for other constraint violations
+      if (error.code === '23514') {
+        return {
+          success: false,
+          error: 'Invalid capital call data',
+          validationErrors: ['Please check the amount and percentage values']
+        };
+      }
+      
       return { success: false, error: 'Failed to create capital call' };
     }
   }
