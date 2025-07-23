@@ -204,11 +204,6 @@ export default function RejectedStageDistribution({ deals }: RejectedStageDistri
               <p className="mt-1">
                 Categories with rejections: {rejectionStats.length} of {Object.keys(REJECTION_CATEGORIES).length}
               </p>
-              {rejectionStats.some(stat => !stat.categoryKey || stat.categoryKey === 'OTHER') && (
-                <p className="text-xs text-amber-600 mt-1">
-                  ⚠️ Some rejections categorized from legacy free-text reasons
-                </p>
-              )}
             </div>
           </div>
         )}
