@@ -2,7 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 
 // Route imports
-import dealsRoutes from './routes/deals';
+import dealsRoutes from './routes/deals/index';
 import fundsRoutes from './routes/funds';
 import usersRoutes from './routes/users';
 import authRoutes from './routes/auth';
@@ -18,10 +18,10 @@ import capitalCallsRoutes from './routes/capital-calls';
 import capitalCallManagementRoutes from './routes/capital-call-management';
 import closingSchedulesRoutes from './routes/closing-schedules';
 import meetingsRoutes from './routes/meetings';
-import calendarRoutes from './routes/calendar.routes'; // New unified calendar API
+
 import { systemRouter } from './routes/system';
 import v1Router from './routes/v1/index'; // V1 API routes including AI analysis
-import aiAnalysisRoutes from './routes/ai-analysis';
+
 import enumsRoutes from './routes/enums';
 import fundOverviewRoutes from './routes/fund-overview';
 import devilsAdvocateRoutes from './routes/devils-advocate';
@@ -78,7 +78,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/capital-call-management', capitalCallManagementRoutes);
   app.use('/api/closing-schedules', closingSchedulesRoutes);
   app.use('/api/meetings', meetingsRoutes);
-  app.use('/api/calendar', calendarRoutes); // New unified calendar API endpoint
+
   app.use('/api/dashboard', dashboardRoutes);
   app.use('/api/leaderboard', leaderboardRoutes);
   app.use('/api/activity', activityRoutes);
@@ -89,7 +89,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/fund-overview', fundOverviewRoutes); // Single source of truth for fund metrics
   app.use('/api/system', systemRouter);
   app.use('/api/v1', v1Router); // V1 API routes including AI analysis
-  app.use('/api/ai-analysis', aiAnalysisRoutes); // Direct access to AI analysis
   
   // Catch-all route for 404s
   app.use('/api/*', notFoundHandler);

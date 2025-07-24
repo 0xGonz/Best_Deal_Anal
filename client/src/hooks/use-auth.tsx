@@ -51,19 +51,16 @@ async function fetchCurrentUser(): Promise<User | null> {
     }
     
     if (!response.ok) {
-      console.error('Error fetching user:', response.status, response.statusText);
       throw new Error(`Failed to fetch user: ${response.statusText}`);
     }
     
     const userData = await response.json();
     if (!userData || !userData.id) {
-      console.error('Invalid user data received:', userData);
       throw new Error('Invalid user data received from server');
     }
     
     return userData;
   } catch (error) {
-    console.error('Exception in fetchCurrentUser:', error);
     return null;
   }
 }
@@ -89,37 +86,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Refresh auth method that can be called manually
   const refreshAuth = async (): Promise<User | null> => {
-    console.log('Manual auth refresh requested');
     const result = await refetch();
     return result.data ?? null;
   };
 
   const login = useMutation({
     mutationFn: async (credentials: LoginData) => {
-      console.log('Auth login mutation starting with credentials:', { username: credentials.username, password: '******' });
       try {
         const res = await apiRequest("POST", "/api/auth/login", credentials);
         if (!res.ok) {
           const errorText = await res.text().catch(() => 'Unknown error');
-          console.error('Login API error response:', res.status, errorText);
           throw new Error(errorText || `Login failed with status ${res.status}`);
         }
         
         const userData = await res.json();
         if (!userData || !userData.id) {
-          console.error('Invalid user data received from login:', userData);
           throw new Error('Invalid user data received from server');
         }
         
-        console.log('Login API response successful:', userData);
         return userData;
       } catch (error) {
-        console.error('Login API request failed:', error);
         throw error;
       }
     },
     onSuccess: async (user: User) => {
-      console.log('Login mutation onSuccess handler, setting user data:', user);
       // Immediately update the local query cache
       localQueryClient.setQueryData(["/api/auth/me"], user);
       
@@ -137,7 +127,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await refreshAuth();
     },
     onError: (error: Error) => {
-      console.error('Login mutation onError handler:', error);
       toast({
         title: "Login failed",
         description: error.message || "Unable to login. Please try again.",
@@ -156,13 +145,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         return response; // Return the response
       } catch (error) {
-        console.error('Logout API request failed:', error);
         throw error;
       }
     },
     onSuccess: () => {
       // Clear the auth data in the cache
-      console.log('Logout successful, clearing auth data');
       localQueryClient.setQueryData(["/api/auth/me"], null);
       
       // Invalidate all queries that depend on authentication
@@ -172,7 +159,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.location.href = "/auth";
     },
     onError: (error: Error) => {
-      console.error('Logout mutation error handler:', error);
       toast({
         title: "Logout failed",
         description: error.message || "Unable to logout. Please try again.",

@@ -64,8 +64,6 @@ export function useDealDocuments(dealId: number | undefined) {
         documentType: doc.documentType,
       }));
       
-      console.log(`📝 useDealDocuments: Setting ${docMetas.length} documents in context:`, docMetas);
-      
       // Update docs state
       setDocs(docMetas);
       
@@ -73,15 +71,12 @@ export function useDealDocuments(dealId: number | undefined) {
       if (docMetas.length > 0) {
         const currentStillValid = current && docMetas.some(doc => doc.id === current.id);
         if (!current || !currentStillValid) {
-          console.log(`🎯 useDealDocuments: Auto-selecting first document:`, docMetas[0]);
           setCurrent(docMetas[0]);
         }
       } else {
-        console.log(`❌ useDealDocuments: No documents found, clearing selection`);
         setCurrent(null);
       }
     } else {
-      console.log(`⚠️ useDealDocuments: No data received or data is not an array:`, data);
       setDocs([]);
       setCurrent(null);
     }

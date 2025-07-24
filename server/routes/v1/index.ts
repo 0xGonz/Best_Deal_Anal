@@ -4,7 +4,7 @@
  */
 
 import { Router } from 'express';
-import dealsRoutes from '../deals';
+import dealsRoutes from '../deals/index';
 import fundsRoutes from '../funds';
 import usersRoutes from '../users';
 import authRoutes from '../auth';

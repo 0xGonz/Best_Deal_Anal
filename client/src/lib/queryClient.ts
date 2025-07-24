@@ -37,13 +37,11 @@ export async function apiRequest(
       const errorClone = res.clone();
       try {
         const errorData = await errorClone.json();
-        console.error(`Error response from ${url}:`, { status: res.status, data: errorData });
       } catch (jsonError) {
         try {
           const errorText = await errorClone.text();
-          console.error(`Error response from ${url}:`, { status: res.status, text: errorText });
         } catch (textError) {
-          console.error(`Failed to read error response from ${url}:`, textError);
+          // Silently handle error
         }
       }
     }
@@ -52,7 +50,6 @@ export async function apiRequest(
     // Don't use throwIfResNotOk which consumes the body
     return res;
   } catch (error) {
-    console.error(`Exception during fetch to ${url}:`, error);
     throw error;
   }
 }
@@ -64,34 +61,26 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const url = queryKey[0] as string;
-    console.log(`Query fetch request: ${url}`, { queryKey, unauthorizedBehavior });
-    
     try {
       const res = await fetch(url, {
         credentials: "include",
       });
       
-      console.log(`Query Response from ${url}:`, { status: res.status, statusText: res.statusText, ok: res.ok });
-      
       if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-        console.log(`Returning null for 401 response from ${url} as configured`);
         return null;
       }
       
       if (!res.ok) {
         try {
           const errorText = await res.text();
-          console.error(`Error response from ${url}:`, { status: res.status, text: errorText });
           throw new Error(`${res.status}: ${errorText}`);
         } catch (readError) {
-          console.error(`Failed to read error response from ${url}:`, readError);
           throw new Error(`${res.status}: ${res.statusText}`);
         }
       }
       
-      const data = await res.json();
-      console.log(`Query data received from ${url}:`, data);
-      return data;
+          const data = await res.json();
+    return data;
     } catch (error) {
       console.error(`Exception during query fetch to ${url}:`, error);
       throw error;
