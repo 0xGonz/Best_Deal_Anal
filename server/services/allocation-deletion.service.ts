@@ -39,7 +39,7 @@ export class AllocationDeletionService {
 
           if (capitalCalls.rows.length > 0) {
             await tx.execute(sql`DELETE FROM capital_calls WHERE allocation_id = ${allocationId}`);
-            console.log(`Removed ${capitalCalls.rows.length} capital calls for allocation ${allocationId}`);
+            // Removed capital calls as part of allocation deletion
           }
 
           // Step 4: Reset allocation state for clean deletion

@@ -8,20 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { MiniMemo } from '@shared/schema';
 import { UserAvatar } from '@/components/common/UserAvatar';
-
-// Import due diligence checklist as a constant to be used throughout the app
-export const DUE_DILIGENCE_CHECKLIST = {
-  financialReview: 'Financial Review',
-  legalReview: 'Legal Review',
-  marketAnalysis: 'Market Analysis',
-  teamAssessment: 'Team Assessment', 
-  customerInterviews: 'Customer Interviews',
-  competitorAnalysis: 'Competitor Analysis',
-  technologyReview: 'Technology Review',
-  businessModelValidation: 'Business Model Validation',
-  regulatoryCompliance: 'Regulatory Compliance',
-  esgAssessment: 'Background Check'
-};
+import { DUE_DILIGENCE_CHECKLIST } from '@/lib/constants/due-diligence-constants';
 
 interface MemoUser {
   id: number;

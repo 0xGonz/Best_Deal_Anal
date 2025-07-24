@@ -35,19 +35,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { User } from "@shared/schema";
-
-export const DUE_DILIGENCE_CHECKLIST = {
-  financialReview: 'Financial Review',
-  legalReview: 'Legal Review',
-  marketAnalysis: 'Market Analysis',
-  teamAssessment: 'Team Assessment', 
-  customerInterviews: 'Customer Interviews',
-  competitorAnalysis: 'Competitor Analysis',
-  technologyReview: 'Technology Review',
-  businessModelValidation: 'Business Model Validation',
-  regulatoryCompliance: 'Regulatory Compliance',
-  esgAssessment: 'Background Check'
-};
+import { DUE_DILIGENCE_CHECKLIST } from '@/lib/constants/due-diligence-constants';
 
 const miniMemoSchema = z.object({
   dealId: z.number().optional(),

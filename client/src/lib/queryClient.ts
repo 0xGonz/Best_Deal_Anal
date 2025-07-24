@@ -13,8 +13,6 @@ export async function apiRequest(
   data?: unknown | undefined,
   isFormData: boolean = false,
 ): Promise<Response> {
-  console.log(`API Request: ${method} ${url}`, data ? { data: isFormData ? 'FormData' : data } : 'No data');
-  
   const options: RequestInit = {
     method,
     credentials: "include",
@@ -31,9 +29,7 @@ export async function apiRequest(
   }
 
   try {
-    console.log(`Sending fetch request to ${url} with options:`, { ...options, body: options.body ? 'BODY_DATA' : undefined });
     const res = await fetch(url, options);
-    console.log(`API Response from ${url}:`, { status: res.status, statusText: res.statusText, ok: res.ok });
     
     // Create a clone of response before reading its body
     // This allows us to both log the error response and return the original response

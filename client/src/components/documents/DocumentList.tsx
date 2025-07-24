@@ -77,18 +77,12 @@ export default function DocumentList({ dealId }: DocumentListProps) {
   }) as { data: Document[] | undefined, isLoading: boolean };
 
   // Add useEffect to log when documents data changes
-  useEffect(() => {
-    if (documents) {
-      console.log(`📊 Documents query SUCCESS for dealId=${dealId}:`, documents);
-    }
-  }, [documents, dealId]);
+  // Documents loaded successfully
   
   // Set the selected document when documents are loaded and none is selected yet
-  // Only run when documents change, NOT when selectedDocument changes
   useEffect(() => {
     if (documents && documents.length > 0 && !selectedDocument) {
       setSelectedDocument(documents[0]);
-      console.log(`📋 Auto-selected first document: ${documents[0]?.fileName}`);
     }
   }, [documents]); // Removed selectedDocument from dependency array
 
@@ -109,7 +103,6 @@ export default function DocumentList({ dealId }: DocumentListProps) {
       queryClient.setQueryData([`/api/documents/deal/${dealId}`], (oldDocs: Document[] | undefined) => {
         if (!oldDocs) return oldDocs;
         const filteredDocs = oldDocs.filter(doc => doc.id !== deletedDocumentId);
-        console.log(`🗑️ Removed document ${deletedDocumentId} from cache, ${filteredDocs.length} documents remaining`);
         return filteredDocs;
       });
       
@@ -210,19 +203,12 @@ export default function DocumentList({ dealId }: DocumentListProps) {
   };
 
   const handleSaveDocumentType = () => {
-    console.log(`💾 Save button clicked! editingDocument:`, editingDocument);
-    console.log(`💾 editDocumentType:`, editDocumentType);
-    console.log(`💾 editDescription:`, editDescription);
-    
     if (editingDocument) {
-      console.log(`✨ Calling mutation with documentId=${editingDocument.id}, documentType=${editDocumentType}, description=${editDescription}`);
       editDocumentMutation.mutate({
         documentId: editingDocument.id,
         documentType: editDocumentType,
         description: editDescription,
       });
-    } else {
-      console.log(`❌ No editingDocument found, cannot save`);
     }
   };
 
@@ -275,14 +261,7 @@ export default function DocumentList({ dealId }: DocumentListProps) {
       formData.append('description', description);
     }
 
-    // Debug logging
-    console.log('📤 Starting upload for:', {
-      fileName: uploadingFile.name,
-      dealId: dealId.toString(),
-      documentType,
-      description: description || 'none',
-      endpoint: '/api/documents/upload'
-    });
+    // Starting file upload
 
     // Basic validation of dealId
     if (!dealId || isNaN(Number(dealId))) {
@@ -311,16 +290,12 @@ export default function DocumentList({ dealId }: DocumentListProps) {
       
       clearTimeout(timeoutId);
       
-      console.log('📡 Upload response status:', res.status);
-      
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        console.error('💥 Upload failed with status:', res.status, errorData);
         throw new Error(errorData.error || errorData.message || 'Failed to upload document');
       }
       
       const responseData = await res.json();
-      console.log('✅ Upload successful:', responseData);
       
       // Force immediate refresh of document list
       await queryClient.invalidateQueries({ queryKey: [`/api/documents/deal/${dealId}`] });

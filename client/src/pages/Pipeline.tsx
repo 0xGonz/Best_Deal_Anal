@@ -52,13 +52,10 @@ export default function Pipeline() {
 
   // Handle URL parameters for sector filtering
   useEffect(() => {
-    console.log('Pipeline page loaded, checking URL params');
     const urlParams = new URLSearchParams(window.location.search);
     const sectorFromUrl = urlParams.get('sector');
-    console.log('Sector from URL:', sectorFromUrl);
     if (sectorFromUrl) {
       setSectorFilter(decodeURIComponent(sectorFromUrl));
-      console.log('Applied sector filter:', decodeURIComponent(sectorFromUrl));
     }
   }, []); // Run once on mount
 
@@ -102,9 +99,6 @@ export default function Pipeline() {
       return response;
     },
     onSuccess: async (data: any) => {
-      // Log the data response
-      console.log('Deal update response:', data);
-      
       // Get the stage label
       const stageLabel = data.stage ? DealStageLabels[data.stage as keyof typeof DealStageLabels] : 'a new stage';
       
@@ -124,7 +118,7 @@ export default function Pipeline() {
         queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
         queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
       } catch (err) {
-        console.error('Failed to create notification:', err);
+        // Silent fail for notifications - non-critical
       }
       
       // Refresh deals data

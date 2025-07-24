@@ -37,7 +37,6 @@ type RegisterData = {
 
 async function fetchCurrentUser(): Promise<User | null> {
   try {
-    console.log('Fetching current user data');
     const response = await fetch('/api/auth/me', {
       credentials: 'include',
       headers: {
@@ -48,7 +47,6 @@ async function fetchCurrentUser(): Promise<User | null> {
     });
     
     if (response.status === 401) {
-      console.log('User is not authenticated (401 response)');
       return null;
     }
     
@@ -63,7 +61,6 @@ async function fetchCurrentUser(): Promise<User | null> {
       throw new Error('Invalid user data received from server');
     }
     
-    console.log('Current user data fetched successfully:', userData);
     return userData;
   } catch (error) {
     console.error('Exception in fetchCurrentUser:', error);

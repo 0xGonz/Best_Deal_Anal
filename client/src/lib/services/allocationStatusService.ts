@@ -153,43 +153,9 @@ export function calculateStatusMetrics(allocations: FundAllocation[]): Allocatio
   return metrics;
 }
 
-/**
- * Find all allocations with status inconsistencies
- * Note: This is now deprecated since we use derived status from database view
- */
-export function findStatusInconsistencies(allocations: FundAllocation[]): Array<{
-  allocation: FundAllocation;
-  validation: StatusValidationResult;
-}> {
-  // No longer needed since status is derived from database view
-  // All allocations should have correct status by design
-  return [];
-}
+// Removed deprecated findStatusInconsistencies function - no longer needed with database view approach
 
-/**
- * Get summary of status inconsistencies for debugging
- */
-export function getInconsistencySummary(allocations: FundAllocation[]): {
-  totalInconsistencies: number;
-  details: Array<{
-    dealName: string;
-    paymentPercentage: number;
-    currentStatus: string;
-    correctStatus: string;
-  }>;
-} {
-  const inconsistencies = findStatusInconsistencies(allocations);
-  
-  return {
-    totalInconsistencies: inconsistencies.length,
-    details: inconsistencies.map(item => ({
-      dealName: item.allocation.dealName || 'Unknown Deal',
-      paymentPercentage: item.validation.paymentPercentage,
-      currentStatus: item.validation.currentStatus,
-      correctStatus: item.validation.correctStatus
-    }))
-  };
-}
+// Removed deprecated getInconsistencySummary function - no longer needed with database view approach
 
 /**
  * Modular status badge component props generator

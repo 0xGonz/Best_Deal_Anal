@@ -32,71 +32,11 @@ systemRouter.post('/database/test-connection', async (req: Request, res: Respons
   }
 });
 
-// Endpoint to force synchronization of pending operations
-systemRouter.post('/database/sync-pending', async (req: Request, res: Response) => {
-  // We no longer use hybrid storage, but keep endpoint for compatibility
-  console.log('Received sync-pending request - operation now obsolete');
-  
-  res.json({ 
-    success: true, 
-    message: 'No action needed - using fixed storage implementation',
-    pendingOperations: 0
-  });
-});
+// Removed obsolete /database/sync-pending endpoint - no longer needed with fixed storage implementation
 
-// Endpoint to simulate database failure for testing (admin only)
-systemRouter.post('/database/simulate-failure', (req: Request, res: Response) => {
-  // Check if user is authenticated and has admin role
-  if (!req.session?.userId || req.session?.role !== 'admin') {
-    return res.status(403).json({ 
-      success: false, 
-      message: 'Unauthorized - admin access required'
-    });
-  }
-  
-  // We no longer use hybrid storage, but keep endpoint for compatibility
-  console.log('Received database-failure simulation request - operation now obsolete');
-  
-  res.json({ 
-    success: true, 
-    message: 'Feature disabled - using fixed storage implementation',
-    mode: StorageFactory.storage instanceof MemStorage ? 'memory' : 'database'
-  });
-});
+// Removed obsolete /database/simulate-failure endpoint - testing feature no longer needed
 
-// Endpoint to restore normal operation after testing (admin only)
-systemRouter.post('/database/restore-normal', async (req: Request, res: Response) => {
-  // Check if user is authenticated and has admin role
-  if (!req.session?.userId || req.session?.role !== 'admin') {
-    return res.status(403).json({ 
-      success: false, 
-      message: 'Unauthorized - admin access required'
-    });
-  }
-  
-  // We no longer use hybrid storage, but keep endpoint for compatibility
-  console.log('Received restore-normal request - operation now obsolete');
-  
-  // Check if database is connected
-  try {
-    await pool.query('SELECT 1');
-    
-    res.json({ 
-      success: true, 
-      message: 'Database is already operating normally',
-      mode: StorageFactory.storage instanceof MemStorage ? 'memory' : 'database',
-      connected: true
-    });
-  } catch (dbError) {
-    res.status(503).json({ 
-      success: false, 
-      message: 'Database connection issue detected',
-      error: dbError instanceof Error ? dbError.message : String(dbError),
-      mode: StorageFactory.storage instanceof MemStorage ? 'memory' : 'database',
-      connected: false
-    });
-  }
-});
+// Removed obsolete /database/restore-normal endpoint - testing feature no longer needed
 
 // Endpoint to check system health
 systemRouter.get('/health', async (req: Request, res: Response) => {

@@ -11,7 +11,7 @@ import * as path from 'path';
 import connectPgSimple from 'connect-pg-simple';
 import memorystore from 'memorystore';
 import { StorageFactory } from "./storage-factory";
-import { initJobQueues } from "./jobs";
+// Removed broken Bull-based job queue system
 import { metricsMiddleware } from "./middleware/metrics";
 import { LoggingService } from "./services";
 
@@ -232,10 +232,9 @@ async function initialize() {
   app.use(express.static(rootPublic));
   console.log('Configured static file serving for uploads and PDF.js worker');
 
-  // Initialize background job queues
+  // Initialize background job processing
   try {
-    initJobQueues();
-    // Start the performance-optimized job queue
+    // Start the PostgreSQL-based job queue
     jobQueue.start();
     console.log('✅ Background job processing started');
   } catch (error) {

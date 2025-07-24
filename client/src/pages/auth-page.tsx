@@ -168,8 +168,6 @@ export default function AuthPage() {
                       role: 'analyst'
                     });
                     
-                    console.log('Registration successful, showing animation');
-                    
                     // Add a slight delay before redirect to show the animation
                     setTimeout(() => {
                       // Use navigate from wouter instead of window.location
@@ -177,7 +175,6 @@ export default function AuthPage() {
                     }, 1500);
                   } catch (error) {
                     setIsAuthenticating(false);
-                    console.error('Registration error:', error);
                     // Error handling is already in the auth context
                   }
                 }} isLoading={isLoading} />
@@ -212,11 +209,9 @@ function LoginForm({ onSubmit, isLoading }: { onSubmit: (username: string, passw
       }
       
       const { username, password } = data;
-      console.log('Submitting login with credentials:', { username, password: '******' });
       await onSubmit(username, password);
     } catch (error) {
       // Error is handled in the auth context
-      console.error('Login error in form:', error);
       setFormIsSubmitting(false);
       
       // Remove loading animation
